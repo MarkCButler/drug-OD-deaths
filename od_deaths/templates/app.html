@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    >
+    <link rel="stylesheet" href="../../static/main.css">
+    <script defer src="../../static/main.js"></script>
+    <title>Drug OD Deaths</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-dark bg-primary">
+      <div class="container-fluid">
+        <button
+          class="navbar-toggler" type="button" data-bs-toggle="collapse"
+          data-bs-target="#sidebar"
+          aria-controls="sidebar" aria-expanded="false"
+          aria-label="Toggle sidebar"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </div>
+    </nav>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-auto bg-secondary p-0">
+          <div class="collapse collapse-horizontal show" id="sidebar">
+            <nav>
+              <div class="nav nav-tabs flex-column" role="tablist">
+                <button
+                  class="btn btn-lg text-start nav-link py-3 active"
+                  id="summary-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#summary" type="button" role="tab"
+                  aria-controls="summary" aria-selected="true"
+                >
+                  <i class="fa-solid fa-list me-3"></i>
+                  Summary
+                </button>
+                <button
+                  class="btn btn-lg text-start nav-link py-3"
+                  id="map-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#map" type="button" role="tab"
+                  aria-controls="map" aria-selected="false"
+                >
+                  <i class="fa-solid fa-map me-3"></i>
+                  Map
+                </button>
+                <button
+                  class="btn btn-lg text-start nav-link py-3"
+                  id="time-dev-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#time-dev" type="button" role="tab"
+                  aria-controls="time-dev" aria-selected="false"
+                >
+                  <i class="fa-solid fa-chart-line me-3"></i>
+                  Time development
+                </button>
+                <button
+                  class="btn btn-lg text-start nav-link py-3"
+                  id="data-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#data" type="button" role="tab"
+                  aria-controls="data" aria-selected="false"
+                >
+                  <i class="fa-solid fa-database me-3"></i>
+                  Data
+                </button>
+                <button
+                  class="btn btn-lg text-start nav-link py-3"
+                  id="notes-tab"
+                  data-bs-toggle="tab"
+                  data-bs-target="#notes" type="button" role="tab"
+                  aria-controls="notes" aria-selected="false"
+                >
+                  <i class="fa-solid fa-file-lines me-3"></i>
+                  Technical notes
+                </button>
+              </div>
+            </nav>
+          </div>
+        </div>
+        <div class="col">
+          <div class="tab-content">
+            <div
+              class="tab-pane fade show active" id="summary" role="tabpanel"
+              aria-labelledby="summary-tab"
+            >
+              <div class="row p-4">
+                <div class="col-10">
+                  <h1 class="display-3 my-3">The Opioid Epidemic</h1>
+                  <p class="h4 my-3">
+                    The death rate in the US due to opioid overdose increased by
+                    almost a factor of six between 1997 and 2017 [1]. Even
+                    though the overall number of drug-overdose deaths has
+                    stabilized, the number of deaths due to synthetic opioids
+                    such as fentanyl is still climbing. (See the first plot
+                    below.) There are signs of progress, however. In the second
+                    plot below, the downward slopes on the right side of the
+                    plot show deceleration in growth of the death rate. The map
+                    at the bottom of the page shows the disturbing regional
+                    concentration in the per capita death rate in 2017, when the
+                    overall number of drug-overdose deaths peaked.
+                  </p>
+                  <p>
+                    [1] Sarah DeWeerdt, "Tracing the US opioid crisis to its
+                    roots", Nature 573, S10-S12 (2019)
+                  </p>
+                  <h2 class="h3 mt-5 mb-3">Drug-overdose deaths in the US</h2>
+                  <p class="h4 my-3">
+                    Each data point represents the number of deaths during the
+                    preceding 12-month period.
+                  </p>
+                </div>
+              </div>
+
+            </div>
+            <div
+              class="tab-pane fade" id="map" role="tabpanel"
+              aria-labelledby="map-tab"
+            >
+              Map content
+            </div>
+            <div
+              class="tab-pane fade" id="time-dev" role="tabpanel"
+              aria-labelledby="time-dev-tab"
+            >
+              Time-development content
+            </div>
+            <div
+              class="tab-pane fade" id="data" role="tabpanel"
+              aria-labelledby="data-tab"
+            >
+              Data content
+            </div>
+            <div
+              class="tab-pane fade" id="notes" role="tabpanel"
+              aria-labelledby="notes-tab"
+            >
+              Technical-notes content
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
