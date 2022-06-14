@@ -1,0 +1,13 @@
+*.code-workspace
+*.csv
+*.sqlite
+.history
+.idea
+.ipynb_checkpoints
+.venv/
+.vscode/
+__pycache__/
+data/
+node_modules/
+/static/
+scratch*
