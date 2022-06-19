@@ -82,7 +82,7 @@ if DB_PATH.exists():
 db_con = sqlite3.connect(DB_PATH)
 with db_con:
     cursor = db_con.cursor()
-    cursor.executescript(SCRIPT_PATH.read_text())
+    cursor.executescript(SCRIPT_PATH.read_text(encoding='utf-8'))
     states_data.to_sql('states', con=db_con,
                        if_exists='append', index=False)
     deaths_data.to_sql('death_counts', con=db_con,
