@@ -8,8 +8,10 @@ authors = ["Your Name <you@example.com>"]
 python = "^3.10"
 Flask = "^2.1.2"
 pandas = "^1.4.2"
+SQLAlchemy = "^1.4.37"
 
 [tool.poetry.dev-dependencies]
+pylint = "^2.14.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
