@@ -116,7 +116,15 @@
                   </p>
                 </div>
               </div>
-
+              <div class="row">
+                <div id="test-chart"></div>
+                <script type="module">
+                  const testChartJSON = {{ test_chart | safe}};
+                  const config = {responsive: true};
+                  Plotly.newPlot('test-chart', testChartJSON['data'],
+                                 testChartJSON['layout'], config);
+                </script>
+              </div>
             </div>
             <div
               class="tab-pane fade" id="map" role="tabpanel"
