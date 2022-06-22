@@ -31,6 +31,13 @@ module.exports = {
           },
           'sass-loader'
         ]
+      },
+      {
+        test: /\.js$/,
+        use: [
+          'ify-loader',
+          'transform-loader?plotly.js/tasks/compress_attributes.js',
+        ]
       }
     ]
   },

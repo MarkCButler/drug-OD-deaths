@@ -6,3 +6,6 @@ import './js/bootstrap';
 import './scss/main.scss';
 
 import './js/fontawesome';
+
+import Plotly from 'plotly.js/dist/plotly-basic.js';
+window.Plotly = Plotly;
