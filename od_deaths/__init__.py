@@ -24,8 +24,8 @@ def create_app():
     def index():
         return render_template('app.html')
 
-    @app.route('/test-chart')
-    def get_test_chart():
+    @app.route('/test-plot')
+    def get_test_plot():
         fig = px.bar(x=['a', 'b', 'c'], y=[1, 3, 2])
         response = make_response(
             json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)

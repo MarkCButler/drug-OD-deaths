@@ -1,19 +1,19 @@
 {
-    "env": {
-        "browser": true,
-        "es2022": true,
-        "node": true
-    },
-    "extends": [
-        "google"
-    ],
-    "parserOptions": {
-        "ecmaVersion": "latest",
-        "sourceType": "module"
-    },
-    "rules": {
-      "require-jsdoc" : "off",
-      "spaced-comment": "off",
-      "comma-dangle": "off"
-    }
+  "env": {
+    "browser": true,
+    "es2022": true,
+    "node": true
+  },
+  "extends": [
+    "eslint:recommended", "google"
+  ],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "rules": {
+    "require-jsdoc" : "off",
+    "spaced-comment": "off",
+    "comma-dangle": "off"
+  }
 }

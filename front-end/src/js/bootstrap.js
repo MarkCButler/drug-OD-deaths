@@ -1,4 +1,5 @@
 'use strict';
+
 /*
  * The full list of bootstrap's javascript plugins below was copied from the
  * documentation.  Plugins not currently used in the app are commented out
