@@ -116,14 +116,34 @@
                   </p>
                 </div>
               </div>
-              <div class="row">
-                <div id="test-chart"></div>
-                <script type="module">
-                  const testChartJSON = {{ test_chart | safe}};
-                  const config = {responsive: true};
-                  Plotly.newPlot('test-chart', testChartJSON['data'],
-                                 testChartJSON['layout'], config);
-                </script>
+              <div class="row p-4">
+                <div class="col">
+                  <div id="test-chart"></div>
+                  <script type="module">
+                    const testChart = document.getElementById('test-chart');
+                    fetch('/test-chart')
+                      .then(response => {
+                        if (response.ok) {
+                          return response.json();
+                        } else {
+                          throw new Error(`HTTP status ${response.status}`);
+                        }
+                      })
+                      .then(testChartJSON => {
+                        const config = {responsive: true};
+                        const data = testChartJSON['data'];
+                        const layout = testChartJSON['layout'];
+                        Plotly.newPlot(testChart, data, layout, config);
+                      })
+                      .catch(error => {
+                        testChart.classList.add('h3', 'text-warning');
+                        testChart.innerHTML = (
+                          '<p>Failed to fetch or generate test-chart.</p>'
+                          + `<p>${error}</p>`
+                        );
+                      })
+                  </script>
+                </div>
               </div>
             </div>
             <div
