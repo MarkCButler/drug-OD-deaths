@@ -10,11 +10,11 @@ https://github.com/MarkCButler/drug-OD-deaths-R
 In contrast to the project at drug-OD-deaths-R, which used the `shiny` package
 to create a web app, the current project uses a full-stack tool set for web
 development.  The back end is a `flask` app that uses the Python data-science
-stack for data analysis, and the user interface is defined by a `Jinja2`
-template that is rendered by `flask`.  The JavaScript that controls the
-front-end's interactivity is bundled by means of `webpack` with customized tools
-that are used to style the user interface (e.g., a small, customized subset of
-`bootstrap`.)
+stack for analysis and visualization of data, and the user interface is defined
+by a `Jinja2` template that is rendered by `flask`.  The JavaScript that enables
+user interaction is bundled by means of `webpack` with front-end libraries
+(e.g., a small, customized subset of `bootstrap` and a selection of modules from
+`plotly.js`.)
 
 The
 [data on drug-overdose deaths](https://data.cdc.gov/NCHS/VSRR-Provisional-Drug-Overdose-Death-Counts/xkb8-kh2a),

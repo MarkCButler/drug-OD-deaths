@@ -1,12 +1,12 @@
 'use strict';
 
-import './js/bootstrap';
+import './js/app-bootstrap';
 
 // main.scss includes a customized subset of bootstrap scss imports as well as
 // the bootswatch theme.
 import './scss/main.scss';
 
-import './js/fontawesome';
+import './js/app-fontawesome';
 
 // Add plots and associated event listeners to the DOM.
 import './js/plots';

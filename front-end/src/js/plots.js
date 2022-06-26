@@ -1,6 +1,6 @@
 'use strict';
 
-import Plotly from 'plotly.js/dist/plotly-basic.js';
+import Plotly from './app-plotly';
 
 
 class HTTPError extends Error {

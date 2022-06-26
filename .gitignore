@@ -8,6 +8,7 @@
 .vscode/
 __pycache__/
 data/
+build*
 node_modules/
 /static/
 scratch*
