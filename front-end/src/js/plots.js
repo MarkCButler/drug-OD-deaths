@@ -41,4 +41,4 @@ function displayPlotError(error, divElem, plotName) {
 }
 
 const testPlot = document.getElementById('test-plot');
-void addPlot(testPlot, '/test-plot', 'test-plot');
+void addPlot(testPlot, '/plots/test-plot', 'test-plot');
