@@ -1,3 +1,6 @@
+// Bootstrap functions need to be imported first.
+@import "bootstrap/scss/functions";
+
 // Some variable definitions from bootstrap's _variables.scss are copied here so
 // that they can be used in customizing bootstrap.
 $spacer: 1rem;
@@ -18,8 +21,10 @@ $navbar-padding-y: $spacer * .25;               // default: $spacer * .5
 // if necessary.
 
 // Configuration
-@import "bootstrap/scss/functions";
+// Note that after variable overrides, the next two imports should be variables
+// and maps (in that order).
 @import "bootstrap/scss/variables";
+@import "bootstrap/scss/maps";
 @import "bootstrap/scss/mixins";
 @import "bootstrap/scss/utilities";
 
