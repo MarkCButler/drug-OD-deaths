@@ -16,10 +16,7 @@ async function addPlot(divElem, url, plotName) {
     const response = await fetch(url);
     if (response.ok) {
       const plotJSON = await response.json();
-      const config = {responsive: true};
-      const data = plotJSON['data'];
-      const layout = plotJSON['layout'];
-      Plotly.newPlot(divElem, data, layout, config);
+      Plotly.newPlot(divElem, plotJSON);
     } else {
       throw new HTTPError(`status code ${response.status}`);
     }
@@ -39,6 +36,8 @@ function displayPlotError(error, divElem, plotName) {
   divElem.innerHTML = `<p>Failed to fetch or generate ${plotName}.</p>` +
                       `<p>${error}</p>`;
 }
+
+// TODO: In updating plots, use Plotly.react
 
 const testPlot = document.getElementById('test-plot');
 void addPlot(testPlot, '/plots/test-plot', 'test-plot');
