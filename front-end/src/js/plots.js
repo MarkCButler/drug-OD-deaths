@@ -16,7 +16,12 @@ async function addPlot(divElem, url, plotName) {
     const response = await fetch(url);
     if (response.ok) {
       const plotJSON = await response.json();
-      Plotly.newPlot(divElem, plotJSON);
+      const config = {
+        responsive: true,
+        displayModeBar: false,
+        scrollZoom: false
+      };
+      Plotly.newPlot(divElem, plotJSON.data, plotJSON.layout, config);
     } else {
       throw new HTTPError(`status code ${response.status}`);
     }

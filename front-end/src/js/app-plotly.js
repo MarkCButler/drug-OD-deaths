@@ -10,7 +10,9 @@
 const Plotly = require('plotly.js/lib/core');
 
 // Load in the trace types you need.
-Plotly.register([require('plotly.js/lib/scattergeo')]);
+Plotly.register([
+  require('plotly.js/lib/choropleth')]
+);
 
 // Export the custom build
 module.exports = Plotly;
