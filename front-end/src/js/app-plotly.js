@@ -11,6 +11,7 @@ const Plotly = require('plotly.js/lib/core');
 
 // Load in the trace types you need.
 Plotly.register([
+  require('plotly.js/lib/scatter'),
   require('plotly.js/lib/choropleth')]
 );
 

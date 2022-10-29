@@ -44,5 +44,8 @@ function displayPlotError(error, divElem, plotName) {
 
 // TODO: In updating plots, use Plotly.react
 
-const testPlot = document.getElementById('test-plot');
-void addPlot(testPlot, '/plots/test-plot', 'test-plot');
+const plotIDs = ['test-line-plot', 'test-map-plot'];
+for (const plotID of plotIDs) {
+  const testPlot = document.getElementById(plotID);
+  void addPlot(testPlot, `/plots/${plotID}`, plotID);
+}

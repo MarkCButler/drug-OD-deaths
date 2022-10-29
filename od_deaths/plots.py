@@ -9,6 +9,24 @@ from .labels import COLORBAR_TITLES, COLORBAR_TICKFORMATS, MAP_HOVERTEMPLATES
 
 plot_views = Blueprint('plots', __name__, url_prefix='/plots')
 
+
+@plot_views.route('/test-line-plot')
+def get_test_line_plot():
+    # Generate dummy data for testing the design of the map.
+    # TODO: delete the code for generating dummy data
+    df = px.data.gapminder().query("continent == 'Oceania'")
+    fig = px.line(df, x='year', y='lifeExp', color='country', markers=True)
+    return _make_plot_response(fig)
+
+
+def _make_plot_response(fig):
+    response = make_response(
+        json.dumps(fig, cls=plotly_utils.PlotlyJSONEncoder)
+    )
+    response.headers['Content-Type'] = 'application/json'
+    return response
+
+
 # Generate dummy data for testing the design of the map.
 # TODO: delete the code for generating dummy data.
 from numpy.random import default_rng
@@ -75,8 +93,8 @@ state_columns = list(zip(*states.items()))
 colorbar_ranges = {}
 
 
-@plot_views.route('/test-plot')
-def get_test_plot():
+@plot_views.route('/test-map-plot')
+def get_test_map_plot():
     # Dummy value, will be an input passed to the function that plots the map.
     statistic_label = 'normalized_death_count'
     # TODO: Add query that gets the absolute maximum and minimum for the
@@ -120,11 +138,7 @@ def get_test_plot():
         zmax=colorbar_range[1]
     )
     _set_map_layout(fig, statistic_label)
-    response = make_response(
-        json.dumps(fig, cls=plotly_utils.PlotlyJSONEncoder)
-    )
-    response.headers['Content-Type'] = 'application/json'
-    return response
+    return _make_plot_response(fig)
 
 
 def _set_map_layout(fig, statistic_label):
