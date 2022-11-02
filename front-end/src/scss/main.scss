@@ -8,9 +8,19 @@ $font-size-base: 1rem;
 $font-size-sm: $font-size-base * .875;
 $font-size-lg: $font-size-base * 1.25;
 
+
 // Customization of bootstrap
+// 1. Decrease vertical padding and font size for the navbar.
 $navbar-toggler-font-size: $font-size-sm;       // default: $font-size-lg
 $navbar-padding-y: $spacer * .25;               // default: $spacer * .5
+// 2.  Use ease-in rather than ease as the transition timing function for the
+// animated collapse of the sidebar.  A plotly graph gets resized after this
+// sidebar is toggled.  With the ease timing function, the transition appears to
+// have settled down during the final part of the transition, and so the plot
+// resize is startling.  With the ease-in timing function, the transition is
+// still barrelling along at the moment that the resize happens, and so the
+// resize is less eye-catching.
+$transition-collapse-width:   width .4s ease-in;  // default: width .35s ease
 
 // Variables for the bootswatch theme.
 @import "bootswatch/dist/darkly/variables";
