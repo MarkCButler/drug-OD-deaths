@@ -19,6 +19,15 @@ def get_test_line_plot():
     return _make_plot_response(fig)
 
 
+@plot_views.route('/dummy-line-plot')
+def get_dummy_line_plot():
+    # Generate dummy data for testing the design of the map.
+    # TODO: delete the code for generating dummy data
+    df = px.data.gapminder().query("continent == 'Oceania'")
+    fig = px.line(df, x='year', y='lifeExp', color='country', markers=True)
+    return _make_plot_response(fig)
+
+
 def _make_plot_response(fig):
     response = make_response(
         json.dumps(fig, cls=plotly_utils.PlotlyJSONEncoder)

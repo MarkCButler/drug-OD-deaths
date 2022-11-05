@@ -90,7 +90,7 @@
               class="tab-pane fade show active" id="summary" role="tabpanel"
               aria-labelledby="summary-tab"
             >
-              <div class="row p-4">
+              <div class="row pt-4 px-4">
                 <div class="col-10">
                   <h1 class="display-4 my-3">The Opioid Epidemic</h1>
                   <p class="h5 my-3">
@@ -116,8 +116,37 @@
                     preceding 12-month period.
                   </p>
                   <div class="od-deaths-plot" id="test-line-plot"></div>
-                  <div>some space</div>
+                  <h2 class="h4 mt-5 mb-3">Growth rate of the epidemic</h2>
+                  <div class="od-deaths-plot" id="dummy-line-plot"></div>
+                  <h2 class="h4 mt-5 mb-3">Regional distribution in 2017</h2>
+                  <p class="h5 my-3">
+                    Number of drug-overdose deaths per 100,000 people
+                  </p>
                   <div class="od-deaths-plot" id="test-map-plot"></div>
+                </div>
+              </div>
+              <div class="row px-4">
+                <div class="col-12">
+                  <p class="h5 mt-5 mb-3">Data sources</p>
+                  <p>
+                    Drug OD deaths:
+                    <a href="{{ urls['od_deaths_data'] }}">
+                      {{ urls['od_deaths_data'] }}
+                    </a>
+                  </p>
+                  <p>
+                    Annual state populations:
+                    <a href="{{ urls['population_data'] }}">
+                      {{ urls['population_data'] }}
+                    </a>
+                  </p>
+                  <p class="h5 mt-4 mb-3">Source code</p>
+                  <p>
+                    <a href="{{ urls['source_code'] }}">
+                      {{ urls['source_code'] }}
+                    </a>
+                  </p>
+
                 </div>
               </div>
             </div>
