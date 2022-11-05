@@ -8,5 +8,6 @@ import './scss/main.scss';
 
 import './js/app-fontawesome';
 
-// Add plots and associated event listeners to the DOM.
+// Add plots/tables and associated event listeners to the DOM.
 import './js/plots';
+import './js/tables';
