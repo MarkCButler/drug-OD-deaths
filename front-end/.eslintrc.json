@@ -12,8 +12,9 @@
     "sourceType": "module"
   },
   "rules": {
+    "arrow-parens": "off",
+    "comma-dangle": "off",
     "require-jsdoc" : "off",
-    "spaced-comment": "off",
-    "comma-dangle": "off"
+    "spaced-comment": "off"
   }
 }
