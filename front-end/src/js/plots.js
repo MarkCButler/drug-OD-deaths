@@ -1,14 +1,7 @@
 'use strict';
 
+import {displayAppError, HTTPError} from './errors';
 import Plotly from './app-plotly';
-
-
-class HTTPError extends Error {
-  constructor(message) {
-    super(message);
-    this.name = 'HTTPError';
-  }
-}
 
 
 async function addPlot(divElem, url, plotName) {
@@ -26,30 +19,17 @@ async function addPlot(divElem, url, plotName) {
       throw new HTTPError(`status code ${response.status}`);
     }
   } catch (error) {
-    displayPlotError(error, divElem, plotName);
+    displayAppError(error, divElem, plotName);
   }
 }
 
-
-function displayPlotError(error, divElem, plotName) {
-  if (!divElem.classList.contains('h3')) {
-    divElem.classList.add('h3');
-  }
-  if (!divElem.classList.contains('text-warning')) {
-    divElem.classList.add('text-warning');
-  }
-  divElem.innerHTML = `<p>Failed to fetch or generate ${plotName}.</p>` +
-                      `<p>${error}</p>`;
-}
 
 // TODO: In updating plots, use Plotly.react
-
 const plotIDs = ['test-line-plot', 'dummy-line-plot', 'test-map-plot'];
 for (const plotID of plotIDs) {
   const testPlot = document.getElementById(plotID);
   void addPlot(testPlot, `/plots/${plotID}`, plotID);
 }
-
 
 // Plotly objects do not natively understand bootstrap events, so we need to add
 // handlers to resize plots after to certain bootstrap events:
@@ -80,6 +60,7 @@ function refreshTabPanes() {
     }
   }
 }
+
 
 // Add event listeners to resize plots after the sidebar is toggled.
 ['hidden.bs.collapse', 'shown.bs.collapse'].forEach(
