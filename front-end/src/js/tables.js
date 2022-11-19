@@ -16,5 +16,7 @@ async function addTable(divElem, url, tableName) {
   }
 }
 
-const testTable = document.getElementById('od-deaths-table');
-void addTable(testTable, '/tables/od-deaths-table', 'od-deaths-table');
+const odDeathsTable = document.getElementById('od-deaths-table');
+void addTable(odDeathsTable, '/tables/od-deaths-table', 'od-deaths-table');
+const populationTable = document.getElementById('population-table');
+void addTable(populationTable, '/tables/population-table', 'population-table');
