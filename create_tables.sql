@@ -1,27 +1,27 @@
 PRAGMA foreign_keys = ON;
 
-CREATE TABLE states (
-  State TEXT NOT NULL PRIMARY KEY,
+CREATE TABLE locations (
+  Abbr TEXT NOT NULL PRIMARY KEY,
   Name TEXT NOT NULL
 );
 
 CREATE TABLE death_counts (
-  State TEXT NOT NULL,
+  Location_abbr TEXT NOT NULL,
   Year INTEGER NOT NULL,
   Month TEXT NOT NULL,
   Indicator TEXT NOT NULL,
-  Value INTEGER NOT NULL,
-  Label TEXT NOT NULL,
-  PRIMARY KEY (State, Year, Month, Indicator),
-  FOREIGN KEY (State)
-    REFERENCES states (State)
+  Death_count INTEGER NOT NULL,
+  OD_type TEXT NOT NULL,
+  PRIMARY KEY (Location_abbr, Year, Month, Indicator),
+  FOREIGN KEY (Location_abbr)
+    REFERENCES locations (Abbr)
 );
 
 CREATE TABLE populations (
-  State TEXT NOT NULL,
+  Location_abbr TEXT NOT NULL,
   Year INTEGER NOT NULL,
   Population INTEGER NOT NULL,
-  PRIMARY KEY (State, Year),
-  FOREIGN KEY (State)
-    REFERENCES states (State)
+  PRIMARY KEY (Location_abbr, Year),
+  FOREIGN KEY (Location_abbr)
+    REFERENCES locations (Abbr)
 );
