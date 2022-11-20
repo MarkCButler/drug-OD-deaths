@@ -90,8 +90,15 @@ def get_population_table():
     data = _get_expanded_table('all_population_data')
     columns = ['Location', 'Year', 'Population']
     # Reshape the table to reproduce the original form of the raw data.
-    return pivot(data[columns], index='Location', columns='Year',
-                 values='Population')
+    data = (
+        pivot(data[columns], index='Location', columns='Year',
+              values='Population')
+        .reset_index()
+    )
+    # In the reshaped dataframe, the set of columns confusingly is named 'Year',
+    # and this shows up when the dataframe is converted to an HTML table.
+    data.columns.name = ''
+    return data
 
 
 def _get_expanded_table(query_key):
