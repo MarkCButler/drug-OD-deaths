@@ -3,7 +3,7 @@
 import './js/app-bootstrap';
 
 // main.scss includes a customized subset of bootstrap scss imports as well as
-// the bootswatch theme.
+// the bootswatch theme and the style sheet for the DataTables Library.
 import './scss/main.scss';
 
 import './js/app-fontawesome';

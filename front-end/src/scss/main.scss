@@ -79,3 +79,6 @@ $transition-collapse-width:   width .4s ease-in;  // default: width .35s ease
 
 // Style sheet for the bootswatch theme
 @import 'bootswatch/dist/darkly/bootswatch';
+
+// Style sheet for the DataTables library with bootstrap styling
+@import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
