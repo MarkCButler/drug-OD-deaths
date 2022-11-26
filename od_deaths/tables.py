@@ -19,8 +19,7 @@ def od_deaths_table():
     """Return an HTML table of raw data on OD deaths.
 
     The id to be assigned to the DOM table element should be included in the url
-    as a parameter.  The app front end uses 'id=od-deaths-table-dt' (where 'dt'
-    indicates that the id is used by javascript datatables library).
+    as a parameter.  The app front end uses 'id=od-deaths-table'.
 
     The table is a subset of the raw data with some column names changed to
     improve readability.
@@ -40,8 +39,7 @@ def population_table():
     """Return an HTML table of raw population data.
 
     The id to be assigned to the DOM table element should be included in the url
-    as a parameter.  The app front end uses 'id=population-table-dt' (where 'dt'
-    indicates that id is used by the javascript datatables library).
+    as a parameter.  The app front end uses 'id=population-table'.
 
     The table is a subset of the raw data with some column names changed to
     improve readability.
