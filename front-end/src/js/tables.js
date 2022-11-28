@@ -6,22 +6,21 @@ import 'datatables.net-bs5';
 import {displayAppError, HTTPError} from './errors';
 
 // Options used by the DataTables library
-const dtOptions = {
+const datatableOptions = {
   order: []
 };
 
 
-async function addTable(divElem, url, tableId) {
+async function addTable(divElem, {tableId, url, interactive}) {
   try {
     url = url + '?id=' + tableId;
     const response = await fetch(url);
     if (response.ok) {
       divElem.innerHTML = await response.text();
       addBootstrapStyle(tableId);
-      // The DataTables library used to make the table interactive is a jQuery
-      // plug-in, and so jQuery syntax is used in calling the library.
-      const selector = '#' + tableId;
-      $(selector).DataTable(dtOptions);           // eslint-disable-line new-cap
+      if (interactive) {
+        makeInteractive(tableId);
+      }
     } else {
       throw new HTTPError(`status code ${response.status}`);
     }
@@ -38,7 +37,36 @@ function addBootstrapStyle(tableId) {
 }
 
 
-const odDeathsTable = document.getElementById('od-deaths-table-pane');
-void addTable(odDeathsTable, '/tables/od-deaths-table', 'od-deaths-table');
-const populationTable = document.getElementById('population-table-pane');
-void addTable(populationTable, '/tables/population-table', 'population-table');
+function makeInteractive(tableId) {
+  // The DataTables library used to make the table interactive is a jQuery
+  // plug-in, and so jQuery syntax is used in calling the library.
+  const selector = '#' + tableId;
+  $(selector).DataTable(datatableOptions);        // eslint-disable-line new-cap
+}
+
+
+const tableMetadata = [
+  {
+    tablePaneId: 'od-deaths-table-pane',
+    tableId: 'od-deaths-table',
+    url: '/tables/od-deaths-table',
+    interactive: true
+  },
+  {
+    tablePaneId: 'population-table-pane',
+    tableId: 'population-table',
+    url: '/tables/population-table',
+    interactive: true
+  },
+  {
+    tablePaneId: 'od-code-table-pane',
+    tableId: 'od-code-table',
+    url: '/tables/od-code-table',
+    interactive: false
+  }
+];
+
+tableMetadata.forEach(metadata => {
+  const divElem = document.getElementById(metadata.tablePaneId);
+  void addTable(divElem, metadata);
+});
