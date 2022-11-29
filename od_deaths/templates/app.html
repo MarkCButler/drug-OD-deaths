@@ -213,8 +213,78 @@
               class="tab-pane fade" id="notes" role="tabpanel"
               aria-labelledby="notes-tab"
             >
-              Technical-notes content
-              <div id="od-code-table-pane">
+              <div class="row pt-4 px-4">
+                <div class="col-10">
+                  <h1 class="h1 my-3">Technical notes</h1>
+                  <h5 class="h5 my-3">
+                    Data for drug-overdose deaths
+                  </h5>
+                  <ul>
+                    <li class="mb-2">
+                      The death counts are provisional values given by the Vital
+                      Statistics Rapid Release program of the US government.
+                    </li>
+                    <li class="mb-2">
+                      Provisional counts of drug-overdose deaths are reported
+                      with a lag time of six months following the date of death.
+                    </li>
+                    <li class="mb-2">
+                      The death count listed for a given month represents the
+                      number of deaths occurring during the preceding 12-month
+                      period. As a result, the death count does not show
+                      seasonal variation.
+                    </li>
+                    <li class="mb-2">
+                      Due to low data quality, the death count was not reported
+                      for certain combinations of month, year, state, and drug
+                      category.
+                    </li>
+                    <li class="mb-2">
+                      Because of variations in reporting by different states,
+                      death rates involving specific drug categories are not
+                      compared between states. The only comparison made between
+                      states is the total number of drug-overdose deaths.
+                    </li>
+                    <li class="mb-2">
+                      <p class="mb-2">
+                        The data includes cause-of-death codes from ICD–10, the
+                        Tenth Revision of the International Statistical
+                        Classification of Diseases and Related Health Problems.
+                        The correspondence between plot labels and ICD-10 codes
+                        is as follows:
+                      </p>
+                      <div class="px-4 py-2" id="od-code-table-pane"></div>
+                    </li>
+                    <li class="mb-2">
+                      Additional information regarding the data on drug-overdose
+                      deaths is available at
+                      <a href="{{ urls['od_deaths_data'] }}">
+                        {{ urls['od_deaths_data'] }}
+                      </a>
+                    </li>
+                  </ul>
+                  <h5 class="h5 mt-4 mb-3">
+                    Population data
+                  </h5>
+                  <ul>
+                    <li class="mb-2">
+                      Annual population estimates (dated July 1) are given by
+                      the US Census Bureau.
+                    </li>
+                    <li class="mb-2">
+                      For plots showing number of deaths per 100,000 population,
+                      linear interpolation is used to obtain population
+                      estimates that do not have an abrupt change in July.
+                    </li>
+                    <li class="mb-2">
+                      Additional information regarding the annual population
+                      estimates is available at
+                      <a href="{{ urls['population_data'] }}">
+                        {{ urls['population_data'] }}
+                      </a>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>

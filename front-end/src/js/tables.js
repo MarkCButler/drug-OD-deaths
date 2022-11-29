@@ -1,11 +1,11 @@
 'use strict';
 
+// Import the datatables library and its dependency jquery.
 import $ from 'jquery';
 import 'datatables.net-bs5';
 
 import {displayAppError, HTTPError} from './errors';
 
-// Options used by the DataTables library
 const datatableOptions = {
   order: []
 };
@@ -38,8 +38,8 @@ function addBootstrapStyle(tableId) {
 
 
 function makeInteractive(tableId) {
-  // The DataTables library used to make the table interactive is a jQuery
-  // plug-in, and so jQuery syntax is used in calling the library.
+  // The datatables library used to make the table interactive is a jquery
+  // plug-in, and so jquery syntax is used in calling the library.
   const selector = '#' + tableId;
   $(selector).DataTable(datatableOptions);        // eslint-disable-line new-cap
 }
