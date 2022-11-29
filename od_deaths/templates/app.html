@@ -11,7 +11,7 @@
     <title>Drug OD Deaths</title>
   </head>
   <body>
-    <nav class="navbar navbar-dark bg-primary">
+    <div class="navbar navbar-dark bg-primary">
       <div class="container-fluid">
         <button
           class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -22,61 +22,59 @@
         </button>
         <span class="navbar-brand">Drug OD Deaths</span>
       </div>
-    </nav>
+    </div>
     <div class="container-fluid">
       <div class="row">
         <div class="col-auto bg-secondary p-0">
-          <div class="collapse collapse-horizontal show" id="sidebar">
-            <nav>
-              <div class="nav nav-tabs flex-column" role="tablist">
-                <button
-                  class="btn btn-lg text-start nav-link py-3 active"
-                  id="summary-tab" data-bs-toggle="tab"
-                  data-bs-target="#summary" type="button" role="tab"
-                  aria-controls="summary" aria-selected="true"
-                >
-                  <i class="fa-solid fa-list me-3"></i>
-                  Summary
-                </button>
-                <button
-                  class="btn btn-lg text-start nav-link py-3" id="map-tab"
-                  data-bs-toggle="tab" data-bs-target="#map" type="button"
-                  role="tab" aria-controls="map" aria-selected="false"
-                >
-                  <i class="fa-solid fa-map me-3"></i>
-                  Map
-                </button>
-                <button
-                  class="btn btn-lg text-start nav-link py-3" id="time-dev-tab"
-                  data-bs-toggle="tab" data-bs-target="#time-dev" type="button"
-                  role="tab" aria-controls="time-dev" aria-selected="false"
-                >
-                  <i class="fa-solid fa-chart-line me-3"></i>
-                  Time development
-                </button>
-                <button
-                  class="btn btn-lg text-start nav-link py-3" id="data-tab"
-                  data-bs-toggle="tab" data-bs-target="#data" type="button"
-                  role="tab" aria-controls="data" aria-selected="false"
-                >
-                  <i class="fa-solid fa-database me-3"></i>
-                  Data
-                </button>
-                <button
-                  class="btn btn-lg text-start nav-link py-3" id="notes-tab"
-                  data-bs-toggle="tab" data-bs-target="#notes" type="button"
-                  role="tab" aria-controls="notes" aria-selected="false"
-                >
-                  <i class="fa-solid fa-file-lines me-3"></i>
-                  Technical notes
-                </button>
-              </div>
-            </nav>
-          </div>
+          <nav class="collapse collapse-horizontal show" id="sidebar">
+            <div class="nav nav-tabs flex-column" role="tablist">
+              <button
+                class="btn btn-lg text-start nav-link py-3 active"
+                id="summary-tab" data-bs-toggle="tab" data-bs-target="#summary"
+                type="button" role="tab" aria-controls="summary"
+                aria-selected="true"
+              >
+                <i class="fa-solid fa-list me-3"></i>
+                Summary
+              </button>
+              <button
+                class="btn btn-lg text-start nav-link py-3" id="map-tab"
+                data-bs-toggle="tab" data-bs-target="#map" type="button"
+                role="tab" aria-controls="map" aria-selected="false"
+              >
+                <i class="fa-solid fa-map me-3"></i>
+                Map
+              </button>
+              <button
+                class="btn btn-lg text-start nav-link py-3" id="time-dev-tab"
+                data-bs-toggle="tab" data-bs-target="#time-dev" type="button"
+                role="tab" aria-controls="time-dev" aria-selected="false"
+              >
+                <i class="fa-solid fa-chart-line me-3"></i>
+                Time development
+              </button>
+              <button
+                class="btn btn-lg text-start nav-link py-3" id="data-tab"
+                data-bs-toggle="tab" data-bs-target="#data" type="button"
+                role="tab" aria-controls="data" aria-selected="false"
+              >
+                <i class="fa-solid fa-database me-3"></i>
+                Data
+              </button>
+              <button
+                class="btn btn-lg text-start nav-link py-3" id="notes-tab"
+                data-bs-toggle="tab" data-bs-target="#notes" type="button"
+                role="tab" aria-controls="notes" aria-selected="false"
+              >
+                <i class="fa-solid fa-file-lines me-3"></i>
+                Technical notes
+              </button>
+            </div>
+          </nav>
         </div>
         <div class="col">
-          <div class="tab-content">
-            <div
+          <main class="tab-content">
+            <section
               class="tab-pane fade show active" id="summary" role="tabpanel"
               aria-labelledby="summary-tab"
             >
@@ -109,15 +107,15 @@
                   <h2 class="h4 mt-5 mb-3">Growth rate of the epidemic</h2>
                   <div class="od-deaths-plot" id="dummy-line-plot"></div>
                   <h2 class="h4 mt-5 mb-3">Regional distribution in 2017</h2>
-                  <p class="h5 my-3">
+                  <h3 class="h5 my-3">
                     Number of drug-overdose deaths per 100,000 people
-                  </p>
+                  </h3>
                   <div class="od-deaths-plot" id="test-map-plot"></div>
                 </div>
               </div>
-              <div class="row px-4">
+              <footer class="row px-4">
                 <div class="col-12">
-                  <p class="h5 mt-5 mb-3">Data sources</p>
+                  <h2 class="h5 mt-5 mb-3">Data sources</h2>
                   <p>
                     Drug OD deaths:
                     <a href="{{ urls['od_deaths_data'] }}">
@@ -130,33 +128,58 @@
                       {{ urls['population_data'] }}
                     </a>
                   </p>
-                  <p class="h5 mt-4 mb-3">Source code</p>
+                  <h2 class="h5 mt-4 mb-3">Source code</h2>
                   <p>
                     <a href="{{ urls['source_code'] }}">
                       {{ urls['source_code'] }}
                     </a>
                   </p>
                 </div>
-              </div>
-            </div>
-            <div
+              </footer>
+            </section>
+            <section
               class="tab-pane fade" id="map" role="tabpanel"
               aria-labelledby="map-tab"
             >
-              Map content
-            </div>
-            <div
+              <div class="row pt-4 px-4">
+                <div class="col-10">
+                  <h2 class="h1 my-3">Drug-Overdose Deaths in the US</h2>
+                  <h3 class="h4 mb-3" id="map-plot-title-1">
+                    Number of drug-overdose deaths
+                  </h3>
+                  <h4 class="h5 mb-3" id="map-plot-title-2">
+                    Twelve-month period ending September 2019
+                  </h4>
+                </div>
+              </div>
+            </section>
+            <section
               class="tab-pane fade" id="time-dev" role="tabpanel"
               aria-labelledby="time-dev-tab"
             >
-              Time-development content
-            </div>
-            <div
+              <div class="row pt-4 px-4">
+                <div class="col-10">
+                  <h2 class="h1 my-3">Time development by OD category</h2>
+                  <h3 class="h4 mb-3" id="time-plot-title-1">
+                    Number of deaths, preceding 12-month period
+                  </h3>
+                  <h4 class="h5 mb-3" id="time-plot-title-2">
+                    United States
+                  </h4>
+                </div>
+              </div>
+            </section>
+            <section
               class="tab-pane fade" id="data" role="tabpanel"
               aria-labelledby="data-tab"
             >
               <div class="row pt-4 px-4">
                 <div class="col-12">
+                  <h2 class="h1 my-3">Data used for analysis</h2>
+                  <p class="h5 mb-5">
+                    Raw data is shown, with some column names changed to improve
+                    readability
+                  </p>
                   <nav>
                     <div class="nav nav-pills mb-3" role="tablist">
                       <button
@@ -193,32 +216,34 @@
                     >
                     </div>
                   </div>
-                  <p class="h5 mt-5 mb-3">Data sources</p>
-                  <p>
-                    Drug OD deaths:
-                    <a href="{{ urls['od_deaths_data'] }}">
-                      {{ urls['od_deaths_data'] }}
-                    </a>
-                  </p>
-                  <p>
-                    Annual state populations:
-                    <a href="{{ urls['population_data'] }}">
-                      {{ urls['population_data'] }}
-                    </a>
-                  </p>
+                  <footer>
+                    <h3 class="h5 mt-5 mb-3">Data sources</h3>
+                    <p>
+                      Drug OD deaths:
+                      <a href="{{ urls['od_deaths_data'] }}">
+                        {{ urls['od_deaths_data'] }}
+                      </a>
+                    </p>
+                    <p>
+                      Annual state populations:
+                      <a href="{{ urls['population_data'] }}">
+                        {{ urls['population_data'] }}
+                      </a>
+                    </p>
+                  </footer>
                 </div>
               </div>
-            </div>
-            <div
+            </section>
+            <section
               class="tab-pane fade" id="notes" role="tabpanel"
               aria-labelledby="notes-tab"
             >
               <div class="row pt-4 px-4">
                 <div class="col-10">
-                  <h1 class="h1 my-3">Technical notes</h1>
-                  <h5 class="h5 my-3">
+                  <h2 class="h1 my-3">Technical notes</h2>
+                  <h3 class="h5 mb-3">
                     Data for drug-overdose deaths
-                  </h5>
+                  </h3>
                   <ul>
                     <li class="mb-2">
                       The death counts are provisional values given by the Vital
@@ -263,9 +288,9 @@
                       </a>
                     </li>
                   </ul>
-                  <h5 class="h5 mt-4 mb-3">
+                  <h3 class="h5 mt-4 mb-3">
                     Population data
-                  </h5>
+                  </h3>
                   <ul>
                     <li class="mb-2">
                       Annual population estimates (dated July 1) are given by
@@ -286,8 +311,8 @@
                   </ul>
                 </div>
               </div>
-            </div>
-          </div>
+            </section>
+          </main>
         </div>
       </div>
     </div>
