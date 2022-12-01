@@ -78,10 +78,10 @@
               class="tab-pane fade show active" id="summary" role="tabpanel"
               aria-labelledby="summary-tab"
             >
-              <div class="row pt-4 px-4">
+              <div class="row px-4 pt-4 mb-5">
                 <div class="col-10">
-                  <h1 class="display-4 my-3">The Opioid Epidemic</h1>
-                  <p class="h5 my-3">
+                  <h1 class="display-4 pt-3 mb-3">The Opioid Epidemic</h1>
+                  <p class="h5 mb-3">
                     The death rate in the US due to opioid overdose increased by
                     almost a factor of six between 1997 and 2017 [1]. Even
                     though the overall number of drug-overdose deaths has
@@ -94,41 +94,41 @@
                     concentration in the per capita death rate in 2017, when the
                     overall number of drug-overdose deaths peaked.
                   </p>
-                  <p>
+                  <p class="mb-5">
                     [1] Sarah DeWeerdt, "Tracing the US opioid crisis to its
                     roots", Nature 573, S10-S12 (2019)
                   </p>
-                  <h2 class="h4 mt-5 mb-3">Drug-overdose deaths in the US</h2>
-                  <p class="h5 my-3">
+                  <h2 class="h4 mb-3">Drug-overdose deaths in the US</h2>
+                  <p class="h5 mb-3">
                     Each data point represents the number of deaths during the
                     preceding 12-month period.
                   </p>
-                  <div class="od-deaths-plot" id="test-line-plot"></div>
-                  <h2 class="h4 mt-5 mb-3">Growth rate of the epidemic</h2>
-                  <div class="od-deaths-plot" id="dummy-line-plot"></div>
-                  <h2 class="h4 mt-5 mb-3">Regional distribution in 2017</h2>
-                  <h3 class="h5 my-3">
+                  <div class="od-deaths-plot mb-5" id="test-line-plot"></div>
+                  <h2 class="h4 mb-3">Growth rate of the epidemic</h2>
+                  <div class="od-deaths-plot mb-5" id="dummy-line-plot"></div>
+                  <h2 class="h4 mb-3">Regional distribution in 2017</h2>
+                  <h3 class="h5 mb-3">
                     Number of drug-overdose deaths per 100,000 people
                   </h3>
                   <div class="od-deaths-plot" id="test-map-plot"></div>
                 </div>
               </div>
-              <footer class="row px-4">
+              <footer class="row px-4 pt-4">
                 <div class="col-12">
-                  <h2 class="h5 mt-5 mb-3">Data sources</h2>
+                  <h2 class="h5 mb-3">Data sources</h2>
                   <p>
                     Drug OD deaths:
                     <a href="{{ urls['od_deaths_data'] }}">
                       {{ urls['od_deaths_data'] }}
                     </a>
                   </p>
-                  <p>
+                  <p class="mb-4">
                     Annual state populations:
                     <a href="{{ urls['population_data'] }}">
                       {{ urls['population_data'] }}
                     </a>
                   </p>
-                  <h2 class="h5 mt-4 mb-3">Source code</h2>
+                  <h2 class="h5 mb-3">Source code</h2>
                   <p>
                     <a href="{{ urls['source_code'] }}">
                       {{ urls['source_code'] }}
@@ -143,7 +143,7 @@
             >
               <div class="row pt-4 px-4">
                 <div class="col-10">
-                  <h2 class="h1 my-3">Drug-Overdose Deaths in the US</h2>
+                  <h2 class="h1 pt-3 mb-3">Drug-Overdose Deaths in the US</h2>
                   <h3 class="h4 mb-3" id="map-plot-title-1">
                     Number of drug-overdose deaths
                   </h3>
@@ -159,7 +159,7 @@
             >
               <div class="row pt-4 px-4">
                 <div class="col-10">
-                  <h2 class="h1 my-3">Time development by OD category</h2>
+                  <h2 class="h1 pt-3 mb-3">Time development by OD category</h2>
                   <h3 class="h4 mb-3" id="time-plot-title-1">
                     Number of deaths, preceding 12-month period
                   </h3>
@@ -175,13 +175,13 @@
             >
               <div class="row pt-4 px-4">
                 <div class="col-12">
-                  <h2 class="h1 my-3">Data used for analysis</h2>
-                  <p class="h5 mb-5">
+                  <h2 class="h1 pt-3 mb-3">Data used for analysis</h2>
+                  <p class="h5 mb-3">
                     Raw data is shown, with some column names changed to improve
                     readability
                   </p>
-                  <nav>
-                    <div class="nav nav-pills mb-3" role="tablist">
+                  <nav class="mb-3">
+                    <div class="nav nav-pills" role="tablist">
                       <button
                         class="nav-link active" id="od-deaths-table-tab"
                         data-bs-toggle="tab"
@@ -203,7 +203,7 @@
                       </button>
                     </div>
                   </nav>
-                  <div class="tab-content">
+                  <div class="tab-content mb-5">
                     <div
                       class="tab-pane fade show active"
                       id="od-deaths-table-pane"
@@ -217,7 +217,7 @@
                     </div>
                   </div>
                   <footer>
-                    <h3 class="h5 mt-5 mb-3">Data sources</h3>
+                    <h3 class="h5 mb-3">Data sources</h3>
                     <p>
                       Drug OD deaths:
                       <a href="{{ urls['od_deaths_data'] }}">
@@ -240,11 +240,11 @@
             >
               <div class="row pt-4 px-4">
                 <div class="col-10">
-                  <h2 class="h1 my-3">Technical notes</h2>
+                  <h2 class="h1 pt-3 mb-3">Technical notes</h2>
                   <h3 class="h5 mb-3">
                     Data for drug-overdose deaths
                   </h3>
-                  <ul>
+                  <ul class="mb-4">
                     <li class="mb-2">
                       The death counts are provisional values given by the Vital
                       Statistics Rapid Release program of the US government.
@@ -288,7 +288,7 @@
                       </a>
                     </li>
                   </ul>
-                  <h3 class="h5 mt-4 mb-3">
+                  <h3 class="h5 mb-3">
                     Population data
                   </h3>
                   <ul>
