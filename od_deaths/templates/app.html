@@ -79,7 +79,7 @@
               aria-labelledby="summary-tab"
             >
               <div class="row px-4 pt-4 mb-5">
-                <div class="col-10">
+                <div class="col 12 col-xxl-10">
                   <h1 class="display-4 pt-3 mb-3">The Opioid Epidemic</h1>
                   <p class="h5 mb-3">
                     The death rate in the US due to opioid overdose increased by
@@ -142,7 +142,7 @@
               aria-labelledby="map-tab"
             >
               <div class="row pt-4 px-4">
-                <div class="col-10">
+                <div class="col-12 col-xxl-10">
                   <h2 class="h1 pt-3 mb-3">Drug-Overdose Deaths in the US</h2>
                   <h3 class="h4 mb-3" id="map-plot-title-1">
                     Number of drug-overdose deaths
@@ -150,15 +150,64 @@
                   <h4 class="h5 mb-3" id="map-plot-title-2">
                     Twelve-month period ending September 2019
                   </h4>
+                  <div id="interactive-map-plot"></div>
                 </div>
               </div>
+              <form class="row pt-4 px-4">
+                <div class="col-4 d-flex flex-column">
+                  <label class="form-label" for="select-map-plot-statistic">
+                    Select the statistic to display
+                  </label>
+                  <div class="d-flex">
+                    <div class="od-deaths-select-container">
+                      <select
+                        class="form-select" name="map-plot-statistic"
+                        id="select-map-plot-statistic"
+                      >
+                        <option value="{{ statistic_types[0].value }}" selected>
+                          {{ statistic_types[0].name }}
+                        </option>
+                        {% for statistic_type in statistic_types[1:] %}
+                        <option value="{{ statistic_type.value }}">
+                          {{ statistic_type.name }}
+                        </option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-4 d-flex flex-column">
+                  <label class="form-label" for="select-map-plot-period">
+                    Select the twelve-month period ending
+                  </label>
+                  <div class="d-flex">
+                    <div class="od-deaths-select-container">
+                      <select
+                        class="form-select" name="map-plot-period"
+                        id="select-map-plot-period"
+                      >
+                        {% for time_period in time_periods[:-1] %}
+                        <option value="{{ time_period|urlencode }}">
+                          {{ time_period }}
+                        </option>
+                        {% endfor %}
+                        <option
+                          value="{{ time_periods[-1]|urlencode }}" selected
+                        >
+                          {{ time_periods[-1] }}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </form>
             </section>
             <section
               class="tab-pane fade" id="time-dev" role="tabpanel"
               aria-labelledby="time-dev-tab"
             >
               <div class="row pt-4 px-4">
-                <div class="col-10">
+                <div class="col-12 col-xxl-10">
                   <h2 class="h1 pt-3 mb-3">Time development by OD category</h2>
                   <h3 class="h4 mb-3" id="time-plot-title-1">
                     Number of deaths, preceding 12-month period
@@ -166,8 +215,87 @@
                   <h4 class="h5 mb-3" id="time-plot-title-2">
                     United States
                   </h4>
+                  <div id="interactive-time-plot"></div>
                 </div>
               </div>
+              <form class="row pt-4 px-4">
+                <div class="col-4 d-flex flex-column">
+                  <label class="form-label" for="select-time-plot-location">
+                    Select the US or a state
+                  </label>
+                  <div class="d-flex">
+                    <div class="od-deaths-select-container">
+                      <select
+                        class="form-select" name="time-plot-location"
+                        id="select-time-plot-location"
+                      >
+                        <option value="{{ locations[0].value }}" selected>
+                          {{ locations[0].name }}
+                        </option>
+                        {% for location in locations[1:] %}
+                        <option value="{{ location.value }}">
+                          {{ location.name }}
+                        </option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-4 d-flex flex-column">
+                  <label class="form-label" for="select-time-plot-statistic">
+                    Select the statistic to display
+                  </label>
+                  <div class="d-flex">
+                    <div class="od-deaths-select-container">
+                      <select
+                        class="form-select" name="time-plot-statistic"
+                        id="select-time-plot-statistic"
+                      >
+                        <option value="{{ statistic_types[0].value }}" selected>
+                          {{ statistic_types[0].name }}
+                        </option>
+                        {% for statistic_type in statistic_types[1:] %}
+                        <option value="{{ statistic_type.value }}">
+                          {{ statistic_type.name }}
+                        </option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-4 d-flex flex-column">
+                  <label class="form-label" for="select-time-plot-od-type">
+                    Select one or more categories to display
+                  </label>
+                  <div class="d-flex">
+                    <div class="od-deaths-select-container">
+                      <select
+                        name="time-plot-od-type" id="select-time-plot-od-type"
+                        multiple
+                      >
+                        <option value="{{ od_types[0].value }}" selected>
+                          {{ od_types[0].name }}
+                        </option>
+                        {% for od_type in od_types[1:] %}
+                        <option value="{{ od_type.value }}">
+                          {{ od_type.name }}
+                        </option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </form>
+              <footer class="row pt-4 px-4">
+                <div class="col-12">
+                  <p>
+                    The death count was not reported for certain combinations of
+                    state, year, month, and category. As a result, some plots of
+                    time development are truncated, and the available categories
+                    of drug-overdose deaths vary by state.
+                  </p>
+                </div>
+              </footer>
             </section>
             <section
               class="tab-pane fade" id="data" role="tabpanel"
@@ -239,7 +367,7 @@
               aria-labelledby="notes-tab"
             >
               <div class="row pt-4 px-4">
-                <div class="col-10">
+                <div class="col-12 col-xxl-10">
                   <h2 class="h1 pt-3 mb-3">Technical notes</h2>
                   <h3 class="h5 mb-3">
                     Data for drug-overdose deaths

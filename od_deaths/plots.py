@@ -3,6 +3,7 @@ import json
 
 from flask import Blueprint, make_response
 import plotly.express as px
+import plotly.graph_objects as go
 import plotly.utils as plotly_utils
 
 from .labels import COLORBAR_TITLES, COLORBAR_TICKFORMATS, MAP_HOVERTEMPLATES
@@ -15,15 +16,11 @@ def get_test_line_plot():
     # Generate dummy data for testing the design of the map.
     # TODO: delete the code for generating dummy data
     df = px.data.gapminder().query("continent == 'Oceania'")
-    fig = px.line(df, x='year', y='lifeExp', color='country', markers=True)
-    return _make_plot_response(fig)
 
+    # The following redundant line is added to work around a bug in plotly, see
+    # https://github.com/plotly/plotly.py/issues/3441#issuecomment-1271747147
+    fig = go.Figure(layout=dict(template='plotly'))
 
-@plot_views.route('/dummy-line-plot')
-def get_dummy_line_plot():
-    # Generate dummy data for testing the design of the map.
-    # TODO: delete the code for generating dummy data
-    df = px.data.gapminder().query("continent == 'Oceania'")
     fig = px.line(df, x='year', y='lifeExp', color='country', markers=True)
     return _make_plot_response(fig)
 

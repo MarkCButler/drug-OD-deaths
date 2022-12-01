@@ -6,24 +6,19 @@ dictionary keys correspond to data categories used in the app's UI.  These keys
 must be used consistently in both the app's front and back-end code.  In order
 to facilitate consistent usage of these keys, all constants and functions that
 involve hard-coded copies of the keys are defined in the current module.  Labels
-defined here that are needed by front-end javascript code are delivered by the
-back end through a Jinja2 template.
+defined here that are needed by front-end code are delivered by the back end
+through a Jinja2 HTML template or are returned in response to AJAX-style calls.
 """
+from collections import namedtuple
+
 import pandas as pd
+
+# Used in setting option tags in the HTML template.
+SelectOption = namedtuple('SelectOption', ['value', 'name'])
 
 ################################################################################
 # Categories of OD death
 ################################################################################
-ORDERED_OD_TYPE_KEYS = [
-    'all_drug_OD',
-    'all_opioids',
-    'prescription_opioids',
-    'synthetic_opioids',
-    'heroin',
-    'cocaine',
-    'other_stimulants'
-]
-
 OD_TYPE_LABELS = {
     'all_drug_OD': 'All drug-overdose deaths',
     'all_opioids': 'All opioids',
@@ -33,6 +28,17 @@ OD_TYPE_LABELS = {
     'cocaine': 'Cocaine',
     'other_stimulants': 'Methamphetamine and other stimulants'
 }
+
+
+def get_od_types():
+    """Return a list of named tuples of the form (value, name) representing the
+    different categories of OD deaths.
+
+    The values are used internally to identify different categories of OD
+    deaths, while the corresponding names are displayed in the UI.
+    """
+    named_tuples = map(SelectOption._make, OD_TYPE_LABELS.items())
+    return list(named_tuples)
 
 
 def get_od_code_table():
@@ -57,13 +63,11 @@ def get_od_code_table():
 ################################################################################
 # Statistics used to describe OD deaths
 ################################################################################
-# TODO:  Check whether this list is needed as a Python object.  Possibly just
-#   define in a comment.
-ORDERED_STATISTIC_KEYS = [
-    'death_count',
-    'normalized_death_count',
-    'percent_change'
-]
+STATISTIC_LABELS = {
+    'death_count': 'Number of deaths',
+    'normalized_death_count': 'Deaths per 100,000 people',
+    'percent_change': 'Percent change in one year'
+}
 
 # Labels displayed when hovering over a map
 MAP_HOVERTEMPLATES = {
@@ -84,18 +88,96 @@ COLORBAR_TICKFORMATS = {
     'percent_change': '.0%'
 }
 
+
+def get_statistic_types():
+    """Return a list of named tuples of the form (value, name) representing the
+    different statistics used to describe the OD deaths.
+
+    The values are used internally to identify different statistics, while the
+    corresponding names are displayed in the UI.
+    """
+    named_tuples = map(SelectOption._make, STATISTIC_LABELS.items())
+    return list(named_tuples)
+
+
 ################################################################################
-# Misc labels
+# Locations for which data is available.
 ################################################################################
-# List of full names of locations for which data is available.
-ORDERED_LOCATIONS = [
-    'United States', 'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
-    'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii',
-    'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana',
-    'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota',
-    'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
-    'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota',
-    'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island',
-    'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
-    'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
-]
+ORDERED_LOCATIONS = {
+    'US': 'United States',
+    'AK': 'Alaska',
+    'AL': 'Alabama',
+    'AR': 'Arkansas',
+    'AZ': 'Arizona',
+    'CA': 'California',
+    'CO': 'Colorado',
+    'CT': 'Connecticut',
+    'DE': 'Delaware',
+    'FL': 'Florida',
+    'GA': 'Georgia',
+    'HI': 'Hawaii',
+    'IA': 'Iowa',
+    'ID': 'Idaho',
+    'IL': 'Illinois',
+    'IN': 'Indiana',
+    'KS': 'Kansas',
+    'KY': 'Kentucky',
+    'LA': 'Louisiana',
+    'MA': 'Massachusetts',
+    'MD': 'Maryland',
+    'ME': 'Maine',
+    'MI': 'Michigan',
+    'MN': 'Minnesota',
+    'MO': 'Missouri',
+    'MS': 'Mississippi',
+    'MT': 'Montana',
+    'NC': 'North Carolina',
+    'ND': 'North Dakota',
+    'NE': 'Nebraska',
+    'NH': 'New Hampshire',
+    'NJ': 'New Jersey',
+    'NM': 'New Mexico',
+    'NV': 'Nevada',
+    'NY': 'New York',
+    'OH': 'Ohio',
+    'OK': 'Oklahoma',
+    'OR': 'Oregon',
+    'PA': 'Pennsylvania',
+    'RI': 'Rhode Island',
+    'SC': 'South Carolina',
+    'SD': 'South Dakota',
+    'TN': 'Tennessee',
+    'TX': 'Texas',
+    'UT': 'Utah',
+    'VA': 'Virginia',
+    'VT': 'Vermont',
+    'WA': 'Washington',
+    'WI': 'Wisconsin',
+    'WV': 'West Virginia',
+    'WY': 'Wyoming'
+}
+
+
+def get_locations():
+    """Return a list of named tuples of the form (value, name) corresponding to
+    locations for which data is available.
+
+    The values are abbreviations used internally to identify locations, while
+    the corresponding names are displayed in the UI.
+    """
+    named_tuples = map(SelectOption._make, ORDERED_LOCATIONS.items())
+    return list(named_tuples)
+
+
+def get_location_names():
+    """Return a list of full names of the locations for which data is
+    available.
+    """
+    return list(ORDERED_LOCATIONS.values())
+
+
+def get_location_abbr():
+    """Return a list of abbreviations of the locations for which data is
+    available.
+    """
+    return list(ORDERED_LOCATIONS.keys())

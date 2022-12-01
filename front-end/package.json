@@ -8,6 +8,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.2.0",
     "@fortawesome/free-solid-svg-icons": "^6.2.0",
     "@popperjs/core": "^2.11.6",
+    "@selectize/selectize": "^0.15.2",
     "autoprefixer": "^10.4.12",
     "bootstrap": "^5.2.2",
     "bootswatch": "^5.2.1",

@@ -80,5 +80,15 @@ $transition-collapse-width:   width .4s ease-in;  // default: width .35s ease
 // Style sheet for the bootswatch theme
 @import 'bootswatch/dist/darkly/bootswatch';
 
-// Style sheet for the DataTables library with bootstrap styling
+// Style sheet for the datatables library with bootstrap-5 styling
 @import 'datatables.net-bs5/css/dataTables.bootstrap5.min.css';
+
+// Style sheet for the selectize library with boostrap-5 styling
+@import '@selectize/selectize/dist/css/selectize.bootstrap5.css';
+
+// Most styles in the app UI are set using bootstrap classes, but bootstrap 5.2
+// does not include a class for setting flex-basis.  Define a class that enables
+// setting flex-basis on select elements in the app template.
+.od-deaths-select-container {
+  flex: 0 1 22rem;
+}

@@ -4,9 +4,18 @@ from pathlib import Path
 from flask import Flask, render_template
 
 from .database import init_app
+from .labels import get_locations, get_od_types, get_statistic_types
 from .plots import plot_views
 from .tables import table_views
-from .template_data import URLS
+from .template_data import TIME_PERIODS, URLS
+
+app_kwargs = {
+    'locations': get_locations(),
+    'od_types': get_od_types(),
+    'statistic_types': get_statistic_types(),
+    'time_periods': TIME_PERIODS,
+    'urls': URLS
+}
 
 
 def create_app():
@@ -22,6 +31,6 @@ def create_app():
 
     @app.route('/')
     def index():
-        return render_template('app.html', urls=URLS)
+        return render_template('app.html', **app_kwargs)
 
     return app

@@ -3,7 +3,7 @@ from flask import Blueprint, request
 from pandas import Categorical
 
 from .database import get_od_deaths_table, get_population_table
-from .labels import get_od_code_table, ORDERED_LOCATIONS
+from .labels import get_location_names, get_od_code_table
 
 table_views = Blueprint('tables', __name__, url_prefix='/tables')
 
@@ -25,7 +25,7 @@ def od_deaths_table():
     improve readability.
     """
     data = get_od_deaths_table()
-    data.Location = Categorical(data.Location, categories=ORDERED_LOCATIONS,
+    data.Location = Categorical(data.Location, categories=get_location_names(),
                                 ordered=True)
     data.Month = Categorical(data.Month, categories=ORDERED_MONTHS,
                              ordered=True)
@@ -49,7 +49,7 @@ def population_table():
     improve readability.
     """
     data = get_population_table()
-    data.Location = Categorical(data.Location, categories=ORDERED_LOCATIONS,
+    data.Location = Categorical(data.Location, categories=get_location_names(),
                                 ordered=True)
     data = data.sort_values(by='Location')
     return _to_html_table(data)

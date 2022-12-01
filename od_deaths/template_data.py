@@ -7,3 +7,6 @@ URLS = {
     'source_code': 'https://github.com/MarkCButler/drug-OD-deaths-Python'
 }
 # pylint: enable=line-too-long
+
+TIME_PERIODS = ['September ' + str(year)
+                for year in range(2015, 2020)]
