@@ -6,45 +6,6 @@ import 'datatables.net-bs5';
 
 import {displayAppError, HTTPError} from './errors';
 
-const datatableOptions = {
-  order: []
-};
-
-
-async function addTable(divElem, {tableId, url, interactive}) {
-  try {
-    url = url + '?id=' + tableId;
-    const response = await fetch(url);
-    if (response.ok) {
-      divElem.innerHTML = await response.text();
-      addBootstrapStyle(tableId);
-      if (interactive) {
-        makeInteractive(tableId);
-      }
-    } else {
-      throw new HTTPError(`status code ${response.status}`);
-    }
-  } catch (error) {
-    displayAppError(error, divElem, tableId);
-  }
-}
-
-
-function addBootstrapStyle(tableId) {
-  const table = document.getElementById(tableId);
-  const classArgs = ['table', 'table-primary', 'table-striped'];
-  table.classList.add(...classArgs);
-}
-
-
-function makeInteractive(tableId) {
-  // The datatables library used to make the table interactive is a jquery
-  // plug-in, and so jquery syntax is used in calling the library.
-  const selector = '#' + tableId;
-  $(selector).DataTable(datatableOptions);        // eslint-disable-line new-cap
-}
-
-
 const tableMetadata = [
   {
     tablePaneId: 'od-deaths-table-pane',
@@ -66,7 +27,46 @@ const tableMetadata = [
   }
 ];
 
+const datatableOptions = {
+  order: []
+};
+
+
+async function addTable(tableDiv, {tableId, url, interactive}) {
+  try {
+    url = url + '?id=' + tableId;
+    const response = await fetch(url);
+    if (response.ok) {
+      tableDiv.innerHTML = await response.text();
+      addBootstrapStyle(tableId);
+      if (interactive) {
+        makeInteractive(tableId);
+      }
+    } else {
+      throw new HTTPError(`status code ${response.status}`);
+    }
+  } catch (error) {
+    displayAppError(error, tableDiv, tableId);
+  }
+}
+
+
+function addBootstrapStyle(tableId) {
+  const table = document.getElementById(tableId);
+  const classArgs = ['table', 'table-primary', 'table-striped'];
+  table.classList.add(...classArgs);
+}
+
+
+function makeInteractive(tableId) {
+  // The datatables library used to make the table interactive is a jquery
+  // plug-in, and so jquery syntax is used in calling the library.
+  const selector = '#' + tableId;
+  $(selector).DataTable(datatableOptions);        // eslint-disable-line new-cap
+}
+
+
 tableMetadata.forEach(metadata => {
-  const divElem = document.getElementById(metadata.tablePaneId);
-  void addTable(divElem, metadata);
+  const tableDiv = document.getElementById(metadata.tablePaneId);
+  void addTable(tableDiv, metadata);
 });
