@@ -34,7 +34,7 @@
                 type="button" role="tab" aria-controls="summary"
                 aria-selected="true"
               >
-                <i class="fa-solid fa-list me-3"></i>
+                <i class="fa-solid fa-list me-2"></i>
                 Summary
               </button>
               <button
@@ -42,7 +42,7 @@
                 data-bs-toggle="tab" data-bs-target="#map" type="button"
                 role="tab" aria-controls="map" aria-selected="false"
               >
-                <i class="fa-solid fa-map me-3"></i>
+                <i class="fa-solid fa-map me-2"></i>
                 Map
               </button>
               <button
@@ -50,7 +50,7 @@
                 data-bs-toggle="tab" data-bs-target="#time-dev" type="button"
                 role="tab" aria-controls="time-dev" aria-selected="false"
               >
-                <i class="fa-solid fa-chart-line me-3"></i>
+                <i class="fa-solid fa-chart-line me-2"></i>
                 Time development
               </button>
               <button
@@ -58,7 +58,7 @@
                 data-bs-toggle="tab" data-bs-target="#data" type="button"
                 role="tab" aria-controls="data" aria-selected="false"
               >
-                <i class="fa-solid fa-database me-3"></i>
+                <i class="fa-solid fa-database me-2"></i>
                 Data
               </button>
               <button
@@ -66,20 +66,20 @@
                 data-bs-toggle="tab" data-bs-target="#notes" type="button"
                 role="tab" aria-controls="notes" aria-selected="false"
               >
-                <i class="fa-solid fa-file-lines me-3"></i>
+                <i class="fa-solid fa-file-lines me-2"></i>
                 Technical notes
               </button>
             </div>
           </nav>
         </div>
-        <div class="col">
+        <div class="col-12 col-lg">
           <main class="tab-content">
             <section
               class="tab-pane fade show active" id="summary" role="tabpanel"
               aria-labelledby="summary-tab"
             >
               <div class="row px-4 pt-4 mb-5">
-                <div class="col 12 col-xxl-10">
+                <div class="col col-xl-11 col-xxl-10">
                   <h1 class="display-4 pt-3 mb-3">The Opioid Epidemic</h1>
                   <p class="h5 mb-3">
                     The death rate in the US due to opioid overdose increased by
@@ -114,7 +114,7 @@
                 </div>
               </div>
               <footer class="row px-4 pt-4">
-                <div class="col-12">
+                <div class="col">
                   <h2 class="h5 mb-3">Data sources</h2>
                   <p>
                     Drug OD deaths:
@@ -142,7 +142,7 @@
               aria-labelledby="map-tab"
             >
               <div class="row pt-4 px-4">
-                <div class="col-12 col-xxl-10">
+                <div class="col col-xl-11 col-xxl-10">
                   <h2 class="h1 pt-3 mb-3">Drug-Overdose Deaths in the US</h2>
                   <h3 class="h4 mb-3" id="map-plot-title-1">
                     Number of drug-overdose deaths
@@ -150,7 +150,7 @@
                   <h4 class="h5 mb-3" id="map-plot-title-2">
                     Twelve-month period ending September 2019
                   </h4>
-                  <div id="interactive-map-plot"></div>
+                  <div class="od-deaths-plot" id="interactive-map-plot"></div>
                 </div>
               </div>
               <form class="row pt-4 px-4">
@@ -207,7 +207,7 @@
               aria-labelledby="time-dev-tab"
             >
               <div class="row pt-4 px-4">
-                <div class="col-12 col-xxl-10">
+                <div class="col col-xl-11 col-xxl-10">
                   <h2 class="h1 pt-3 mb-3">Time development by OD category</h2>
                   <h3 class="h4 mb-3" id="time-plot-title-1">
                     Number of deaths, preceding 12-month period
@@ -215,7 +215,7 @@
                   <h4 class="h5 mb-3" id="time-plot-title-2">
                     United States
                   </h4>
-                  <div id="interactive-time-plot"></div>
+                  <div class="od-deaths-plot" id="interactive-time-plot"></div>
                 </div>
               </div>
               <form class="row pt-4 px-4">
@@ -287,7 +287,7 @@
                 </div>
               </form>
               <footer class="row pt-4 px-4">
-                <div class="col-12">
+                <div class="col">
                   <p>
                     The death count was not reported for certain combinations of
                     state, year, month, and category. As a result, some plots of
@@ -302,7 +302,7 @@
               aria-labelledby="data-tab"
             >
               <div class="row pt-4 px-4">
-                <div class="col-12">
+                <div class="col">
                   <h2 class="h1 pt-3 mb-3">Data used for analysis</h2>
                   <p class="h5 mb-3">
                     Raw data is shown, with some column names changed to improve
@@ -367,7 +367,7 @@
               aria-labelledby="notes-tab"
             >
               <div class="row pt-4 px-4">
-                <div class="col-12 col-xxl-10">
+                <div class="col col-xl-11 col-xxl-10">
                   <h2 class="h1 pt-3 mb-3">Technical notes</h2>
                   <h3 class="h5 mb-3">
                     Data for drug-overdose deaths
