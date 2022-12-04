@@ -4,25 +4,26 @@ export const plotMetadata = [
   {
     plotId: 'test-line-plot',
     url: '/plots/test-line-plot',
-    tabPane: 'summary',
+    visibleOnLoad: true,
     controls: null
   },
   {
     plotId: 'dummy-line-plot',
     url: '/plots/test-line-plot',
-    tabPane: 'summary',
+    visibleOnLoad: true,
     controls: null
   },
   {
     plotId: 'test-map-plot',
     url: 'plots/test-map-plot',
-    tabPane: 'summary',
+    visibleOnLoad: true,
     controls: null
   },
   {
     plotId: 'interactive-map-plot',
     url: 'plots/test-map-plot',
-    tabPane: 'map',
+    visibleOnLoad: false,
+    tabId: 'map-tab',
     controls: [
       {
         controlId: 'select-map-plot-statistic',
@@ -37,7 +38,8 @@ export const plotMetadata = [
   {
     plotId: 'interactive-time-plot',
     url: '/plots/test-line-plot',
-    tabPane: 'time-dev',
+    visibleOnLoad: false,
+    tabId: 'time-dev-tab',
     controls: [
       {
         controlId: 'select-time-plot-location',
