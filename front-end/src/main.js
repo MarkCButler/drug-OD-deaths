@@ -7,10 +7,19 @@
 // 4. The css for the selectize library
 import './scss/main.scss';
 
-// Import subsets of the javascript for bootstrap 5 and fontawesome.
-import './js/app-bootstrap';
+// Import subsets of the javascript for fontawesome and bootstrap 5.  The import
+// of app-fontawesome should occur first, because it causes SVG icons to be
+// loaded asynchronously.  As these icons are rendered, the space available for
+// the app's plots changes, and as a result, plots should be not loaded until
+// after rendering of SVG icons is complete.
+//
+// In contrast, the import of app-bootstrap, which enables toggling the sidebar
+// and switching tab content, does not need to block rendering of the plots.
 import './js/app-fontawesome';
+import './js/app-bootstrap';
 
-// Add plots/tables and associated event listeners to the DOM.
+// Add plots and tables, along with associated controls and event listeners, to
+// the DOM.
 import './js/plots';
+import './js/plot-controls';
 import './js/tables';
