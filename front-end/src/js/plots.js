@@ -41,10 +41,10 @@ const ICONS_RENDERED = 'fontawesome-i2svg-complete';
 // In order to avoid this race condition, plots are not added to a tab until it
 // is visible for the first time.
 const visiblePlotMetadata = plotMetadata.filter(
-    metadata => metadata.visibleOnLoad
+  metadata => metadata.visibleOnLoad
 );
 const hiddenPlotMetadata = plotMetadata.filter(
-    metadata => !metadata.visibleOnLoad
+  metadata => !metadata.visibleOnLoad
 );
 
 const plotlyConfig = {
@@ -68,10 +68,10 @@ function addPlotsFromMetadata(metadataArray) {
   metadataArray.forEach(metadata => {
     const plotDiv = document.getElementById(metadata.plotId);
     getPlotJSON(plotDiv, metadata.url)
-        .then(plotJSON => {
-          Plotly.newPlot(plotDiv, plotJSON.data, plotJSON.layout, plotlyConfig);
-        })
-        .catch(error => displayAppError(error, plotDiv, metadata.plotId));
+      .then(plotJSON => {
+        Plotly.newPlot(plotDiv, plotJSON.data, plotJSON.layout, plotlyConfig);
+      })
+      .catch(error => displayAppError(error, plotDiv, metadata.plotId));
   });
 }
 
@@ -105,18 +105,16 @@ hiddenPlotMetadata.forEach(metadata => {
   const tab = document.getElementById(metadata.tabId);
   const plotDiv = document.getElementById(metadata.plotId);
   getPlotJSON(plotDiv, metadata.url)
-      .then(plotJSON => {
-        tab.addEventListener(
-            'shown.bs.tab',
-            () => {
-              Plotly.newPlot(
-                  plotDiv, plotJSON.data, plotJSON.layout, plotlyConfig
-              );
-            },
-            {once: true}
-        );
-      })
-      .catch(error => displayAppError(error, plotDiv, metadata.plotId));
+    .then(plotJSON => {
+      tab.addEventListener(
+        'shown.bs.tab',
+        () => {
+          Plotly.newPlot(plotDiv, plotJSON.data, plotJSON.layout, plotlyConfig);
+        },
+        {once: true}
+      );
+    })
+    .catch(error => displayAppError(error, plotDiv, metadata.plotId));
 });
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -129,7 +127,7 @@ hiddenPlotMetadata.forEach(metadata => {
 // When the sidebar or tab is visible, it will have the CSS class 'show'.
 ////////////////////////////////////////////////////////////////////////////////
 const tabPanes = ['summary', 'map', 'time-dev'].map(
-    id => document.getElementById(id)
+  id => document.getElementById(id)
 );
 const sidebar = document.getElementById('sidebar');
 
@@ -155,7 +153,7 @@ function refreshTabPanes() {
 
 // Add event listeners to resize plots after the sidebar is toggled.
 ['hidden.bs.collapse', 'shown.bs.collapse'].forEach(
-    eventType => sidebar.addEventListener(eventType, refreshTabPanes)
+  eventType => sidebar.addEventListener(eventType, refreshTabPanes)
 );
 
 // Add event listener to resize the plots of a tab that has just been made

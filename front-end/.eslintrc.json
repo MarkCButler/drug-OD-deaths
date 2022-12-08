@@ -14,6 +14,7 @@
   "rules": {
     "arrow-parens": "off",
     "comma-dangle": "off",
+    "indent": ["error", 2],
     "no-multi-spaces": ["error", { "ignoreEOLComments": true }],
     "require-jsdoc" : "off",
     "spaced-comment": "off"
