@@ -29,11 +29,22 @@ const selectizeIds = plotControlMetadata.reduce(
   []
 );
 
+
+// Placeholder function illustrating how to use an event handler with selectize.
+const eventHandler = function(name) {
+  return function(...args) {
+    console.log(name, ...args);
+  };
+};
+
 selectizeIds.forEach(controlId => {
   // The selectize library used to enhance the select elements is a jquery
   // plug-in, and so jquery syntax is used in calling the library.
   const selector = '#' + controlId;
-  $(selector).selectize();
+  $(selector).selectize({
+    plugins: ['remove_button'],
+    onChange: eventHandler('onChange')
+  });
 });
 
 // TODO: In updating plots, use Plotly.react
