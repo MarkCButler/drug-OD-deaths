@@ -21,5 +21,5 @@ import './js/app-bootstrap';
 // Add plots and tables, along with associated controls and event listeners, to
 // the DOM.
 import './js/plots';
-import './js/plot-controls';
+import './js/form-controls';
 import './js/tables';
