@@ -10,6 +10,16 @@ import {plotMetadata} from './plot-metadata';
 // of the SVG icons is complete.
 const ICONS_RENDERED = 'fontawesome-i2svg-complete';
 
+
+export function updatePlot(plotId, url, paramString) {
+  console.log(plotId);
+  console.log(url);
+  console.log(paramString);
+  const plotDiv = document.getElementById(plotId);
+  // TODO: Call getPlotJSON and use Plotly.react to update the plot
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // Add plotly figures to the app's DOM
 ////////////////////////////////////////////////////////////////////////////////
@@ -54,8 +64,8 @@ const plotlyConfig = {
 };
 
 
-async function getPlotJSON(plotDiv, url) {
-  const response = await fetch(url);
+async function getPlotJSON(plotDiv, url, paramString) {
+  const response = await fetch(url + '?' + paramString);
   if (response.ok) {
     return response.json();
   } else {
@@ -64,6 +74,7 @@ async function getPlotJSON(plotDiv, url) {
 }
 
 
+// TODO: Initialization of all plots needs to use parameter strings
 function addPlotsFromMetadata(metadataArray) {
   metadataArray.forEach(metadata => {
     const plotDiv = document.getElementById(metadata.plotId);
@@ -76,7 +87,15 @@ function addPlotsFromMetadata(metadataArray) {
 }
 
 
-// Set up a MutationObserver to add plots to the summary pane after SVG
+// Generate a parameter string for initialization of a plot associated with an
+// interactive form.
+function getFormParamString(formId) {
+  const formData = new FormData(document.getElementById(formId));
+  return new URLSearchParams(formData).toString();
+}
+
+
+// Create a MutationObserver to add plots to the summary pane after SVG
 // rendering is completed.  As explained at
 // https://fontawesome.com/v5/docs/web/advanced/svg-asynchronous-loading
 // the class fontawesome-i2svg-complete is added to the html tag once the
@@ -92,9 +111,13 @@ const observer = new MutationObserver((mutationList, observer) => {
   }
 });
 
-observer.observe(document.documentElement, {
-  attributeFilter: ['class']
-});
+if (document.documentElement.classList.contains(ICONS_RENDERED)) {
+  addPlotsFromMetadata(visiblePlotMetadata);
+} else {
+  observer.observe(document.documentElement, {
+    attributeFilter: ['class']
+  });
+}
 
 // For each plot in a hidden tab pane, fetch the JSON describing the plot from
 // the server and set up an event listener to create the plot as soon as the tab
@@ -104,15 +127,12 @@ observer.observe(document.documentElement, {
 hiddenPlotMetadata.forEach(metadata => {
   const tab = document.getElementById(metadata.tabId);
   const plotDiv = document.getElementById(metadata.plotId);
-  getPlotJSON(plotDiv, metadata.url)
+  const paramString = getFormParamString(metadata.formId);
+  getPlotJSON(plotDiv, metadata.url, paramString)
     .then(plotJSON => {
-      tab.addEventListener(
-        'shown.bs.tab',
-        () => {
-          Plotly.newPlot(plotDiv, plotJSON.data, plotJSON.layout, plotlyConfig);
-        },
-        {once: true}
-      );
+      tab.addEventListener('shown.bs.tab', () => {
+        Plotly.newPlot(plotDiv, plotJSON.data, plotJSON.layout, plotlyConfig);
+      }, {once: true});
     })
     .catch(error => displayAppError(error, plotDiv, metadata.plotId));
 });

@@ -8,6 +8,7 @@
     >
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <script defer src="{{ url_for('static', filename='main.js') }}"></script>
+    <link rel="icon" href="data:,">
     <title>Drug OD Deaths</title>
   </head>
   <body>
@@ -153,7 +154,7 @@
                   <div class="od-deaths-plot" id="interactive-map-plot"></div>
                 </div>
               </div>
-              <form class="row pt-4 px-4">
+              <form class="row pt-4 px-4" id="map-plot-form" >
                 <div class="col-4 d-flex flex-column">
                   <label class="form-label" for="select-map-plot-statistic">
                     Select the statistic to display
@@ -218,7 +219,7 @@
                   <div class="od-deaths-plot" id="interactive-time-plot"></div>
                 </div>
               </div>
-              <form class="row pt-4 px-4">
+              <form class="row pt-4 px-4" id="time-plot-form" >
                 <div class="col-4 d-flex flex-column">
                   <label class="form-label" for="select-time-plot-location">
                     Select the US or a state
