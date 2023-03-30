@@ -2,12 +2,12 @@
 different parts of the app's UI.
 
 In cases where the labels/formatting are specified below by a dictionary, the
-dictionary keys correspond to data categories used in the app's UI.  These keys
-must be used consistently in both the app's front and back-end code.  In order
-to facilitate consistent usage of these keys, all constants and functions that
-involve hard-coded copies of the keys are defined in the current module.  Labels
-defined here that are needed by front-end code are delivered by the back end
-through a Jinja2 HTML template or are returned in response to AJAX-style calls.
+dictionary keys correspond to data categories or filters used in the app's UI.
+These keys must be used consistently in both the app's front and back-end code.
+In order to facilitate consistent usage of these keys, all constants and
+functions that involve hard-coded instances of the keys are defined in the
+current module.  Labels defined here that are needed by front-end code are
+delivered by the back end through a Jinja2 HTML template.
 """
 from collections import namedtuple
 
@@ -20,7 +20,7 @@ SelectOption = namedtuple('SelectOption', ['value', 'name'])
 # Categories of OD death
 ################################################################################
 OD_TYPE_LABELS = {
-    'all_drug_OD': 'All drug-overdose deaths',
+    'all_drug_od': 'All drug-overdose deaths',
     'all_opioids': 'All opioids',
     'prescription_opioids': 'Prescription opioid pain relievers',
     'synthetic_opioids': 'Fentanyl and other synthetic opioids',
@@ -181,3 +181,80 @@ def get_location_abbr():
     available.
     """
     return list(ORDERED_LOCATIONS.keys())
+
+
+################################################################################
+# Time periods that can be selected for plots.
+################################################################################
+TIME_PERIODS = ['September ' + str(year)
+                for year in range(2015, 2020)]
+
+
+################################################################################
+# Parameter names used in front-end requests for plots
+################################################################################
+time_plot_param_names = {
+    'location': 'time-plot-location',
+    'statistic': 'time-plot-statistic',
+    'od_type': 'time-plot-od-type'
+}
+
+map_plot_param_names = {
+    'statistic': 'map-plot-statistic',
+    'period': 'map-plot-period'
+}
+
+
+################################################################################
+# Parameter name-value pairs for plots of the summary pane.
+################################################################################
+epidemic_peak_params = [
+    [time_plot_param_names['location'], 'US'],
+    [time_plot_param_names['statistic'], 'death_count'],
+    [time_plot_param_names['od_type'], 'all_drug_od'],
+    [time_plot_param_names['od_type'], 'prescription_opioids'],
+    [time_plot_param_names['od_type'], 'synthetic_opioids'],
+    [time_plot_param_names['od_type'], 'heroin'],
+    [time_plot_param_names['od_type'], 'cocaine'],
+    [time_plot_param_names['od_type'], 'other_stimulants'],
+]
+
+growth_rate_params = [
+    [time_plot_param_names['location'], 'US'],
+    [time_plot_param_names['statistic'], 'percent_change'],
+    [time_plot_param_names['od_type'], 'all_opioids'],
+    [time_plot_param_names['od_type'], 'prescription_opioids'],
+    [time_plot_param_names['od_type'], 'synthetic_opioids'],
+    [time_plot_param_names['od_type'], 'heroin'],
+    [time_plot_param_names['od_type'], 'cocaine'],
+    [time_plot_param_names['od_type'], 'other_stimulants'],
+]
+
+distribution_params = [
+    [map_plot_param_names['statistic'], 'normalized_death_count'],
+    [map_plot_param_names['period'], 'December 2017']
+]
+
+
+def get_preset_plot_params():
+    """Return a dictionary that can be used by the front end to generate preset
+    query strings for certain plots.
+
+    For plots linked to an HTML form, the parameters of the plot can be changed
+    interactively by the user.  When the front end queries the back end for a
+    plot linked to a form, parameters from the form are included in the query.
+
+    For plots not linked to an HTML form, the front end uses the dataset object
+    to retrieve the parameters that should be included in the query string.  The
+    dictionary returned by the current function is used in the Jinja2 HTML
+    template to populate the dataset objects with information about parameters.
+
+    Each key in the dictionary corresponds to a plot.  Each value is a list of
+    name-value pairs representing parameters to be used by the front end in
+    querying the back end for the plot.
+    """
+    return {
+        'epidemic_peak': epidemic_peak_params,
+        'growth_rate': growth_rate_params,
+        'distribution': distribution_params
+    }

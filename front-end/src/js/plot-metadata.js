@@ -2,7 +2,7 @@
 
 export const plotMetadata = [
   {
-    plotId: 'test-line-plot',
+    plotId: 'epidemic-peak',
     url: '/plots/test-line-plot',
     visibleOnLoad: true,
     formId: null,
@@ -10,7 +10,7 @@ export const plotMetadata = [
     controls: null
   },
   {
-    plotId: 'dummy-line-plot',
+    plotId: 'growth-rate',
     url: '/plots/test-line-plot',
     visibleOnLoad: true,
     formId: null,
@@ -18,7 +18,7 @@ export const plotMetadata = [
     controls: null
   },
   {
-    plotId: 'test-map-plot',
+    plotId: 'distribution',
     url: 'plots/test-map-plot',
     visibleOnLoad: true,
     formId: null,

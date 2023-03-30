@@ -104,14 +104,26 @@
                     Each data point represents the number of deaths during the
                     preceding 12-month period.
                   </p>
-                  <div class="od-deaths-plot mb-5" id="test-line-plot"></div>
+                  <div
+                    class="od-deaths-plot mb-5" id="epidemic-peak"
+                    data-od-plot-params='{{ plot_params['epidemic_peak']|tojson }}'
+                  >
+                  </div>
                   <h2 class="h4 mb-3">Growth rate of the epidemic</h2>
-                  <div class="od-deaths-plot mb-5" id="dummy-line-plot"></div>
+                  <div
+                    class="od-deaths-plot mb-5" id="growth-rate"
+                    data-od-plot-params='{{ plot_params['growth_rate']|tojson }}'
+                  >
+                  </div>
                   <h2 class="h4 mb-3">Regional distribution in 2017</h2>
                   <h3 class="h5 mb-3">
                     Number of drug-overdose deaths per 100,000 people
                   </h3>
-                  <div class="od-deaths-plot" id="test-map-plot"></div>
+                  <div
+                    class="od-deaths-plot" id="distribution"
+                    data-od-plot-params='{{ plot_params['distribution']|tojson }}'
+                  >
+                  </div>
                 </div>
               </div>
               <footer class="row px-4 pt-4">
@@ -162,8 +174,8 @@
                   <div class="d-flex">
                     <div class="od-deaths-select-container">
                       <select
-                        class="form-select" name="map-plot-statistic"
-                        id="select-map-plot-statistic"
+                        class="form-select" id="select-map-plot-statistic"
+                        name="{{ map_plot_param_names['statistic'] }}"
                       >
                         <option value="{{ statistic_types[0].value }}" selected>
                           {{ statistic_types[0].name }}
@@ -184,8 +196,8 @@
                   <div class="d-flex">
                     <div class="od-deaths-select-container">
                       <select
-                        class="form-select" name="map-plot-period"
-                        id="select-map-plot-period"
+                        class="form-select" id="select-map-plot-period"
+                        name="{{ map_plot_param_names['period'] }}"
                       >
                         {% for time_period in time_periods[:-1] %}
                         <option value="{{ time_period|urlencode }}">
@@ -227,8 +239,8 @@
                   <div class="d-flex">
                     <div class="od-deaths-select-container">
                       <select
-                        class="form-select" name="time-plot-location"
-                        id="select-time-plot-location"
+                        class="form-select" id="select-time-plot-location"
+                        name="{{ time_plot_param_names['location'] }}"
                       >
                         <option value="{{ locations[0].value }}" selected>
                           {{ locations[0].name }}
@@ -249,8 +261,8 @@
                   <div class="d-flex">
                     <div class="od-deaths-select-container">
                       <select
-                        class="form-select" name="time-plot-statistic"
-                        id="select-time-plot-statistic"
+                        class="form-select" id="select-time-plot-statistic"
+                        name="{{ time_plot_param_names['statistic'] }}"
                       >
                         <option value="{{ statistic_types[0].value }}" selected>
                           {{ statistic_types[0].name }}
@@ -271,8 +283,8 @@
                   <div class="d-flex">
                     <div class="od-deaths-select-container">
                       <select
-                        name="time-plot-od-type" id="select-time-plot-od-type"
-                        multiple
+                        id="select-time-plot-od-type"
+                        name="{{ time_plot_param_names['od_type'] }}" multiple
                       >
                         <option value="{{ od_types[0].value }}" selected>
                           {{ od_types[0].name }}

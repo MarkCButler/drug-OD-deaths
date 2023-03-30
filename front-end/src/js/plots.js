@@ -74,11 +74,11 @@ async function getPlotJSON(plotDiv, url, paramString) {
 }
 
 
-// TODO: Initialization of all plots needs to use parameter strings
 function addPlotsFromMetadata(metadataArray) {
   metadataArray.forEach(metadata => {
     const plotDiv = document.getElementById(metadata.plotId);
-    getPlotJSON(plotDiv, metadata.url)
+    const paramString = getParamString(metadata.formId, plotDiv);
+    getPlotJSON(plotDiv, metadata.url, paramString)
       .then(plotJSON => {
         Plotly.newPlot(plotDiv, plotJSON.data, plotJSON.layout, plotlyConfig);
       })
@@ -87,10 +87,27 @@ function addPlotsFromMetadata(metadataArray) {
 }
 
 
-// Generate a parameter string for initialization of a plot associated with an
-// interactive form.
+function getParamString(formId, plotDiv) {
+  if (formId) {
+    return getFormParamString(formId);
+  } else {
+    return getParamStringFromDataset(plotDiv);
+  }
+}
+
+
 function getFormParamString(formId) {
   const formData = new FormData(document.getElementById(formId));
+  return new URLSearchParams(formData).toString();
+}
+
+
+function getParamStringFromDataset(plotDiv) {
+  const paramArray = JSON.parse(plotDiv.dataset.odPlotParams);
+  const formData = new FormData();
+  paramArray.forEach((name, value) => {
+    formData.append(name, value);
+  });
   return new URLSearchParams(formData).toString();
 }
 
@@ -127,7 +144,7 @@ if (document.documentElement.classList.contains(ICONS_RENDERED)) {
 hiddenPlotMetadata.forEach(metadata => {
   const tab = document.getElementById(metadata.tabId);
   const plotDiv = document.getElementById(metadata.plotId);
-  const paramString = getFormParamString(metadata.formId);
+  const paramString = getParamString(metadata.formId, plotDiv);
   getPlotJSON(plotDiv, metadata.url, paramString)
     .then(plotJSON => {
       tab.addEventListener('shown.bs.tab', () => {
