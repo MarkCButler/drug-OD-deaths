@@ -6,7 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import plotly.utils as plotly_utils
 
-from .labels import COLORBAR_TITLES, COLORBAR_TICKFORMATS, MAP_HOVERTEMPLATES
+from .ui_labels import COLORBAR_TITLES, COLORBAR_TICKFORMATS, MAP_HOVERTEMPLATES
 
 plot_views = Blueprint('plots', __name__, url_prefix='/plots')
 

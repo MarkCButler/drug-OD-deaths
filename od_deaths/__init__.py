@@ -4,10 +4,10 @@ from pathlib import Path
 from flask import Flask, render_template
 
 from .database import init_app
-from .labels import get_locations, get_od_types, get_statistic_types
 from .plots import plot_views
 from .tables import table_views
 from .template_data import TIME_PERIODS, URLS
+from .ui_labels import get_locations, get_od_types, get_statistic_types
 
 app_kwargs = {
     'locations': get_locations(),

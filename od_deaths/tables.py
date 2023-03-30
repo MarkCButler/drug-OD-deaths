@@ -3,7 +3,7 @@ from flask import Blueprint, request
 from pandas import Categorical
 
 from .database import get_od_deaths_table, get_population_table
-from .labels import get_location_names, get_od_code_table
+from .ui_labels import get_location_names, get_od_code_table
 
 table_views = Blueprint('tables', __name__, url_prefix='/tables')
 
