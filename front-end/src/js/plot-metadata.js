@@ -3,7 +3,7 @@
 export const plotMetadata = [
   {
     plotId: 'epidemic-peak',
-    url: '/plots/test-line-plot',
+    url: '/plots/time-plot',
     visibleOnLoad: true,
     formId: null,
     tabId: 'summary',
@@ -11,7 +11,7 @@ export const plotMetadata = [
   },
   {
     plotId: 'growth-rate',
-    url: '/plots/test-line-plot',
+    url: '/plots/time-plot',
     visibleOnLoad: true,
     formId: null,
     tabId: 'summary',
@@ -19,7 +19,7 @@ export const plotMetadata = [
   },
   {
     plotId: 'distribution',
-    url: 'plots/test-map-plot',
+    url: 'plots/map-plot',
     visibleOnLoad: true,
     formId: null,
     tabId: 'summary',
@@ -27,7 +27,7 @@ export const plotMetadata = [
   },
   {
     plotId: 'interactive-map-plot',
-    url: 'plots/test-map-plot',
+    url: 'plots/map-plot',
     visibleOnLoad: false,
     formId: 'map-plot-form',
     tabId: 'map-tab',
@@ -44,7 +44,7 @@ export const plotMetadata = [
   },
   {
     plotId: 'interactive-time-plot',
-    url: '/plots/test-line-plot',
+    url: '/plots/time-plot',
     visibleOnLoad: false,
     formId: 'time-plot-form',
     tabId: 'time-dev-tab',

@@ -12,11 +12,12 @@ const ICONS_RENDERED = 'fontawesome-i2svg-complete';
 
 
 export function updatePlot(plotId, url, paramString) {
-  console.log(plotId);
-  console.log(url);
-  console.log(paramString);
   const plotDiv = document.getElementById(plotId);
-  // TODO: Call getPlotJSON and use Plotly.react to update the plot
+  getPlotJSON(url, paramString)
+    .then(plotJSON => {
+      Plotly.newPlot(plotDiv, plotJSON.data, plotJSON.layout, plotlyConfig);
+    })
+    .catch(error => displayAppError(error, plotDiv, plotId));
 }
 
 
@@ -64,7 +65,7 @@ const plotlyConfig = {
 };
 
 
-async function getPlotJSON(plotDiv, url, paramString) {
+async function getPlotJSON(url, paramString) {
   const response = await fetch(url + '?' + paramString);
   if (response.ok) {
     return response.json();
@@ -78,7 +79,7 @@ function addPlotsFromMetadata(metadataArray) {
   metadataArray.forEach(metadata => {
     const plotDiv = document.getElementById(metadata.plotId);
     const paramString = getParamString(metadata.formId, plotDiv);
-    getPlotJSON(plotDiv, metadata.url, paramString)
+    getPlotJSON( metadata.url, paramString)
       .then(plotJSON => {
         Plotly.newPlot(plotDiv, plotJSON.data, plotJSON.layout, plotlyConfig);
       })
@@ -145,7 +146,7 @@ hiddenPlotMetadata.forEach(metadata => {
   const tab = document.getElementById(metadata.tabId);
   const plotDiv = document.getElementById(metadata.plotId);
   const paramString = getParamString(metadata.formId, plotDiv);
-  getPlotJSON(plotDiv, metadata.url, paramString)
+  getPlotJSON(metadata.url, paramString)
     .then(plotJSON => {
       tab.addEventListener('shown.bs.tab', () => {
         Plotly.newPlot(plotDiv, plotJSON.data, plotJSON.layout, plotlyConfig);

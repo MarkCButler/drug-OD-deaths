@@ -11,7 +11,7 @@ from .ui_labels import COLORBAR_TITLES, COLORBAR_TICKFORMATS, MAP_HOVERTEMPLATES
 plot_views = Blueprint('plots', __name__, url_prefix='/plots')
 
 
-@plot_views.route('/test-line-plot')
+@plot_views.route('/time-plot')
 def get_test_line_plot():
     # Generate dummy data for testing the design of the map.
     # TODO: delete the code for generating dummy data
@@ -99,7 +99,7 @@ state_columns = list(zip(*states.items()))
 colorbar_ranges = {}
 
 
-@plot_views.route('/test-map-plot')
+@plot_views.route('/map-plot')
 def get_test_map_plot():
     # Dummy value, will be an input passed to the function that plots the map.
     statistic_label = 'normalized_death_count'
