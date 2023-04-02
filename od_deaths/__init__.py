@@ -13,7 +13,6 @@ from .ui_labels import (
 )
 
 template_kwargs = {
-    'locations': get_locations(),
     'od_types': get_od_types(),
     'statistic_types': get_statistic_types(),
     'time_periods': TIME_PERIODS,
@@ -37,6 +36,12 @@ def create_app():
 
     @app.route('/')
     def index():
-        return render_template('app.html', **template_kwargs)
+        # Interaction with the database is required to generate the list of
+        # locations passed to the template. Since such interaction is only
+        # supported within the context of an app, the call to function
+        # get_locations is performed here rather than at the point where
+        # template_kwargs is defined.
+        return render_template('app.html', locations=get_locations(),
+                               **template_kwargs)
 
     return app

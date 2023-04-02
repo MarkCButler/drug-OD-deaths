@@ -12,6 +12,7 @@ following tables:
     placing OD deaths in relatively simple categories.  The Location column
     gives the full name of a location, while Location_abbr gives an abbreviation
     for the location.
+- table of locations, with columns Abbr, Name.
 - normalized table of populations, with columns Location_abbr, Year, Population.
 - raw population data, with a Location column and a set of columns corresponding
     to distinct years.  This table is exposed solely for the purpose of showing
@@ -118,10 +119,19 @@ def _add_location_names(data):
     Used to make the user interface friendlier, e.g., by including the full
     state name in the hover text of plotly maps.
     """
-    query = queries['location_names']
-    conn = get_database_connection()
     state_names = (
-        read_sql_query(query, conn, index_col='Abbr')
+        get_location_table()
         .rename(columns={'Name': 'Location'})
     )
     return data.join(state_names, on='Location_abbr')
+
+
+def get_location_table():
+    """Return a table of locations for which data on OD deaths in available.
+
+    The table gives both the full name of each location ('Name') and an
+    abbreviation ('Abbr').  The abbreviation is set as the index.
+    """
+    query = queries['location_names']
+    conn = get_database_connection()
+    return read_sql_query(query, conn, index_col='Abbr')

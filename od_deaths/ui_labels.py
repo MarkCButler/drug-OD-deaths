@@ -4,14 +4,21 @@ different parts of the app's UI.
 In cases where the labels/formatting are specified below by a dictionary, the
 dictionary keys correspond to data categories or filters used in the app's UI.
 These keys must be used consistently in both the app's front and back-end code.
-In order to facilitate consistent usage of these keys, all constants and
+In order to facilitate consistent usage of these keys, several constants and
 functions that involve hard-coded instances of the keys are defined in the
 current module.  Labels defined here that are needed by front-end code are
 delivered by the back end through a Jinja2 HTML template.
+
+Note that some dictionaries used in the current module depend on the data model
+exposed by the database module.  For instance, the keys used below in
+OD_TYPE_LABELS correspond to values found in the column OD_type in the table of
+OD deaths.
 """
 from collections import namedtuple
 
 import pandas as pd
+
+from .database import get_location_table
 
 # Used in setting option tags in the HTML template.
 SelectOption = namedtuple('SelectOption', ['value', 'name'])
@@ -103,59 +110,37 @@ def get_statistic_types():
 ################################################################################
 # Locations for which data is available.
 ################################################################################
-ORDERED_LOCATIONS = {
-    'US': 'United States',
-    'AK': 'Alaska',
-    'AL': 'Alabama',
-    'AR': 'Arkansas',
-    'AZ': 'Arizona',
-    'CA': 'California',
-    'CO': 'Colorado',
-    'CT': 'Connecticut',
-    'DE': 'Delaware',
-    'FL': 'Florida',
-    'GA': 'Georgia',
-    'HI': 'Hawaii',
-    'IA': 'Iowa',
-    'ID': 'Idaho',
-    'IL': 'Illinois',
-    'IN': 'Indiana',
-    'KS': 'Kansas',
-    'KY': 'Kentucky',
-    'LA': 'Louisiana',
-    'MA': 'Massachusetts',
-    'MD': 'Maryland',
-    'ME': 'Maine',
-    'MI': 'Michigan',
-    'MN': 'Minnesota',
-    'MO': 'Missouri',
-    'MS': 'Mississippi',
-    'MT': 'Montana',
-    'NC': 'North Carolina',
-    'ND': 'North Dakota',
-    'NE': 'Nebraska',
-    'NH': 'New Hampshire',
-    'NJ': 'New Jersey',
-    'NM': 'New Mexico',
-    'NV': 'Nevada',
-    'NY': 'New York',
-    'OH': 'Ohio',
-    'OK': 'Oklahoma',
-    'OR': 'Oregon',
-    'PA': 'Pennsylvania',
-    'RI': 'Rhode Island',
-    'SC': 'South Carolina',
-    'SD': 'South Dakota',
-    'TN': 'Tennessee',
-    'TX': 'Texas',
-    'UT': 'Utah',
-    'VA': 'Virginia',
-    'VT': 'Vermont',
-    'WA': 'Washington',
-    'WI': 'Wisconsin',
-    'WV': 'West Virginia',
-    'WY': 'Wyoming'
-}
+# The constant ORDERED_LOCATIONS is used within the functions get_locations and
+# get_location_names.  We must interact with the database in order to define
+# this global variable, and currently this is only supported within an app
+# context.  So ORDERED_LOCATIONS is initially defined to be None, and it is
+# defined on the fly when needed by an instance of the app.
+ORDERED_LOCATIONS = None
+
+
+def generate_ordered_locations():
+    """Generate a table of ordered locations for which data is available.
+
+    The table of locations exposed by the database module is first retrieved.
+    Rows are first ordered alphabetically based on the full name of the location
+    (which will appear in the UI), and then the row corresponding to the US is
+    moved to the top of the table.
+    """
+    # Note that the function get_location_table used in the next line of code
+    # returns a dataframe with 'Abbr' as the index.  This is convenient for all
+    # functions that consume this dataframe (including the current function).
+    # However, reset_index is used at the end of the current function to convert
+    # 'Abbr' into a column, in order to simplify functions that consume the
+    # output of the current function.
+    data = get_location_table().sort_values(by='Name')
+    reordered_index =  data.index.drop('US').insert(0, 'US')
+    return data.reindex(reordered_index).reset_index()
+
+
+def _ensure_location_definitions():
+    global ORDERED_LOCATIONS
+    if ORDERED_LOCATIONS is None:
+        ORDERED_LOCATIONS = generate_ordered_locations()
 
 
 def get_locations():
@@ -165,22 +150,17 @@ def get_locations():
     The values are abbreviations used internally to identify locations, while
     the corresponding names are displayed in the UI.
     """
-    named_tuples = map(SelectOption._make, ORDERED_LOCATIONS.items())
-    return list(named_tuples)
+    _ensure_location_definitions()
+    return [SelectOption(value=row.Abbr, name=row.Name)
+            for row in ORDERED_LOCATIONS.itertuples(index=False)]
 
 
 def get_location_names():
     """Return a list of full names of the locations for which data is
     available.
     """
-    return list(ORDERED_LOCATIONS.values())
-
-
-def get_location_abbr():
-    """Return a list of abbreviations of the locations for which data is
-    available.
-    """
-    return list(ORDERED_LOCATIONS.keys())
+    _ensure_location_definitions()
+    return list(ORDERED_LOCATIONS.Name)
 
 
 ################################################################################

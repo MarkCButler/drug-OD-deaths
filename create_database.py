@@ -54,7 +54,7 @@ od_type[od_type.str.contains('T40.2')] = 'prescription_opioids'
 od_type[od_type.str.contains('T40.[34]')] = 'synthetic_opioids'
 od_type[od_type.str.contains('T40.5')] = 'cocaine'
 od_type[od_type.str.contains('T43')] = 'other_stimulants'
-od_type[od_type.str.contains('Drug Overdose')] = 'all_drug_OD'
+od_type[od_type.str.contains('Drug Overdose')] = 'all_drug_od'
 deaths_data['OD_type'] = od_type
 
 # Create a table that gives the full state name for each state abbreviation.
