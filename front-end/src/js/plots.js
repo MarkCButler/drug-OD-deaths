@@ -6,17 +6,33 @@ import Plotly from './app-plotly';
 import {displayAppError, HTTPError} from './errors';
 import {plotMetadata} from './plot-metadata';
 
-// Class added to the html DOM element by fontawesome to indicate the rendering
-// of the SVG icons is complete.
-const ICONS_RENDERED = 'fontawesome-i2svg-complete';
+
+// Asynchronously render the plots that are initially visible when the app
+// loads.  Add listeners that resize plots.  Once the promises for plot
+// rendering have settled, fetch the JSON for the plots that are not initially
+// visible.
+export function initializePlots() {
+  const visiblePlotPromises = visiblePlotMetadata.map(
+    metadata => addPlot(metadata)
+  );
+  addResizeListeners();
+  return Promise.allSettled(visiblePlotPromises)
+    .then(() => {
+      const hiddenPlotPromises = hiddenPlotMetadata.map(
+        metadata => preparePlot(metadata)
+      );
+      return Promise.allSettled(hiddenPlotPromises);
+    });
+}
 
 
 export function updatePlot(plotId, url, paramString) {
   const plotDiv = document.getElementById(plotId);
   getPlotJSON(url, paramString)
-    .then(plotJSON => {
-      Plotly.newPlot(plotDiv, plotJSON.data, plotJSON.layout, plotlyConfig);
-    })
+    .then(
+      plotJSON =>
+        Plotly.newPlot(plotDiv, plotJSON.data, plotJSON.layout, plotlyConfig)
+    )
     .catch(error => displayAppError(error, plotDiv, plotId));
 }
 
@@ -65,6 +81,43 @@ const plotlyConfig = {
 };
 
 
+// For a plot in a pane that is initially visible, add the plot to the DOM.
+function addPlot(metadata) {
+  const plotDiv = document.getElementById(metadata.plotId);
+  const paramString = getParamString(metadata.formId, plotDiv);
+  return getPlotJSON( metadata.url, paramString)
+    .then(
+      plotJSON =>
+        Plotly.newPlot(plotDiv, plotJSON.data, plotJSON.layout, plotlyConfig)
+    )
+    .catch(error => displayAppError(error, plotDiv, metadata.plotId));
+}
+
+
+// For a plot in a tab pane that is not initially visible, fetch the JSON
+// describing the plot and set up an event listener to create the plot as soon
+// as the tab pane becomes visible.  As explained above, plotly's autosize
+// algorithm fails if the plot is generated before the tab pane is visible,
+// which can lead to a race condition between plotly resizing and bootstrap
+// updates of the layout.
+function preparePlot(metadata) {
+  const tab = document.getElementById(metadata.tabId);
+  const plotDiv = document.getElementById(metadata.plotId);
+  const paramString = getParamString(metadata.formId, plotDiv);
+  return getPlotJSON(metadata.url, paramString)
+    .then(
+      plotJSON =>
+        tab.addEventListener(
+          'shown.bs.tab',
+          () => Plotly.newPlot(
+            plotDiv, plotJSON.data, plotJSON.layout, plotlyConfig),
+          {once: true},
+        )
+    )
+    .catch(error => displayAppError(error, plotDiv, metadata.plotId));
+}
+
+
 async function getPlotJSON(url, paramString) {
   const response = await fetch(url + '?' + paramString);
   if (response.ok) {
@@ -72,19 +125,6 @@ async function getPlotJSON(url, paramString) {
   } else {
     throw new HTTPError(`status code ${response.status}`);
   }
-}
-
-
-function addPlotsFromMetadata(metadataArray) {
-  metadataArray.forEach(metadata => {
-    const plotDiv = document.getElementById(metadata.plotId);
-    const paramString = getParamString(metadata.formId, plotDiv);
-    getPlotJSON( metadata.url, paramString)
-      .then(plotJSON => {
-        Plotly.newPlot(plotDiv, plotJSON.data, plotJSON.layout, plotlyConfig);
-      })
-      .catch(error => displayAppError(error, plotDiv, metadata.plotId));
-  });
 }
 
 
@@ -106,54 +146,12 @@ function getFormParamString(formId) {
 function getParamStringFromDataset(plotDiv) {
   const paramArray = JSON.parse(plotDiv.dataset.odPlotParams);
   const formData = new FormData();
-  paramArray.forEach((name, value) => {
-    formData.append(name, value);
-  });
+  paramArray.forEach(
+    ({name, value}) => formData.append(name, value)
+  );
   return new URLSearchParams(formData).toString();
 }
 
-
-// Create a MutationObserver to add plots to the summary pane after SVG
-// rendering is completed.  As explained at
-// https://fontawesome.com/v5/docs/web/advanced/svg-asynchronous-loading
-// the class fontawesome-i2svg-complete is added to the html tag once the
-// rendering process is complete.
-const observer = new MutationObserver((mutationList, observer) => {
-  for (const mutation of mutationList) {
-    if (mutation.type === 'attributes' &&
-        mutation.target.classList.contains(ICONS_RENDERED)) {
-      addPlotsFromMetadata(visiblePlotMetadata);
-      observer.disconnect();
-      break;
-    }
-  }
-});
-
-if (document.documentElement.classList.contains(ICONS_RENDERED)) {
-  addPlotsFromMetadata(visiblePlotMetadata);
-} else {
-  observer.observe(document.documentElement, {
-    attributeFilter: ['class']
-  });
-}
-
-// For each plot in a hidden tab pane, fetch the JSON describing the plot from
-// the server and set up an event listener to create the plot as soon as the tab
-// pane becomes visible.  As explained above, plotly's autosize algorithm fails
-// if the plot is generated before the tab pane is visible, which can lead to a
-// race condition between plotly resizing and bootstrap updates of the layout.
-hiddenPlotMetadata.forEach(metadata => {
-  const tab = document.getElementById(metadata.tabId);
-  const plotDiv = document.getElementById(metadata.plotId);
-  const paramString = getParamString(metadata.formId, plotDiv);
-  getPlotJSON(metadata.url, paramString)
-    .then(plotJSON => {
-      tab.addEventListener('shown.bs.tab', () => {
-        Plotly.newPlot(plotDiv, plotJSON.data, plotJSON.layout, plotlyConfig);
-      }, {once: true});
-    })
-    .catch(error => displayAppError(error, plotDiv, metadata.plotId));
-});
 
 ////////////////////////////////////////////////////////////////////////////////
 // Plotly objects do not natively understand bootstrap events, so we need to add
@@ -189,18 +187,21 @@ function refreshTabPanes() {
 }
 
 
-// Add event listeners to resize plots after the sidebar is toggled.
-['hidden.bs.collapse', 'shown.bs.collapse'].forEach(
-  eventType => sidebar.addEventListener(eventType, refreshTabPanes)
-);
+function addResizeListeners() {
+  // Add event listeners to resize plots after the sidebar is toggled.
+  ['hidden.bs.collapse', 'shown.bs.collapse'].forEach(
+    eventType => sidebar.addEventListener(eventType, refreshTabPanes)
+  );
 
-// Add event listener to resize the plots of a tab that has just been made
-// visible.
-sidebar.addEventListener('shown.bs.tab', event => {
-  const idSelector = event.target.dataset.bsTarget;
-  const tabPane = document.querySelector(idSelector);
-  resizeTabPanePlots(tabPane);
-});
+  // Add event listener to resize the plots of a tab that has just been made
+  // visible.
+  sidebar.addEventListener('shown.bs.tab', event => {
+    const idSelector = event.target.dataset.bsTarget;
+    const tabPane = document.querySelector(idSelector);
+    resizeTabPanePlots(tabPane);
+  });
+}
+
 
 // TODO:  Consider adding code to give a reasonable aspect ratio as the width of
 //   the viewport decreases.

@@ -7,6 +7,29 @@ import '@selectize/selectize';
 import {plotMetadata} from './plot-metadata';
 import {updatePlot} from './plots';
 
+
+export function initializeFormControls() {
+  selectizeIds.forEach(controlId => {
+    // The selectize library used to enhance the select elements is a jquery
+    // plug-in, and so jquery syntax is used in calling the library.
+    const selector = '#' + controlId;
+    $(selector).selectize({
+      plugins: ['remove_button'],
+      onChange: getSelectizeChangeHandler(controlId)
+    });
+  });
+
+  for (const [formId, metadata] of Object.entries(formMetadata)) {
+    const form = document.getElementById(formId);
+    form.addEventListener('change', () => {
+      const formData = new FormData(form);
+      const params = new URLSearchParams(formData);
+      updatePlot(metadata.plotId, metadata.url, params.toString());
+    });
+  }
+}
+
+
 // Create an object mapping form IDs to back-end URLs.
 const formMetadata = plotMetadata.reduce(
   (accumObj, metadata) => {
@@ -58,24 +81,4 @@ function getSelectizeChangeHandler(controlId) {
     const changeEvent = new Event('change', {bubbles: true});
     formControl.dispatchEvent(changeEvent);
   };
-}
-
-
-selectizeIds.forEach(controlId => {
-  // The selectize library used to enhance the select elements is a jquery
-  // plug-in, and so jquery syntax is used in calling the library.
-  const selector = '#' + controlId;
-  $(selector).selectize({
-    plugins: ['remove_button'],
-    onChange: getSelectizeChangeHandler(controlId)
-  });
-});
-
-for (const [formId, metadata] of Object.entries(formMetadata)) {
-  const form = document.getElementById(formId);
-  form.addEventListener('change', () => {
-    const formData = new FormData(form);
-    const params = new URLSearchParams(formData);
-    updatePlot(metadata.plotId, metadata.url, params.toString());
-  });
 }

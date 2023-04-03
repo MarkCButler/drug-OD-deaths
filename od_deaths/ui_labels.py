@@ -173,13 +173,13 @@ TIME_PERIODS = ['September ' + str(year)
 ################################################################################
 # Parameter names used in front-end requests for plots
 ################################################################################
-time_plot_param_names = {
+TIME_PLOT_PARAM_NAMES = {
     'location': 'time-plot-location',
     'statistic': 'time-plot-statistic',
     'od_type': 'time-plot-od-type'
 }
 
-map_plot_param_names = {
+MAP_PLOT_PARAM_NAMES = {
     'statistic': 'map-plot-statistic',
     'period': 'map-plot-period'
 }
@@ -188,31 +188,49 @@ map_plot_param_names = {
 ################################################################################
 # Parameter name-value pairs for plots of the summary pane.
 ################################################################################
-epidemic_peak_params = [
-    [time_plot_param_names['location'], 'US'],
-    [time_plot_param_names['statistic'], 'death_count'],
-    [time_plot_param_names['od_type'], 'all_drug_od'],
-    [time_plot_param_names['od_type'], 'prescription_opioids'],
-    [time_plot_param_names['od_type'], 'synthetic_opioids'],
-    [time_plot_param_names['od_type'], 'heroin'],
-    [time_plot_param_names['od_type'], 'cocaine'],
-    [time_plot_param_names['od_type'], 'other_stimulants'],
+EPIDEMIC_PEAK_PARAMS = [
+    {'name': TIME_PLOT_PARAM_NAMES['location'],
+     'value': 'US'},
+    {'name': TIME_PLOT_PARAM_NAMES['statistic'],
+     'value': 'death_count'},
+    {'name': TIME_PLOT_PARAM_NAMES['od_type'],
+     'value': 'all_drug_od'},
+    {'name': TIME_PLOT_PARAM_NAMES['od_type'],
+     'value': 'prescription_opioids'},
+    {'name': TIME_PLOT_PARAM_NAMES['od_type'],
+     'value': 'synthetic_opioids'},
+    {'name': TIME_PLOT_PARAM_NAMES['od_type'],
+     'value': 'heroin'},
+    {'name': TIME_PLOT_PARAM_NAMES['od_type'],
+     'value': 'cocaine'},
+    {'name': TIME_PLOT_PARAM_NAMES['od_type'],
+     'value': 'other_stimulants'}
 ]
 
-growth_rate_params = [
-    [time_plot_param_names['location'], 'US'],
-    [time_plot_param_names['statistic'], 'percent_change'],
-    [time_plot_param_names['od_type'], 'all_opioids'],
-    [time_plot_param_names['od_type'], 'prescription_opioids'],
-    [time_plot_param_names['od_type'], 'synthetic_opioids'],
-    [time_plot_param_names['od_type'], 'heroin'],
-    [time_plot_param_names['od_type'], 'cocaine'],
-    [time_plot_param_names['od_type'], 'other_stimulants'],
+GROWTH_RATE_PARAMS = [
+    {'name': TIME_PLOT_PARAM_NAMES['location'],
+     'value': 'US'},
+    {'name': TIME_PLOT_PARAM_NAMES['statistic'],
+     'value': 'percent_change'},
+    {'name': TIME_PLOT_PARAM_NAMES['od_type'],
+     'value': 'all_opioids'},
+    {'name': TIME_PLOT_PARAM_NAMES['od_type'],
+     'value': 'prescription_opioids'},
+    {'name': TIME_PLOT_PARAM_NAMES['od_type'],
+     'value': 'synthetic_opioids'},
+    {'name': TIME_PLOT_PARAM_NAMES['od_type'],
+     'value': 'heroin'},
+    {'name': TIME_PLOT_PARAM_NAMES['od_type'],
+     'value': 'cocaine'},
+    {'name': TIME_PLOT_PARAM_NAMES['od_type'],
+     'value': 'other_stimulants'}
 ]
 
-distribution_params = [
-    [map_plot_param_names['statistic'], 'normalized_death_count'],
-    [map_plot_param_names['period'], 'December 2017']
+DISTRIBUTION_PARAMS = [
+    {'name': MAP_PLOT_PARAM_NAMES['statistic'],
+     'value': 'normalized_death_count'},
+    {'name': MAP_PLOT_PARAM_NAMES['period'],
+     'value': 'December 2017'}
 ]
 
 
@@ -234,7 +252,7 @@ def get_preset_plot_params():
     querying the back end for the plot.
     """
     return {
-        'epidemic_peak': epidemic_peak_params,
-        'growth_rate': growth_rate_params,
-        'distribution': distribution_params
+        'epidemic_peak': EPIDEMIC_PEAK_PARAMS,
+        'growth_rate': GROWTH_RATE_PARAMS,
+        'distribution': DISTRIBUTION_PARAMS
     }

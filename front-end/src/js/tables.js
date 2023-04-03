@@ -6,6 +6,18 @@ import 'datatables.net-bs5';
 
 import {displayAppError, HTTPError} from './errors';
 
+
+export function initializeTables() {
+  const promises = tableMetadata.map(
+    metadata => {
+      const tableDiv = document.getElementById(metadata.tablePaneId);
+      return addTable(tableDiv, metadata);
+    }
+  );
+  return Promise.allSettled(promises);
+}
+
+
 const tableMetadata = [
   {
     tablePaneId: 'od-deaths-table-pane',
@@ -64,9 +76,3 @@ function makeInteractive(tableId) {
   const selector = '#' + tableId;
   $(selector).DataTable(datatableOptions);        // eslint-disable-line new-cap
 }
-
-
-tableMetadata.forEach(metadata => {
-  const tableDiv = document.getElementById(metadata.tablePaneId);
-  void addTable(tableDiv, metadata);
-});
