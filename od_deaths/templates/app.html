@@ -200,12 +200,12 @@
                         name="{{ map_plot_param_names['period'] }}"
                       >
                         {% for time_period in time_periods[:-1] %}
-                        <option value="{{ time_period|urlencode }}">
+                        <option value="{{ time_period }}">
                           {{ time_period }}
                         </option>
                         {% endfor %}
                         <option
-                          value="{{ time_periods[-1]|urlencode }}" selected
+                          value="{{ time_periods[-1] }}" selected
                         >
                           {{ time_periods[-1] }}
                         </option>

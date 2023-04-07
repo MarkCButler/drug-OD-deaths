@@ -1,18 +1,29 @@
-"""Constants and functions used in setting/formatting labels displayed in
-different parts of the app's UI.
+"""Constants and functions used in managing labels displayed in different parts
+of the app's interface.
 
-In cases where the labels/formatting are specified below by a dictionary, the
-dictionary keys correspond to data categories or filters used in the app's UI.
-These keys must be used consistently in both the app's front and back-end code.
+The keys in the dictionaries below can be considered code that must be used
+consistently in both the app's front end and back end.  These keys correspond to
+data categories or filters used in the app, while the values determine what is
+displayed in the UI and the HTML markup.
+
 In order to facilitate consistent usage of these keys, several constants and
-functions that involve hard-coded instances of the keys are defined in the
-current module.  Labels defined here that are needed by front-end code are
-delivered by the back end through a Jinja2 HTML template.
+functions that involve hard-coded instances of the keys are defined here.
 
-Note that some dictionaries used in the current module depend on the data model
-exposed by the database module.  For instance, the keys used below in
-OD_TYPE_LABELS correspond to values found in the column OD_type in the table of
-OD deaths.
+Values defined in the current module that are needed by front-end code
+are delivered through a Jinja2 HTML template, which uses dictionary keys to
+select the strings rendered in the template.
+
+Some dictionaries defined here depend on the data model exposed by the database
+module.  For instance, the keys used below in OD_TYPE_LABELS correspond to
+values found in the column OD_type in the table of OD deaths.
+
+There is also a dependency between the keys in some dictionaries defined here
+and the module processed_data.  Requests by the front end for plot data include
+parameter name-value pairs defined by constants in the current module.  The
+back-end functions that process data to fulfill these requests need to
+"understand" keys such as 'death_count', 'normalized_death_count', and
+'percent_change' (see STATISTIC_LABELS below) in order to determine how data
+should be processed.
 """
 from collections import namedtuple
 
@@ -129,16 +140,16 @@ def generate_ordered_locations():
     # Note that the function get_location_table used in the next line of code
     # returns a dataframe with 'Abbr' as the index.  This is convenient for all
     # functions that consume this dataframe (including the current function).
-    # However, reset_index is used at the end of the current function to convert
-    # 'Abbr' into a column, in order to simplify functions that consume the
-    # output of the current function.
+    # However, reset_index is used below to convert 'Abbr' into a column, in
+    # order to simplify functions that consume the output of the current
+    # function.
     data = get_location_table().sort_values(by='Name')
-    reordered_index =  data.index.drop('US').insert(0, 'US')
+    reordered_index = data.index.drop('US').insert(0, 'US')
     return data.reindex(reordered_index).reset_index()
 
 
 def _ensure_location_definitions():
-    global ORDERED_LOCATIONS
+    global ORDERED_LOCATIONS                  # pylint: disable=global-statement
     if ORDERED_LOCATIONS is None:
         ORDERED_LOCATIONS = generate_ordered_locations()
 
@@ -168,6 +179,19 @@ def get_location_names():
 ################################################################################
 TIME_PERIODS = ['September ' + str(year)
                 for year in range(2015, 2020)]
+
+# Used to convert time-period labels displayed in the UI into data that can be
+# consumed by the back end.
+TimePeriod = namedtuple('TimePeriod', ['month', 'year'])
+
+
+def get_month_and_year(time_period):
+    """Extract the month and year from a time period label used in the UI.
+
+    The function returns a 2-element iterable Month, Year.
+    """
+    month, year = time_period.split()
+    return TimePeriod(month=month, year=int(year))
 
 
 ################################################################################

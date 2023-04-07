@@ -1,18 +1,28 @@
 """Views that return plots, along with supporting functions."""
 import json
 
-from flask import Blueprint, make_response
+from flask import Blueprint, make_response, request
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.utils as plotly_utils
 
-from .ui_labels import COLORBAR_TITLES, COLORBAR_TICKFORMATS, MAP_HOVERTEMPLATES
+from .processed_data import get_processed_map_data, get_processed_time_data
+from .ui_labels import (
+    COLORBAR_TITLES, COLORBAR_TICKFORMATS, MAP_HOVERTEMPLATES,
+    TIME_PLOT_PARAM_NAMES, MAP_PLOT_PARAM_NAMES
+)
 
 plot_views = Blueprint('plots', __name__, url_prefix='/plots')
 
 
 @plot_views.route('/time-plot')
-def get_test_line_plot():
+def get_time_plot():
+    """Parse query parameters sent by the front end and return the Plotly JSON
+    for the requested plot of time development.
+    """
+    params = parse_plot_params(TIME_PLOT_PARAM_NAMES)
+    data = get_processed_time_data(params)
+
     # Generate dummy data for testing the design of the map.
     # TODO: delete the code for generating dummy data
     df = px.data.gapminder().query("continent == 'Oceania'")
@@ -23,6 +33,36 @@ def get_test_line_plot():
 
     fig = px.line(df, x='year', y='lifeExp', color='country', markers=True)
     return _make_plot_response(fig)
+
+
+def parse_plot_params(plot_param_names):
+    """Convert query parameters into a dictionary that can be consumed by the
+    app module that processes data.
+
+    The parameter names used by the front end in requesting plot data are
+    replaced by simple strings that are understood by the module processed_data.
+
+    Args:
+        plot_param_names:  Dictionary (such as ui_labels.TIME_PLOT_PARAM_NAMES)
+            that has the UI parameter names as values.  The allowed keys are
+            'location', 'statistic', 'od_type', and 'period'.
+
+    Returns:
+        Dictionary with the same keys as the argument plot_param_names.  If the
+        query parameters being parsed included multiple values for a single
+        parameter name, the values are collected into a list.  Example:
+            {
+                'location': 'US',
+                'statistic': 'normalized_death_count',
+                'od_type': ['prescription_opioids', 'synthetic_opioids']
+            }
+    """
+    param_dict = {key: request.args.getlist(plot_param_names[key])
+                  for key in plot_param_names}
+    for key, value in param_dict.items():
+        if len(value) == 1:
+            param_dict[key] = value[0]
+    return param_dict
 
 
 def _make_plot_response(fig):
@@ -100,7 +140,13 @@ colorbar_ranges = {}
 
 
 @plot_views.route('/map-plot')
-def get_test_map_plot():
+def get_map_plot():
+    """Parse query parameters sent by the front end and return the Plotly JSON
+    for the requested plot of US distribution.
+    """
+    params = parse_plot_params(MAP_PLOT_PARAM_NAMES)
+    data = get_processed_map_data(params)
+
     # Dummy value, will be an input passed to the function that plots the map.
     statistic_label = 'normalized_death_count'
     # TODO: Add query that gets the absolute maximum and minimum for the
