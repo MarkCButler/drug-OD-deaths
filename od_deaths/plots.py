@@ -1,18 +1,39 @@
 """Views that return plots, along with supporting functions."""
 import json
 
-from flask import Blueprint, make_response, request
+from flask import Blueprint, make_response
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.utils as plotly_utils
 
 from .processed_data import get_processed_map_data, get_processed_time_data
+from .query_parameters import parse_plot_params
 from .ui_labels import (
     COLORBAR_TITLES, COLORBAR_TICKFORMATS, MAP_HOVERTEMPLATES,
-    TIME_PLOT_PARAM_NAMES, MAP_PLOT_PARAM_NAMES
+    MAP_PLOT_PARAM_NAMES, TIME_PLOT_PARAM_NAMES
 )
 
 plot_views = Blueprint('plots', __name__, url_prefix='/plots')
+
+
+# TODO: For consistency between modules (as well as with the template), move the
+#   functions for time-plot views below the functions for map-plot views.
+@plot_views.route('/interactive-time-plot')
+def get_time_plot_and_options():
+    """Parse query parameters sent by the front end and return JSON that can be
+    used to update both the plot and the options visible on the corresponding
+    form.
+
+    The JSON returned has two keys: 'plot' and 'form-options'.
+
+    The reason the same back-end url is used to deliver a simultaneous update of
+    both the plot and the visible form options is that in the general case, both
+    types of updates require a database query and data processing.  If separate
+    HTTP requests were used to update the plot and the visible form options, the
+    back end would in some cases have to repeat a database query and redo some
+    data processing.
+    """
+    return get_time_plot()
 
 
 @plot_views.route('/time-plot')
@@ -33,36 +54,6 @@ def get_time_plot():
 
     fig = px.line(df, x='year', y='lifeExp', color='country', markers=True)
     return _make_plot_response(fig)
-
-
-def parse_plot_params(plot_param_names):
-    """Convert query parameters into a dictionary that can be consumed by the
-    app module that processes data.
-
-    The parameter names used by the front end in requesting plot data are
-    replaced by simple strings that are understood by the module processed_data.
-
-    Args:
-        plot_param_names:  Dictionary (such as ui_labels.TIME_PLOT_PARAM_NAMES)
-            that has the UI parameter names as values.  The allowed keys are
-            'location', 'statistic', 'od_type', and 'period'.
-
-    Returns:
-        Dictionary with the same keys as the argument plot_param_names.  If the
-        query parameters being parsed included multiple values for a single
-        parameter name, the values are collected into a list.  Example:
-            {
-                'location': 'US',
-                'statistic': 'normalized_death_count',
-                'od_type': ['prescription_opioids', 'synthetic_opioids']
-            }
-    """
-    param_dict = {key: request.args.getlist(plot_param_names[key])
-                  for key in plot_param_names}
-    for key, value in param_dict.items():
-        if len(value) == 1:
-            param_dict[key] = value[0]
-    return param_dict
 
 
 def _make_plot_response(fig):
@@ -137,6 +128,24 @@ state_columns = list(zip(*states.items()))
 # values of that statistic for the dataset.  The colorbar range remains
 # fixed when the selected year changes.
 colorbar_ranges = {}
+
+
+@plot_views.route('/interactive-map-plot')
+def get_map_plot_and_options():
+    """Parse query parameters sent by the front end and return JSON that can be
+    used to update both the plot and the options visible on the corresponding
+    form.
+
+    The JSON returned has two keys: 'plot' and 'form-options'.
+
+    The reason the same back-end url is used to deliver a simultaneous update of
+    both the plot and the visible form options is that in the general case, both
+    types of updates require a database query and data processing.  If separate
+    queries were used for the plot and the visible form options, the back end
+    would in some cases have to repeat a database query and redo some data
+    processing.
+    """
+    return get_map_plot()
 
 
 @plot_views.route('/map-plot')

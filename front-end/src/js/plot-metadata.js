@@ -2,7 +2,7 @@
  * @fileoverview Export an array of metadata needed for initializing plots and
  * for adding event listeners to the forms associated with plots.  The metadata
  * in this array allows functions defined in other modules to make changes to
- * the DOM without hard-coding any details of the DOM.
+ * the DOM without hard-coding details of the DOM.
  */
 
 export const plotMetadata = [
@@ -12,6 +12,7 @@ export const plotMetadata = [
     visibleOnLoad: true,
     formId: null,
     tabId: 'summary',
+    headings: null,
     controls: null
   },
   {
@@ -20,6 +21,7 @@ export const plotMetadata = [
     visibleOnLoad: true,
     formId: null,
     tabId: 'summary',
+    headings: null,
     controls: null
   },
   {
@@ -28,14 +30,25 @@ export const plotMetadata = [
     visibleOnLoad: true,
     formId: null,
     tabId: 'summary',
+    headings: null,
     controls: null
   },
   {
     plotId: 'interactive-map-plot',
-    url: 'plots/map-plot',
+    url: 'plots/interactive-map-plot',
     visibleOnLoad: false,
     formId: 'map-plot-form',
     tabId: 'map-tab',
+    headings: [
+      {
+        headingId: 'map-plot-title-1',
+        url: '/headings/map-plot-heading'
+      },
+      {
+        headingId: 'map-plot-title-2',
+        url: '/headings/map-plot-subheading'
+      }
+    ],
     controls: [
       {
         controlId: 'select-map-plot-statistic',
@@ -49,10 +62,20 @@ export const plotMetadata = [
   },
   {
     plotId: 'interactive-time-plot',
-    url: '/plots/time-plot',
+    url: '/plots/interactive-time-plot',
     visibleOnLoad: false,
     formId: 'time-plot-form',
     tabId: 'time-dev-tab',
+    headings: [
+      {
+        headingId: 'time-plot-title-1',
+        url: '/headings/time-plot-heading'
+      },
+      {
+        headingId: 'time-plot-title-2',
+        url: '/headings/time-plot-subheading'
+      }
+    ],
     controls: [
       {
         controlId: 'select-time-plot-location',

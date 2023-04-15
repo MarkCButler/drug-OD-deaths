@@ -11,7 +11,8 @@ functions that involve hard-coded instances of the keys are defined here.
 
 Values defined in the current module that are needed by front-end code
 are delivered through a Jinja2 HTML template, which uses dictionary keys to
-select the strings rendered in the template.
+select the strings rendered in the template, or in response to HTTP requests
+made by the front end.
 
 Some dictionaries defined here depend on the data model exposed by the database
 module.  For instance, the keys used below in OD_TYPE_LABELS correspond to
@@ -106,6 +107,22 @@ COLORBAR_TICKFORMATS = {
     'percent_change': '.0%'
 }
 
+MAP_PLOT_HEADINGS = {
+    'death_count': 'Number of drug-overdose deaths',
+    'normalized_death_count': ('Number of drug-overdose deaths '
+                               'per 100,000 people'),
+    'percent_change': 'Percent change in drug-overdose deaths'
+}
+
+
+TIME_PLOT_HEADINGS = {
+    'death_count': 'Number of deaths, preceding 12-month period',
+    'normalized_death_count': ('Number of deaths per 100,000 people, '
+                               'preceding 12-month period'),
+    'percent_change': ('Percent change in drug-overdose deaths, '
+                       'preceding 12-month period')
+}
+
 
 def get_statistic_types():
     """Return a list of named tuples of the form (value, name) representing the
@@ -125,27 +142,27 @@ def get_statistic_types():
 # get_location_names.  We must interact with the database in order to define
 # this global variable, and currently this is only supported within an app
 # context.  So ORDERED_LOCATIONS is initially defined to be None, and it is
-# defined on the fly when needed by an instance of the app.
+# defined on the fly when needed by an instance of the app.  The function
+# generate_ordered_locations is used to initialize ORDERED_LOCATIONS.
 ORDERED_LOCATIONS = None
 
 
 def generate_ordered_locations():
     """Generate a table of ordered locations for which data is available.
 
+    The module-level global variable ORDERED_LOCATIONS is initialized to be a
+    dataframe with the following index and column:
+      - index (named 'Abbr') giving the abbreviation used for each location
+      - column 'Name' giving the full name of each location
+
     The table of locations exposed by the database module is first retrieved.
-    Rows are first ordered alphabetically based on the full name of the location
-    (which will appear in the UI), and then the row corresponding to the US is
-    moved to the top of the table.
+    Rows are then ordered alphabetically based on the full name of the location
+    (which will appear in the UI), and the row corresponding to the US is moved
+    to the top of the table.
     """
-    # Note that the function get_location_table used in the next line of code
-    # returns a dataframe with 'Abbr' as the index.  This is convenient for all
-    # functions that consume this dataframe (including the current function).
-    # However, reset_index is used below to convert 'Abbr' into a column, in
-    # order to simplify functions that consume the output of the current
-    # function.
     data = get_location_table().sort_values(by='Name')
     reordered_index = data.index.drop('US').insert(0, 'US')
-    return data.reindex(reordered_index).reset_index()
+    return data.reindex(reordered_index)
 
 
 def _ensure_location_definitions():
@@ -162,8 +179,8 @@ def get_locations():
     the corresponding names are displayed in the UI.
     """
     _ensure_location_definitions()
-    return [SelectOption(value=row.Abbr, name=row.Name)
-            for row in ORDERED_LOCATIONS.itertuples(index=False)]
+    return [SelectOption(value=row.Index, name=row.Name)
+            for row in ORDERED_LOCATIONS.itertuples()]
 
 
 def get_location_names():
@@ -171,7 +188,7 @@ def get_location_names():
     available.
     """
     _ensure_location_definitions()
-    return list(ORDERED_LOCATIONS.Name)
+    return list(ORDERED_LOCATIONS['Name'])
 
 
 ################################################################################
@@ -192,6 +209,17 @@ def get_month_and_year(time_period):
     """
     month, year = time_period.split()
     return TimePeriod(month=month, year=int(year))
+
+
+def get_previous_year_period(time_period):
+    """Given as input a string representing a time period, return a string
+    representing time period one year earlier.
+
+    For example, if argument to the function is 'September 2019', return
+    'September 2018'.
+    """
+    month, year = time_period.split()
+    return f'{month} {int(year) - 1}'
 
 
 ################################################################################
@@ -280,3 +308,53 @@ def get_preset_plot_params():
         'growth_rate': GROWTH_RATE_PARAMS,
         'distribution': DISTRIBUTION_PARAMS
     }
+
+
+################################################################################
+# HTML headings that are updated dynamically
+################################################################################
+
+
+def get_map_plot_heading(param_dict):
+    """Return an HTML heading dynamically selected for the map plot.
+
+    Args:
+        param_dict:  dictionary of query parameters in the format returned by
+            query_parameters.parse_plot_params.
+    """
+    return MAP_PLOT_HEADINGS[param_dict['statistic']]
+
+
+def get_map_plot_subheading(param_dict):
+    """Return an HTML subheading dynamically selected for the map plot.
+
+    Args:
+        param_dict:  dictionary of query parameters in the format returned by
+            query_parameters.parse_plot_params.
+    """
+    period = param_dict['period']
+    if param_dict['statistic'] == 'percent_change':
+        subheading = get_previous_year_period(period) + ' to ' + period
+    else:
+        subheading = 'Twelve-month period ending ' + period
+    return subheading
+
+
+def get_time_plot_heading(param_dict):
+    """Return an HTML heading dynamically selected for the time plot.
+
+    Args:
+        param_dict:  dictionary of query parameters in the format returned by
+            query_parameters.parse_plot_params.
+    """
+    return TIME_PLOT_HEADINGS[param_dict['statistic']]
+
+
+def get_time_plot_subheading(param_dict):
+    """Return an HTML subheading dynamically selected for the time plot.
+
+    Args:
+        param_dict:  dictionary of query parameters in the format returned by
+            query_parameters.parse_plot_params.
+    """
+    return ORDERED_LOCATIONS.loc[param_dict['location'], 'Name']

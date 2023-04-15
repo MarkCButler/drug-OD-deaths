@@ -7,39 +7,36 @@
 import $ from 'jquery';
 import '@selectize/selectize';
 
+import {fetchJson, fetchText} from './app-fetch';
 import {plotMetadata} from './plot-metadata';
 import {updatePlot} from './plots';
+import {displayAppError} from './errors';
 
 
+/**
+ * Customize form controls and add event listeners.
+ */
 export function initializeFormControls() {
-  selectizeIds.forEach(controlId => {
-    // The selectize library used to enhance the select elements is a jquery
-    // plug-in, and so jquery syntax is used in calling the library.
-    const selector = '#' + controlId;
-    $(selector).selectize({
-      plugins: ['remove_button'],
-      onChange: getSelectizeChangeHandler(controlId)
-    });
-  });
-
+  applySelectize();
   for (const [formId, metadata] of Object.entries(formMetadata)) {
-    const form = document.getElementById(formId);
-    form.addEventListener('change', () => {
-      const formData = new FormData(form);
-      const params = new URLSearchParams(formData);
-      updatePlot(metadata.plotId, metadata.url, params.toString());
-    });
+    addFormListeners(formId, metadata);
   }
 }
 
 
-// Create an object mapping form IDs to back-end URLs.
+// Create an object mapping form ID to metadata about dynamic updates that
+// should occur when form values are modified interactively.
 const formMetadata = plotMetadata.reduce(
   (accumObj, metadata) => {
     if (metadata.formId) {
+      const extractedMetadata = {
+        url: metadata.url,
+        plotId: metadata.plotId,
+        headings: metadata.headings
+      };
       return {
         ...accumObj,
-        [metadata.formId]: {url: metadata.url, plotId: metadata.plotId}
+        [metadata.formId]: extractedMetadata
       };
     }
     return accumObj;
@@ -84,4 +81,66 @@ function getSelectizeChangeHandler(controlId) {
     const changeEvent = new Event('change', {bubbles: true});
     formControl.dispatchEvent(changeEvent);
   };
+}
+
+
+// For the form-control IDs in the array selectizeIds, use the selectize
+// library to enhance the features of the form control.
+function applySelectize() {
+  selectizeIds.forEach(controlId => {
+    // The selectize library used to enhance the select elements is a jquery
+    // plug-in, and so jquery syntax is used in calling the library.
+    const selector = '#' + controlId;
+    $(selector).selectize({
+      plugins: ['remove_button'],
+      onChange: getSelectizeChangeHandler(controlId)
+    });
+  });
+}
+
+
+function addFormListeners(formId, metadata) {
+  makePlotAndOptionsInteractive(formId, metadata);
+  if (metadata.headings) {
+    makeHeadingsInteractive(formId, metadata);
+  }
+}
+
+
+function makePlotAndOptionsInteractive(formId, metadata) {
+  const form = document.getElementById(formId);
+  const plotDiv = document.getElementById(metadata.plotId);
+
+  form.addEventListener('change', () => {
+    const paramString = getParamString(form);
+    const jsonPromise = fetchJson(metadata.url, paramString);
+    jsonPromise
+      .then(json => updatePlot(plotDiv, json))
+      .catch(error => displayAppError(error, plotDiv, metadata.plotId));
+    // Add another .then and .catch to handle updating the form options.
+  });
+}
+
+
+function makeHeadingsInteractive(formId, metadata) {
+  const form = document.getElementById(formId);
+
+  form.addEventListener('change', () => {
+    const paramString = getParamString(form);
+    metadata.headings.forEach(headingMetadata => {
+      const headingId = headingMetadata.headingId;
+      const headingElement = document.getElementById(headingId);
+      fetchText(headingMetadata.url, paramString)
+        .then(text => {
+          headingElement.textContent = text;
+        })
+        .catch(error => displayAppError(error, headingElement, headingId));
+    });
+  });
+}
+
+
+function getParamString(form) {
+  const formData = new FormData(form);
+  return new URLSearchParams(formData).toString();
 }
