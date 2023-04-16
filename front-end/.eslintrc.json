@@ -17,6 +17,14 @@
     "indent": ["error", 2],
     "no-multi-spaces": ["error", { "ignoreEOLComments": true }],
     "require-jsdoc" : "off",
-    "spaced-comment": "off"
+    "spaced-comment": "off",
+    "valid-jsdoc": [
+      "error",
+      {
+        "prefer": {"return": "returns"},
+        "requireReturn": false,
+        "requireParamDescription": false
+      }
+    ]
   }
 }

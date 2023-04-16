@@ -1,4 +1,7 @@
-'use strict';
+/**
+ * @fileoverview After importing third-party modules for side effects, add
+ * plots, tables, and event listeners to the DOM.
+ */
 
 // main.scss includes the following:
 // 1. A customized subset of bootstrap scss
@@ -38,8 +41,10 @@ import {initializeFormControls} from './js/form-controls';
 import {initializeTables} from './js/tables';
 
 
-// Asynchronously add plots and tables, along with associated controls and event
-// listeners, to the DOM.
+/**
+ * Asynchronously add plots and tables to the DOM along with event listeners
+ * needed for interactivity.
+ */
 function initialize() {
   initializePlots()
     .then(

@@ -1,4 +1,6 @@
-'use strict';
+/**
+ * @fileoverview Import the bootstrap plugins needed by the app.
+ */
 
 /*
  * The full list of bootstrap's javascript plugins below was copied from the
@@ -6,6 +8,7 @@
  * rather than removed in order to make it easier to add the plugins back in
  * if necessary.
  */
+
 // import 'bootstrap/js/dist/alert';
 // import 'bootstrap/js/dist/button';
 // import 'bootstrap/js/dist/carousel';

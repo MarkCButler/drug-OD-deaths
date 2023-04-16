@@ -1,4 +1,7 @@
-'use strict';
+/**
+ * @fileoverview After importing the components of fontawesome needed by the
+ * app, add SVG icons to the DOM.
+ */
 
 // The fontawesome docs show how to import only the SVG icons that are needed:
 //

@@ -1,4 +1,9 @@
-'use strict';
+/**
+ * @fileoverview Export an array of metadata needed for initializing plots and
+ * for adding event listeners to the forms associated with plots.  The metadata
+ * in this array allows functions defined in other modules to make changes to
+ * the DOM without hard-coding any details of the DOM.
+ */
 
 export const plotMetadata = [
   {

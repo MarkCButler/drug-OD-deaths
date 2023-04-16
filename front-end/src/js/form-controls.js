@@ -1,4 +1,7 @@
-'use strict';
+/**
+ * @fileoverview Export a function that customizes form controls and adds event
+ * listeners needed for the app's interactivity.
+ */
 
 // Import the selectize library and its dependency jquery.
 import $ from 'jquery';

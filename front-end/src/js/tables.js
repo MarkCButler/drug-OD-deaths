@@ -1,4 +1,6 @@
-'use strict';
+/**
+ * @fileoverview Export a function that adds data tables to the DOM.
+ */
 
 // Import the datatables library and its dependency jquery.
 import $ from 'jquery';
@@ -7,6 +9,10 @@ import 'datatables.net-bs5';
 import {displayAppError, HTTPError} from './errors';
 
 
+/**
+ * Asynchronously fetch data tables from the back end and add them to the DOM.
+ * @returns {Promise} Promise that settles once all tables have been added.
+ */
 export function initializeTables() {
   const promises = tableMetadata.map(
     metadata => {

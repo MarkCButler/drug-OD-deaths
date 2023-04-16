@@ -1,4 +1,6 @@
-'use strict';
+/**
+ * @fileoverview Export functions that add and update plots in the DOM.
+ */
 
 // Import a subset of the javascript for plotly.
 import Plotly from './app-plotly';
