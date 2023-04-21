@@ -15,55 +15,6 @@ from .ui_labels import (
 
 plot_views = Blueprint('plots', __name__, url_prefix='/plots')
 
-
-# TODO: For consistency between modules (as well as with the template), move the
-#   functions for time-plot views below the functions for map-plot views.
-@plot_views.route('/interactive-time-plot')
-def get_time_plot_and_options():
-    """Parse query parameters sent by the front end and return JSON that can be
-    used to update both the plot and the options visible on the corresponding
-    form.
-
-    The JSON returned has two keys: 'plot' and 'form-options'.
-
-    The reason the same back-end url is used to deliver a simultaneous update of
-    both the plot and the visible form options is that in the general case, both
-    types of updates require a database query and data processing.  If separate
-    HTTP requests were used to update the plot and the visible form options, the
-    back end would in some cases have to repeat a database query and redo some
-    data processing.
-    """
-    return get_time_plot()
-
-
-@plot_views.route('/time-plot')
-def get_time_plot():
-    """Parse query parameters sent by the front end and return the Plotly JSON
-    for the requested plot of time development.
-    """
-    params = parse_plot_params(TIME_PLOT_PARAM_NAMES)
-    data = get_processed_time_data(params)
-
-    # Generate dummy data for testing the design of the map.
-    # TODO: delete the code for generating dummy data
-    df = px.data.gapminder().query("continent == 'Oceania'")
-
-    # The following redundant line is added to work around a bug in plotly, see
-    # https://github.com/plotly/plotly.py/issues/3441#issuecomment-1271747147
-    fig = go.Figure(layout=dict(template='plotly'))
-
-    fig = px.line(df, x='year', y='lifeExp', color='country', markers=True)
-    return _make_plot_response(fig)
-
-
-def _make_plot_response(fig):
-    response = make_response(
-        json.dumps(fig, cls=plotly_utils.PlotlyJSONEncoder)
-    )
-    response.headers['Content-Type'] = 'application/json'
-    return response
-
-
 # Generate dummy data for testing the design of the map.
 # TODO: delete the code for generating dummy data.
 from numpy.random import default_rng
@@ -239,3 +190,49 @@ def _set_map_layout(fig, statistic_label):
     }
     fig.update_layout(annotations=annotations, coloraxis=coloraxis, geo=geo,
                       margin=margin)
+
+
+def _make_plot_response(fig):
+    response = make_response(
+        json.dumps(fig, cls=plotly_utils.PlotlyJSONEncoder)
+    )
+    response.headers['Content-Type'] = 'application/json'
+    return response
+
+
+@plot_views.route('/interactive-time-plot')
+def get_time_plot_and_options():
+    """Parse query parameters sent by the front end and return JSON that can be
+    used to update both the plot and the options visible on the corresponding
+    form.
+
+    The JSON returned has two keys: 'plot' and 'form-options'.
+
+    The reason the same back-end url is used to deliver a simultaneous update of
+    both the plot and the visible form options is that in the general case, both
+    types of updates require a database query and data processing.  If separate
+    HTTP requests were used to update the plot and the visible form options, the
+    back end would in some cases have to repeat a database query and redo some
+    data processing.
+    """
+    return get_time_plot()
+
+
+@plot_views.route('/time-plot')
+def get_time_plot():
+    """Parse query parameters sent by the front end and return the Plotly JSON
+    for the requested plot of time development.
+    """
+    params = parse_plot_params(TIME_PLOT_PARAM_NAMES)
+    data = get_processed_time_data(params)
+
+    # Generate dummy data for testing the design of the map.
+    # TODO: delete the code for generating dummy data
+    df = px.data.gapminder().query("continent == 'Oceania'")
+
+    # The following redundant line is added to work around a bug in plotly, see
+    # https://github.com/plotly/plotly.py/issues/3441#issuecomment-1271747147
+    fig = go.Figure(layout=dict(template='plotly'))
+
+    fig = px.line(df, x='year', y='lifeExp', color='country', markers=True)
+    return _make_plot_response(fig)
