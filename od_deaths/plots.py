@@ -6,7 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import plotly.utils as plotly_utils
 
-from .processed_data import get_processed_map_data, get_processed_time_data
+from .processing import get_processed_map_data, get_processed_time_data
 from .query_parameters import parse_plot_params
 from .ui_labels import (
     COLORBAR_TITLES, COLORBAR_TICKFORMATS, MAP_HOVERTEMPLATES,
