@@ -27,6 +27,11 @@ from flask import current_app, g
 from pandas import pivot, read_sql_query
 from sqlalchemy import create_engine, text
 
+# The first and last dates for which data is available in the table of OD deaths
+# are January 2015 and September 2019, respectively.
+DATASET_START_YEAR = 2015
+DATASET_END_YEAR = 2019
+
 QUERY_STRINGS = {
     'all_od_deaths': """
        SELECT Location_abbr, Year, Month, Indicator, Death_count

@@ -8,86 +8,109 @@
 export const plotMetadata = [
   {
     plotId: 'epidemic-peak',
-    url: '/plots/time-plot',
+    url: '/plots/time',
     visibleOnLoad: true,
     formId: null,
     tabId: 'summary',
-    headings: null,
-    controls: null
+    controls: null,
+    headingUpdate: null
   },
   {
     plotId: 'growth-rate',
-    url: '/plots/time-plot',
+    url: '/plots/time',
     visibleOnLoad: true,
     formId: null,
     tabId: 'summary',
-    headings: null,
-    controls: null
+    controls: null,
+    headingUpdate: null
   },
   {
     plotId: 'distribution',
-    url: 'plots/map-plot',
+    url: 'plots/map',
     visibleOnLoad: true,
     formId: null,
     tabId: 'summary',
-    headings: null,
-    controls: null
+    controls: null,
+    headingUpdate: null
   },
   {
     plotId: 'interactive-map-plot',
-    url: 'plots/interactive-map-plot',
+    url: 'plots/map',
     visibleOnLoad: false,
     formId: 'map-plot-form',
     tabId: 'map-tab',
-    headings: [
-      {
-        headingId: 'map-plot-title-1',
-        url: '/headings/map-plot-heading'
-      },
-      {
-        headingId: 'map-plot-title-2',
-        url: '/headings/map-plot-subheading'
-      }
-    ],
     controls: [
       {
         controlId: 'select-map-plot-statistic',
-        selectize: false
+        selectize: false,
+        optionsUpdate: {
+          url: '/control-options/map-plot-statistic',
+          triggeringElementIds: ['select-map-plot-period']
+        }
       },
       {
         controlId: 'select-map-plot-period',
-        selectize: false
+        selectize: false,
+        optionsUpdate: {
+          url: '/control-options/map-plot-period',
+          triggeringElementIds: ['select-map-plot-statistic']
+        }
+      }
+    ],
+    headingUpdate: [
+      {
+        headingId: 'map-plot-title-1',
+        url: '/headings/map-plot-heading',
+        triggeringElementIds: [
+          'select-map-plot-statistic'
+        ]
+      },
+      {
+        headingId: 'map-plot-title-2',
+        url: '/headings/map-plot-subheading',
+        triggeringElementIds: [
+          'select-map-plot-statistic',
+          'select-map-plot-period'
+        ]
       }
     ]
   },
   {
     plotId: 'interactive-time-plot',
-    url: '/plots/interactive-time-plot',
+    url: '/plots/time',
     visibleOnLoad: false,
     formId: 'time-plot-form',
     tabId: 'time-dev-tab',
-    headings: [
-      {
-        headingId: 'time-plot-title-1',
-        url: '/headings/time-plot-heading'
-      },
-      {
-        headingId: 'time-plot-title-2',
-        url: '/headings/time-plot-subheading'
-      }
-    ],
     controls: [
       {
         controlId: 'select-time-plot-location',
-        selectize: false
+        selectize: false,
+        optionsUpdate: null
       },
       {
         controlId: 'select-time-plot-statistic',
-        selectize: false
+        selectize: false,
+        optionsUpdate: null
       },
       {
         controlId: 'select-time-plot-od-type',
-        selectize: true
+        selectize: true,
+        optionsUpdate: {
+          url: '/control-options/time-plot-od-type',
+          triggeringElementIds: ['select-time-plot-location']
+        }
+      }
+    ],
+    headingUpdate: [
+      {
+        headingId: 'time-plot-title-1',
+        url: '/headings/time-plot-heading',
+        triggeringElementIds: ['select-time-plot-statistic']
+      },
+      {
+        headingId: 'time-plot-title-2',
+        url: '/headings/time-plot-subheading',
+        triggeringElementIds: ['select-time-plot-location']
       }
     ]
   }

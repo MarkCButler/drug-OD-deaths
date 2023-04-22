@@ -178,11 +178,11 @@
                         name="{{ map_plot_param_names['statistic'] }}"
                       >
                         <option value="{{ statistic_types[0].value }}" selected>
-                          {{ statistic_types[0].name }}
+                          {{ statistic_types[0].text }}
                         </option>
                         {% for statistic_type in statistic_types[1:] %}
                         <option value="{{ statistic_type.value }}">
-                          {{ statistic_type.name }}
+                          {{ statistic_type.text }}
                         </option>
                         {% endfor %}
                       </select>
@@ -200,14 +200,14 @@
                         name="{{ map_plot_param_names['period'] }}"
                       >
                         {% for time_period in time_periods[:-1] %}
-                        <option value="{{ time_period }}">
-                          {{ time_period }}
+                        <option value="{{ time_period.value }}">
+                          {{ time_period.text }}
                         </option>
                         {% endfor %}
                         <option
-                          value="{{ time_periods[-1] }}" selected
+                          value="{{ time_periods[-1].value }}" selected
                         >
-                          {{ time_periods[-1] }}
+                          {{ time_periods[-1].text }}
                         </option>
                       </select>
                     </div>
@@ -243,11 +243,11 @@
                         name="{{ time_plot_param_names['location'] }}"
                       >
                         <option value="{{ locations[0].value }}" selected>
-                          {{ locations[0].name }}
+                          {{ locations[0].text }}
                         </option>
                         {% for location in locations[1:] %}
                         <option value="{{ location.value }}">
-                          {{ location.name }}
+                          {{ location.text }}
                         </option>
                         {% endfor %}
                       </select>
@@ -265,11 +265,11 @@
                         name="{{ time_plot_param_names['statistic'] }}"
                       >
                         <option value="{{ statistic_types[0].value }}" selected>
-                          {{ statistic_types[0].name }}
+                          {{ statistic_types[0].text }}
                         </option>
                         {% for statistic_type in statistic_types[1:] %}
                         <option value="{{ statistic_type.value }}">
-                          {{ statistic_type.name }}
+                          {{ statistic_type.text }}
                         </option>
                         {% endfor %}
                       </select>
@@ -287,11 +287,11 @@
                         name="{{ time_plot_param_names['od_type'] }}" multiple
                       >
                         <option value="{{ od_types[0].value }}" selected>
-                          {{ od_types[0].name }}
+                          {{ od_types[0].text }}
                         </option>
                         {% for od_type in od_types[1:] %}
                         <option value="{{ od_type.value }}">
-                          {{ od_type.name }}
+                          {{ od_type.text }}
                         </option>
                         {% endfor %}
                       </select>

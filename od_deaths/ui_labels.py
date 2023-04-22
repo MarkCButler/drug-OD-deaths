@@ -30,10 +30,10 @@ from collections import namedtuple
 
 import pandas as pd
 
-from .database import get_location_table
+from .database import DATASET_START_YEAR, DATASET_END_YEAR, get_location_table
 
 # Used in setting option tags in the HTML template.
-SelectOption = namedtuple('SelectOption', ['value', 'name'])
+SelectOption = namedtuple('SelectOption', ['value', 'text'])
 
 ################################################################################
 # Categories of OD death
@@ -50,11 +50,11 @@ OD_TYPE_LABELS = {
 
 
 def get_od_types():
-    """Return a list of named tuples of the form (value, name) representing the
+    """Return a list of named tuples of the form (value, text) representing the
     different categories of OD deaths.
 
     The values are used internally to identify different categories of OD
-    deaths, while the corresponding names are displayed in the UI.
+    deaths, while the corresponding text is displayed in the UI.
     """
     named_tuples = map(SelectOption._make, OD_TYPE_LABELS.items())
     return list(named_tuples)
@@ -125,11 +125,11 @@ TIME_PLOT_HEADINGS = {
 
 
 def get_statistic_types():
-    """Return a list of named tuples of the form (value, name) representing the
+    """Return a list of named tuples of the form (value, text) representing the
     different statistics used to describe the OD deaths.
 
     The values are used internally to identify different statistics, while the
-    corresponding names are displayed in the UI.
+    corresponding text is displayed in the UI.
     """
     named_tuples = map(SelectOption._make, STATISTIC_LABELS.items())
     return list(named_tuples)
@@ -172,14 +172,14 @@ def _ensure_location_definitions():
 
 
 def get_locations():
-    """Return a list of named tuples of the form (value, name) corresponding to
+    """Return a list of named tuples of the form (value, text) corresponding to
     locations for which data is available.
 
     The values are abbreviations used internally to identify locations, while
-    the corresponding names are displayed in the UI.
+    the corresponding text is displayed in the UI.
     """
     _ensure_location_definitions()
-    return [SelectOption(value=row.Index, name=row.Name)
+    return [SelectOption(value=row.Index, text=row.Name)
             for row in ORDERED_LOCATIONS.itertuples()]
 
 
@@ -194,32 +194,165 @@ def get_location_names():
 ################################################################################
 # Time periods that can be selected for plots.
 ################################################################################
-TIME_PERIODS = ['September ' + str(year)
-                for year in range(2015, 2020)]
+# Example key-value pair in the TIME_PERIODS dictionary:
+#
+# 'september_2018': 'September 2018'
+#
+# The key 'september_2018' corresponds to the 12-month period ending September
+# 2018.
+TIME_PERIODS = {
+    ('september_' + str(year)): ('September ' + str(year))
+    for year in range(DATASET_START_YEAR, DATASET_END_YEAR + 1)
+}
 
-# Used to convert time-period labels displayed in the UI into data that can be
+FIRST_TIME_PERIOD = 'september_' + str(DATASET_START_YEAR)
+
+# Used to convert time periods sent as query parameters into data that can be
 # consumed by the back end.
 TimePeriod = namedtuple('TimePeriod', ['month', 'year'])
 
 
-def get_month_and_year(time_period):
-    """Extract the month and year from a time period label used in the UI.
+def get_time_periods():
+    """Return a list of name tuples of the form (value, text) representing the
+    different time periods for which map data can be displayed.
+
+    The values are used internally to identify different time periods, while the
+    corresponding text is displayed in the UI.
+    """
+    named_tuples = map(SelectOption._make, TIME_PERIODS.items())
+    return list(named_tuples)
+
+
+def get_month_and_year(period_key):
+    """Extract the month and year from a string used internally to identify a
+    time period.
 
     The function returns a 2-element iterable Month, Year.
     """
-    month, year = time_period.split()
-    return TimePeriod(month=month, year=int(year))
+    month, year = period_key.split('_')
+    return TimePeriod(month=month.capitalize(), year=int(year))
 
 
-def get_previous_year_period(time_period):
-    """Given as input a string representing a time period, return a string
-    representing time period one year earlier.
+def get_current_period_label(period_key):
+    """Given as input a string used internally to identify a time period, return
+    a UI label representing the same time period.
 
-    For example, if argument to the function is 'September 2019', return
+    For example, if argument to the function is 'september_2019', return
+    'September 2019'.
+    """
+    month, year = period_key.split('_')
+    return f'{month.capitalize()} {year}'
+
+
+def get_previous_period_label(period_key):
+    """Given as input a string used internally to identify a time period, return
+    a UI label representing time period one year earlier.
+
+    For example, if argument to the function is 'september_2019', return
     'September 2018'.
     """
-    month, year = time_period.split()
-    return f'{month} {int(year) - 1}'
+    month, year = period_key.split('_')
+    return f'{month.capitalize()} {int(year) - 1}'
+
+
+################################################################################
+# HTML headings that are updated dynamically
+################################################################################
+def get_map_plot_heading(param_dict):
+    """Return an HTML heading dynamically selected for the map plot.
+
+    Args:
+        param_dict:  dictionary of query parameters in the format returned by
+            query_parameters.parse_plot_params.
+    """
+    return MAP_PLOT_HEADINGS[param_dict['statistic']]
+
+
+def get_map_plot_subheading(param_dict):
+    """Return an HTML subheading dynamically selected for the map plot.
+
+    Args:
+        param_dict:  dictionary of query parameters in the format returned by
+            query_parameters.parse_plot_params.
+    """
+    period_key = param_dict['period']
+    period_label = get_current_period_label(period_key)
+    if param_dict['statistic'] == 'percent_change':
+        subheading = (get_previous_period_label(period_key)
+                      + ' to ' + period_label)
+    else:
+        subheading = 'Twelve-month period ending ' + period_label
+    return subheading
+
+
+def get_time_plot_heading(param_dict):
+    """Return an HTML heading dynamically selected for the time plot.
+
+    Args:
+        param_dict:  dictionary of query parameters in the format returned by
+            query_parameters.parse_plot_params.
+    """
+    return TIME_PLOT_HEADINGS[param_dict['statistic']]
+
+
+def get_time_plot_subheading(param_dict):
+    """Return an HTML subheading dynamically selected for the time plot.
+
+    Args:
+        param_dict:  dictionary of query parameters in the format returned by
+            query_parameters.parse_plot_params.
+    """
+    return ORDERED_LOCATIONS.loc[param_dict['location'], 'Name']
+
+
+################################################################################
+# Options for HTML select elements that are updated dynamically
+################################################################################
+def get_map_plot_statistic_options(param_dict):
+    """Return a list of options dynamically selected for the form control that
+    determines which statistic is displayed on the map plot.
+
+    Args:
+        param_dict:  dictionary of query parameters in the format returned by
+            query_parameters.parse_plot_params.
+    Returns:
+        List of strings, each corresponding to an option value.
+    """
+    if param_dict['period'] == FIRST_TIME_PERIOD:
+        statistic_labels = STATISTIC_LABELS.copy()
+        del statistic_labels['percent_change']
+    else:
+        statistic_labels = STATISTIC_LABELS
+    return list(statistic_labels.keys())
+
+
+def get_map_plot_period_options(param_dict):
+    """Return a list of options dynamically selected for the form control that
+    determines which time period is displayed on the map plot.
+
+    Args:
+        param_dict:  dictionary of query parameters in the format returned by
+            query_parameters.parse_plot_params.
+    Returns:
+        List of strings, each corresponding to an option value.
+    """
+    if param_dict['statistic'] == 'percent_change':
+        time_periods = TIME_PERIODS.copy()
+        del time_periods[FIRST_TIME_PERIOD]
+    else:
+        time_periods = TIME_PERIODS
+    return list(time_periods.keys())
+
+
+def get_time_plot_od_type_options(param_dict):
+    """Return a list of options dynamically selected for the form control that
+    determines which type of OD death is displayed on the map plot.
+
+    Args:
+        param_dict:  dictionary of query parameters in the format returned by
+            query_parameters.parse_plot_params.
+    """
+    return []
 
 
 ################################################################################
@@ -282,7 +415,7 @@ DISTRIBUTION_PARAMS = [
     {'name': MAP_PLOT_PARAM_NAMES['statistic'],
      'value': 'normalized_death_count'},
     {'name': MAP_PLOT_PARAM_NAMES['period'],
-     'value': 'December 2017'}
+     'value': 'december_2017'}
 ]
 
 
@@ -308,53 +441,3 @@ def get_preset_plot_params():
         'growth_rate': GROWTH_RATE_PARAMS,
         'distribution': DISTRIBUTION_PARAMS
     }
-
-
-################################################################################
-# HTML headings that are updated dynamically
-################################################################################
-
-
-def get_map_plot_heading(param_dict):
-    """Return an HTML heading dynamically selected for the map plot.
-
-    Args:
-        param_dict:  dictionary of query parameters in the format returned by
-            query_parameters.parse_plot_params.
-    """
-    return MAP_PLOT_HEADINGS[param_dict['statistic']]
-
-
-def get_map_plot_subheading(param_dict):
-    """Return an HTML subheading dynamically selected for the map plot.
-
-    Args:
-        param_dict:  dictionary of query parameters in the format returned by
-            query_parameters.parse_plot_params.
-    """
-    period = param_dict['period']
-    if param_dict['statistic'] == 'percent_change':
-        subheading = get_previous_year_period(period) + ' to ' + period
-    else:
-        subheading = 'Twelve-month period ending ' + period
-    return subheading
-
-
-def get_time_plot_heading(param_dict):
-    """Return an HTML heading dynamically selected for the time plot.
-
-    Args:
-        param_dict:  dictionary of query parameters in the format returned by
-            query_parameters.parse_plot_params.
-    """
-    return TIME_PLOT_HEADINGS[param_dict['statistic']]
-
-
-def get_time_plot_subheading(param_dict):
-    """Return an HTML subheading dynamically selected for the time plot.
-
-    Args:
-        param_dict:  dictionary of query parameters in the format returned by
-            query_parameters.parse_plot_params.
-    """
-    return ORDERED_LOCATIONS.loc[param_dict['location'], 'Name']

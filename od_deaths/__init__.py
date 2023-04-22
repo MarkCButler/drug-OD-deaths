@@ -3,20 +3,21 @@ from pathlib import Path
 
 from flask import Flask, render_template
 
+from .control_options import option_views
 from .database import init_app
 from .headings import heading_views
 from .plots import plot_views
 from .tables import table_views
 from .template_data import URLS
 from .ui_labels import (
-    get_locations, get_od_types, get_statistic_types, get_preset_plot_params,
-    MAP_PLOT_PARAM_NAMES, TIME_PERIODS, TIME_PLOT_PARAM_NAMES
+    get_locations, get_od_types, get_preset_plot_params, get_statistic_types,
+    get_time_periods, MAP_PLOT_PARAM_NAMES, TIME_PLOT_PARAM_NAMES
 )
 
 template_kwargs = {
     'od_types': get_od_types(),
     'statistic_types': get_statistic_types(),
-    'time_periods': TIME_PERIODS,
+    'time_periods': get_time_periods(),
     'urls': URLS,
     'map_plot_param_names': MAP_PLOT_PARAM_NAMES,
     'time_plot_param_names': TIME_PLOT_PARAM_NAMES,
@@ -33,6 +34,7 @@ def create_app():
 
     init_app(app)
     app.register_blueprint(heading_views)
+    app.register_blueprint(option_views)
     app.register_blueprint(plot_views)
     app.register_blueprint(table_views)
 

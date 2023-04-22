@@ -81,29 +81,16 @@ state_columns = list(zip(*states.items()))
 colorbar_ranges = {}
 
 
-@plot_views.route('/interactive-map-plot')
-def get_map_plot_and_options():
-    """Parse query parameters sent by the front end and return JSON that can be
-    used to update both the plot and the options visible on the corresponding
-    form.
-
-    The JSON returned has two keys: 'plot' and 'form-options'.
-
-    The reason the same back-end url is used to deliver a simultaneous update of
-    both the plot and the visible form options is that in the general case, both
-    types of updates require a database query and data processing.  If separate
-    queries were used for the plot and the visible form options, the back end
-    would in some cases have to repeat a database query and redo some data
-    processing.
-    """
-    return get_map_plot()
-
-
-@plot_views.route('/map-plot')
+@plot_views.route('/map')
 def get_map_plot():
-    """Parse query parameters sent by the front end and return the Plotly JSON
+    """Parse query parameters sent with the request and return the Plotly JSON
     for the requested plot of US distribution.
     """
+    response_json = _get_map_plot_json()
+    return _make_plot_response(response_json)
+
+
+def _get_map_plot_json():
     params = parse_plot_params(MAP_PLOT_PARAM_NAMES)
     data = get_processed_map_data(params)
 
@@ -150,7 +137,7 @@ def get_map_plot():
         zmax=colorbar_range[1]
     )
     _set_map_layout(fig, statistic_label)
-    return _make_plot_response(fig)
+    return fig
 
 
 def _set_map_layout(fig, statistic_label):
@@ -192,37 +179,24 @@ def _set_map_layout(fig, statistic_label):
                       margin=margin)
 
 
-def _make_plot_response(fig):
+def _make_plot_response(response_data):
     response = make_response(
-        json.dumps(fig, cls=plotly_utils.PlotlyJSONEncoder)
+        json.dumps(response_data, cls=plotly_utils.PlotlyJSONEncoder)
     )
     response.headers['Content-Type'] = 'application/json'
     return response
 
 
-@plot_views.route('/interactive-time-plot')
-def get_time_plot_and_options():
-    """Parse query parameters sent by the front end and return JSON that can be
-    used to update both the plot and the options visible on the corresponding
-    form.
-
-    The JSON returned has two keys: 'plot' and 'form-options'.
-
-    The reason the same back-end url is used to deliver a simultaneous update of
-    both the plot and the visible form options is that in the general case, both
-    types of updates require a database query and data processing.  If separate
-    HTTP requests were used to update the plot and the visible form options, the
-    back end would in some cases have to repeat a database query and redo some
-    data processing.
-    """
-    return get_time_plot()
-
-
-@plot_views.route('/time-plot')
+@plot_views.route('/time')
 def get_time_plot():
-    """Parse query parameters sent by the front end and return the Plotly JSON
+    """Parse query parameters sent with the request and return the Plotly JSON
     for the requested plot of time development.
     """
+    response_json = _get_time_plot_json()
+    return _make_plot_response(response_json)
+
+
+def _get_time_plot_json():
     params = parse_plot_params(TIME_PLOT_PARAM_NAMES)
     data = get_processed_time_data(params)
 
@@ -235,4 +209,4 @@ def get_time_plot():
     fig = go.Figure(layout=dict(template='plotly'))
 
     fig = px.line(df, x='year', y='lifeExp', color='country', markers=True)
-    return _make_plot_response(fig)
+    return fig
