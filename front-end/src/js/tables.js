@@ -6,7 +6,8 @@
 import $ from 'jquery';
 import 'datatables.net-bs5';
 
-import {displayAppError, HTTPError} from './errors';
+import {displayAppError} from './errors';
+import {fetchText} from './app-fetch';
 
 
 /**
@@ -50,22 +51,17 @@ const datatableOptions = {
 };
 
 
-async function addTable(tableDiv, {tableId, url, interactive}) {
-  try {
-    url = url + '?id=' + tableId;
-    const response = await fetch(url);
-    if (response.ok) {
-      tableDiv.innerHTML = await response.text();
+function addTable(tableDiv, {tableId, url, interactive}) {
+  const paramString = 'id=' + tableId;
+  return fetchText(url, paramString)
+    .then(text => {
+      tableDiv.innerHTML = text;
       addBootstrapStyle(tableId);
       if (interactive) {
         makeInteractive(tableId);
       }
-    } else {
-      throw new HTTPError(`status code ${response.status}`);
-    }
-  } catch (error) {
-    displayAppError(error, tableDiv, tableId);
-  }
+    })
+    .catch(error => displayAppError(error, tableDiv, tableId));
 }
 
 
