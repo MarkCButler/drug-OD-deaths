@@ -2,6 +2,7 @@
   "scripts": {
     "build": "webpack --config webpack.prod.js",
     "start": "webpack --watch --config webpack.dev.js",
+    "jsdoc": "jsdoc --recurse src",
     "lint": "eslint src webpack.common.js webpack.dev.js webpack.prod.js"
   },
   "dependencies": {
@@ -32,6 +33,7 @@
   },
   "devDependencies": {
     "eslint": "^8.25.0",
-    "eslint-config-google": "^0.14.0"
+    "eslint-config-google": "^0.14.0",
+    "jsdoc": "^4.0.2"
   }
 }

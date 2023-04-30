@@ -11,5 +11,6 @@ __pycache__/
 data/
 build*
 node_modules/
+out/
 /static/
 scratch*
