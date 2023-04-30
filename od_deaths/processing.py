@@ -19,7 +19,8 @@ def get_processed_map_data(param_dict):
           month and year.
     """
     period = get_month_and_year(param_dict['period'])
-    data = get_map_data(month=period.month, year=period.year)
+    data = get_map_data(month=period.month, year=period.year,
+                        add_location_names=True)
     return data
 
 
@@ -42,6 +43,7 @@ def get_processed_time_data(param_dict):
     """
     data = get_time_data(
         location_abbr=param_dict['location'],
-        od_types=param_dict['od_type']
+        od_types=param_dict['od_type'],
+        add_location_names=False
     )
     return data

@@ -85,7 +85,7 @@ def close_database_connection(ex=None):        # pylint: disable=unused-argument
     """Close the database connection for the current request.
 
     When the app is created, flask.teardown_appcontext is used to register this
-    function to be called when the application context end.
+    function to be called when the application context ends.
 
     Args:
         ex: unhandled exception, passed to the function if teardown_appcontext
@@ -96,38 +96,55 @@ def close_database_connection(ex=None):        # pylint: disable=unused-argument
         conn.close()
 
 
-def get_map_data(month, year):
+def get_map_data(month, year, add_location_names):
     """Return a table giving the number of OD deaths per state in a given
     period.
 
-    Data from the table of OD deaths is returned, with OD_type = 'all_od_deaths'
+    Args:
+        month: month (full name) used in filtering the data
+        year: year (4-digit integer) used in filtering the data
+        add_location_names:  boolean indicating whether a column of location
+            names should be included in the table.  If add_location_names=False,
+            the returned table has column Location_abbr but not column Location.
+
+    Data from the table of OD deaths is returned, with OD_type='all_od_deaths'
     and with Month and Year given by the function arguments.
 
-    The returned table has columns Location, Location_abbr, Year, Month,
-    Death_count.  (The Indicator and OD_type columns of the table of OD deaths
-    documented in the module docstring are not returned.)
+    The returned table has columns Location_abbr, Location (if argument
+    add_location_names=True), Year, Month, Death_count.  The Indicator and
+    OD_type columns of the table of OD deaths documented in the module docstring
+    are not returned.
     """
-    return _get_expanded_table(
+    return _perform_query(
         query=text(QUERY_STRINGS['map_data']),
-        params={'month': month, 'year': year}
+        params={'month': month, 'year': year},
+        add_location_names=add_location_names,
     )
 
 
-def get_time_data(location_abbr, od_types):
+def get_time_data(location_abbr, od_types, add_location_names):
     """Return a table giving the number of OD deaths in a given location as a
     function of time.
 
+    Args:
+        location_abbr: location abbreviation used in filtering the data
+        od_types: string or list of strings used in filtering the data
+        add_location_names:  boolean indicating whether a column of location
+            names should be included in the table.  If add_location_names=False,
+            the returned table has column Location_abbr but not column Location.
+
     Data from the table of OD deaths is returned, with Location_abbr given by
     the argument location_abbr, and with the data filtered so that OD_type
-    includes only the value(s) given by argument od_types, which is a string or
-    a list of strings.
+    includes only the value(s) given by argument od_types.
 
-    The returned table has columns Location, Location_abbr, Year, Month,
-    Death_count, OD_type.  (The Indicator column of the table of OD deaths
-    documented in the module docstring are not returned.)
+    The returned table has columns Location_abbr, Location (if argument
+    add_location_names=True), Year, Month, Death_count, OD_type.  The Indicator
+    column of the table of OD deaths documented in the module docstring is not
+    returned.
     """
     query, params = _get_time_query_and_params(location_abbr, od_types)
-    return _get_expanded_table(query=query, params=params)
+    return _perform_query(query=query, params=params,
+                          add_location_names=add_location_names)
 
 
 def _get_time_query_and_params(location_abbr, od_types):
@@ -164,7 +181,7 @@ def get_od_deaths_table():
     improve readability.  After renaming, the column names are 'Location',
     'Year', 'Month', 'Indicator', and 'Death count'.
     """
-    data = _get_expanded_table(
+    data = _perform_query(
         query=text(QUERY_STRINGS['all_od_deaths'])
     )
     columns = ['Location', 'Year', 'Month', 'Indicator', 'Death_count']
@@ -177,7 +194,7 @@ def get_population_table():
     The table is a subset of the raw data with some column names changed to
     improve readability.
     """
-    data = _get_expanded_table(
+    data = _perform_query(
         query=text(QUERY_STRINGS['all_population_data'])
     )
     columns = ['Location', 'Year', 'Population']
@@ -189,16 +206,25 @@ def get_population_table():
     )
     # In the reshaped dataframe, the set of columns confusingly is named 'Year',
     # and this shows up when the dataframe is converted to an HTML table.
-    data.columns.name = ''
+    data.columns.name = None
     return data
 
 
-def _get_expanded_table(query, params=None):
+def _perform_query(query, params=None, add_location_names=True):
+    """Query the database and return the result as a dataframe.
+
+    Args:
+        query:  sqlalchemy.sql.expression.TextClause object representing the SQL
+            query
+        params:  dictionary of parameters to be bound to the query
+        add_location_names:  boolean indicating whether a column of location
+            names should be added to the table.  If add_location_names=False,
+            the returned table has column Location_abbr but not column Location.
+    """
     conn = get_database_connection()
-    data = (
-        _add_location_names(read_sql_query(query, conn, params=params))
-        .rename(columns={'Abbr': 'Location_abbr'})
-    )
+    data = read_sql_query(query, conn, params=params)
+    if add_location_names:
+        data = _add_location_names(data)
     return data
 
 
