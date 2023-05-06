@@ -1,4 +1,4 @@
-"""Generate SQLite database from csv files."""
+"""Generate SQLite database of normalized tables from csv files."""
 # Standard-library imports
 from pathlib import Path
 import sqlite3
@@ -16,11 +16,13 @@ DEATH_COUNTS_PATH = Path('data') / 'VSRR_Provisional_Drug_Overdose_Death_Counts.
 # downloaded from www.census.gov.  The csv file contains population estimates
 # for the US and each of the 50 states.  For each of the years 2014 - 2019,
 # there is an estimate of the population on July 1.
-population_data = (pd.read_csv(POPULATION_PATH)
-                   .rename(columns={'State': 'Location'})
-                   .melt(id_vars=['Location'],
-                         var_name='Year',
-                         value_name='Population'))
+population_data = (
+    pd.read_csv(POPULATION_PATH)
+    .rename(columns={'State': 'Location'})
+    .melt(id_vars=['Location'],
+          var_name='Year',
+          value_name='Population')
+)
 
 # Extract from the csv file of death counts the columns and rows needed for
 # the app.  Also filter out rows that are missing the death count, in order to
@@ -36,8 +38,7 @@ bool_index = (~deaths_data.State.isin(['DC', 'YC'])
               & ~deaths_data.Indicator.str.contains(r'incl\. methadone'))
 deaths_data = deaths_data[bool_index].reset_index(drop=True)
 
-# Add an OD_type column to simplify data analysis.  This column will not be
-# shown in the Data tab of the app, which displays only the raw data.
+# Define an OD type for each value of the Indicator column.
 #
 # Note that the order of the commands that define the OD type is significant.
 # For instance, the indicator
@@ -55,7 +56,13 @@ od_type[od_type.str.contains('T40.[34]')] = 'synthetic_opioids'
 od_type[od_type.str.contains('T40.5')] = 'cocaine'
 od_type[od_type.str.contains('T43')] = 'other_stimulants'
 od_type[od_type.str.contains('Drug Overdose')] = 'all_drug_od'
-deaths_data['OD_type'] = od_type
+
+# Create of table of OD types.
+od_type_data = (
+    pd.DataFrame({'Indicator': deaths_data.Indicator.copy(),
+                  'OD_type': od_type})
+    .drop_duplicates()
+)
 
 # Create a table that gives the full state name for each state abbreviation.
 location_data = (
@@ -89,6 +96,8 @@ db_con = sqlite3.connect(DB_PATH)
 with db_con:
     cursor = db_con.cursor()
     cursor.executescript(SCRIPT_PATH.read_text(encoding='utf-8'))
+    od_type_data.to_sql('od_types', con=db_con,
+                        if_exists='append', index=False)
     location_data.to_sql('locations', con=db_con,
                          if_exists='append', index=False)
     deaths_data.to_sql('death_counts', con=db_con,
