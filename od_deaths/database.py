@@ -210,7 +210,7 @@ def get_od_deaths_table():
     return data[columns].rename(columns={'Death_count': 'Death count'})
 
 
-def get_population_table():
+def get_raw_population_table():
     """Return a table of raw population data as a dataframe.
 
     The table is a subset of the raw data with some column names changed to

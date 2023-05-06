@@ -2,16 +2,10 @@
 from flask import Blueprint, request
 from pandas import Categorical
 
-from .database import get_od_deaths_table, get_population_table
-from .ui_labels import get_location_names, get_od_code_table
+from .database import get_od_deaths_table, get_raw_population_table
+from .ui_labels import get_location_names, get_od_code_table, ORDERED_MONTHS
 
 table_views = Blueprint('tables', __name__, url_prefix='/tables')
-
-# Used in ordering table rows by chronological order of month names.
-ORDERED_MONTHS = [
-    'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
-    'September', 'October', 'November', 'December'
-]
 
 
 @table_views.route('od-deaths-table')
@@ -25,10 +19,13 @@ def od_deaths_table():
     improve readability.
     """
     data = get_od_deaths_table()
-    data.Location = Categorical(data.Location, categories=get_location_names(),
+    # Convert columns Location and Month into categorical data for sorting.
+    data['Location'] = Categorical(data['Location'],
+                                   categories=get_location_names(),
+                                   ordered=True)
+    data['Month'] = Categorical(data['Month'],
+                                categories=ORDERED_MONTHS,
                                 ordered=True)
-    data.Month = Categorical(data.Month, categories=ORDERED_MONTHS,
-                             ordered=True)
     data = data.sort_values(by=['Location', 'Year', 'Month', 'Indicator'])
     return _to_html_table(data)
 
@@ -48,9 +45,11 @@ def population_table():
     The table is a subset of the raw data with some column names changed to
     improve readability.
     """
-    data = get_population_table()
-    data.Location = Categorical(data.Location, categories=get_location_names(),
-                                ordered=True)
+    data = get_raw_population_table()
+    # Convert the Location column into categorical data for sorting.
+    data['Location'] = Categorical(data['Location'],
+                                   categories=get_location_names(),
+                                   ordered=True)
     data = data.sort_values(by='Location')
     return _to_html_table(data)
 
