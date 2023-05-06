@@ -43,7 +43,7 @@ QUERY_STRINGS = {
         SELECT Abbr, Name
         FROM locations;""",
     'map_data': """
-        SELECT Location_abbr, Year, Month, Death_count
+        SELECT Location_abbr, Death_count
         FROM death_counts
         WHERE Location_abbr != 'US'
           and YEAR = :year
