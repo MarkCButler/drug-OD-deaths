@@ -72,6 +72,13 @@ const selectizeIds = formControlMetadata.reduce(
   []
 );
 
+// Settings for the selectize library.
+const selectizeSettings = {
+  plugins: ['remove_button'],
+  valueField: 'value',
+  labelField: 'text'
+};
+
 
 // The cost of using the selectize library on a form control is that the
 // control's behavior no longer follows the HTML standard.  In particular, a
@@ -84,6 +91,7 @@ function getSelectizeChangeHandler(controlId) {
     // Dispatch an event that will be handled by the form.
     const changeEvent = new Event('change', {bubbles: true});
     formControl.dispatchEvent(changeEvent);
+    // console.log('Dispatched ', changeEvent);
   };
 }
 
@@ -96,8 +104,8 @@ function applySelectize() {
     // plug-in, and so jquery syntax is used in calling the library.
     const selector = '#' + controlId;
     $(selector).selectize({
-      plugins: ['remove_button'],
-      onChange: getSelectizeChangeHandler(controlId)
+      onChange: getSelectizeChangeHandler(controlId),
+      ...selectizeSettings
     });
   });
 }
@@ -199,32 +207,43 @@ function getParamString(form) {
 function getControlUpdateObject(controlMetadata) {
   const selectElement = document.getElementById(controlMetadata.controlId);
   const optionsUpdate = controlMetadata.optionsUpdate;
-  const controlUpdateObject = {
+  return {
     url: optionsUpdate.url,
     selectElement: selectElement,
     // Use the closest div ancestor to display any error message.
     divAncestor: selectElement.closest('div'),
     triggeringElements: optionsUpdate.triggeringElementIds.map(
       document.getElementById, document
-    )
+    ),
+    // Store all options initially created for the select element.
+    allOptions: getAllOptions(selectElement)
   };
+}
 
-  // Add an object allOptions that stores all options initially created for the
-  // select element.  The key-value pairs are of the form
-  // { <option value>: <option> }
+
+/**
+ * Return an object that stores all options initially created for an HTML select
+ * element
+ * @param {HTMLSelectElement} selectElement
+ * @returns {Object} object that stores all options initially created for the
+ *     select element.  The object keys are option values. If the selectize
+ *     library has been used to enhance the functionality of the select element,
+ *     the object values are option text labels displayed in the UI; otherwise,
+ *     the object values are HTMLOptionElements.
+ */
+function getAllOptions(selectElement) {
   const allOptions = {};
-
   if (selectElement.classList.contains('selectized')) {
-    // Options are stored as objects.
+    const selectizeOptions = selectElement.selectize.options;
+    for (const key of Object.keys(selectizeOptions)) {
+      allOptions[key] = selectizeOptions[key]['text'];
+    }
   } else {
-    // Options are stored as HTML option elements.
     for (const option of selectElement.options) {
       allOptions[option.value] = option;
     }
-    controlUpdateObject['allOptions'] = allOptions;
   }
-
-  return controlUpdateObject;
+  return allOptions;
 }
 
 
@@ -236,15 +255,39 @@ function getControlUpdateObject(controlMetadata) {
  * @param {HTMLElement} selectElement - The select element for which the options
  *     should be updated
  * @param {Object} allOptions - An object that stores all options initially
- *     created for the select element.  Each key-value pair is of the form
- *     { <option value>: <option> }.
+ *     created for the select element.  The object keys are option values. If
+ *     the selectize library has been used to enhance the functionality of the
+ *     select element, the object values are option text labels displayed in the
+ *     UI; otherwise, the object values are HTMLOptionElements.
  */
 function updateSelectOptions(json, selectElement, allOptions) {
   if (selectElement.classList.contains('selectized')) {
-    // TODO: Add a function to do the update for a selectized element.
+    updateSelectizedElement(json, selectElement, allOptions);
   } else {
     updateHTMLSelectElement(json, selectElement, allOptions);
   }
+}
+
+
+function updateSelectizedElement(requiredValues, selectElement, allOptions) {
+  // The reason that keys 'value' and 'text' are used below in updatedOptions is
+  // that selectizeSettings defines these as the valueField and labelField,
+  // respectively.
+  const updatedOptions = requiredValues.map(
+    value => ({
+      'value': value,
+      'text': allOptions[value]
+    })
+  );
+  const selectedValues = selectElement.selectize.items.filter(
+    value => requiredValues.includes(value)
+  );
+  const selectizeControl = selectElement.selectize;
+  selectizeControl.clear();
+  selectizeControl.clearOptions(true);
+  selectizeControl.addOption(updatedOptions);
+  selectizeControl.setValue(selectedValues);
+  selectizeControl.refreshState(false);
 }
 
 

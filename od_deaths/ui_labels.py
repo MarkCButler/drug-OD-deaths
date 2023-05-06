@@ -30,7 +30,8 @@ from collections import namedtuple
 
 import pandas as pd
 
-from .database import DATASET_START_YEAR, DATASET_END_YEAR, get_location_table
+from .database import (DATASET_START_YEAR, DATASET_END_YEAR,
+                       get_location_od_types, get_location_table)
 
 # Used in setting option tags in the HTML template.
 SelectOption = namedtuple('SelectOption', ['value', 'text'])
@@ -263,7 +264,9 @@ def get_map_plot_heading(param_dict):
 
     Args:
         param_dict:  dictionary of query parameters in the format returned by
-            query_parameters.parse_plot_params.
+            query_parameters.parse_plot_params.  The dictionary should include
+            the same keys as MAP_PLOT_PARAM_NAMES, which is defined in the
+            current module.
     """
     return MAP_PLOT_HEADINGS[param_dict['statistic']]
 
@@ -273,7 +276,9 @@ def get_map_plot_subheading(param_dict):
 
     Args:
         param_dict:  dictionary of query parameters in the format returned by
-            query_parameters.parse_plot_params.
+            query_parameters.parse_plot_params.  The dictionary should include
+            the same keys as MAP_PLOT_PARAM_NAMES, which is defined in the
+            current module.
     """
     period_key = param_dict['period']
     period_label = get_current_period_label(period_key)
@@ -290,7 +295,9 @@ def get_time_plot_heading(param_dict):
 
     Args:
         param_dict:  dictionary of query parameters in the format returned by
-            query_parameters.parse_plot_params.
+            query_parameters.parse_plot_params.  The dictionary should include
+            the same keys as TIME_PLOT_PARAM_NAMES, which is defined in the
+            current module.
     """
     return TIME_PLOT_HEADINGS[param_dict['statistic']]
 
@@ -300,7 +307,9 @@ def get_time_plot_subheading(param_dict):
 
     Args:
         param_dict:  dictionary of query parameters in the format returned by
-            query_parameters.parse_plot_params.
+            query_parameters.parse_plot_params.  The dictionary should include
+            the same keys as TIME_PLOT_PARAM_NAMES, which is defined in the
+            current module.
     """
     return ORDERED_LOCATIONS.loc[param_dict['location'], 'Name']
 
@@ -314,7 +323,9 @@ def get_map_plot_statistic_options(param_dict):
 
     Args:
         param_dict:  dictionary of query parameters in the format returned by
-            query_parameters.parse_plot_params.
+            query_parameters.parse_plot_params.  The dictionary should include
+            the same keys as MAP_PLOT_PARAM_NAMES, which is defined in the
+            current module.
     Returns:
         List of strings, each corresponding to an option value.
     """
@@ -332,7 +343,9 @@ def get_map_plot_period_options(param_dict):
 
     Args:
         param_dict:  dictionary of query parameters in the format returned by
-            query_parameters.parse_plot_params.
+            query_parameters.parse_plot_params.  The dictionary should include
+            the same keys as MAP_PLOT_PARAM_NAMES, which is defined in the
+            current module.
     Returns:
         List of strings, each corresponding to an option value.
     """
@@ -350,9 +363,16 @@ def get_time_plot_od_type_options(param_dict):
 
     Args:
         param_dict:  dictionary of query parameters in the format returned by
-            query_parameters.parse_plot_params.
+            query_parameters.parse_plot_params.  The dictionary should include
+            the same keys as TIME_PLOT_PARAM_NAMES, which is defined in the
+            current module.
+    Returns:
+        List of strings, each corresponding to an option value.
     """
-    return []
+    unordered_options = get_location_od_types(param_dict['location'])
+    # Order the options based on the order of keys in OD_TYPE_LABELS.
+    return [option for option in OD_TYPE_LABELS
+            if option in unordered_options]
 
 
 ################################################################################

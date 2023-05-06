@@ -60,7 +60,11 @@ QUERY_STRINGS = {
         SELECT Location_abbr, Year, Month, Death_count, OD_type
         FROM death_counts
         WHERE Location_abbr = :location_abbr
-          and OD_type IN (:od_types);"""
+          and OD_type IN (:od_types);""",
+    'od_types': """
+    SELECT DISTINCT OD_type
+    FROM death_counts
+    WHERE Location_abbr = :location_abbr;"""
 }
 
 
@@ -172,6 +176,24 @@ def _get_time_query_and_params(location_abbr, od_types):
                   for index, element in enumerate(od_types)}
     param_dict['location_abbr'] = location_abbr
     return text(query_string), param_dict
+
+
+def get_location_od_types(location_abbr):
+    """Return a list of the types of OD deaths stored in the database for a
+    given location.
+
+    Args:
+        location_abbr: location abbreviation used in filtering the data
+    Returns:
+        List of strings, each a value in the OD_type column in the table of OD
+        deaths
+    """
+    data = _perform_query(
+        query=text(QUERY_STRINGS['od_types']),
+        params={'location_abbr': location_abbr},
+        add_location_names=False,
+    )
+    return data['OD_type'].tolist()
 
 
 def get_od_deaths_table():
