@@ -24,8 +24,9 @@ CREATE TABLE od_types (
 CREATE TABLE populations (
   Location_abbr TEXT NOT NULL,
   Year INTEGER NOT NULL,
+  Month TEXT NOT NULL,
   Population INTEGER NOT NULL,
-  PRIMARY KEY (Location_abbr, Year),
+  PRIMARY KEY (Location_abbr, Year, Month),
   FOREIGN KEY (Location_abbr)
     REFERENCES locations (Abbr)
 );

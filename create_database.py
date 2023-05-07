@@ -1,11 +1,11 @@
 """Generate SQLite database of normalized tables from csv files."""
-# Standard-library imports
 from pathlib import Path
 import sqlite3
 import sys
 
-# Third-party imports
 import pandas as pd
+
+from interpolate_data import interpolate_population_data
 
 DB_PATH = Path('data') / 'OD-deaths.sqlite'
 SCRIPT_PATH = Path('create_tables.sql')
@@ -19,9 +19,6 @@ DEATH_COUNTS_PATH = Path('data') / 'VSRR_Provisional_Drug_Overdose_Death_Counts.
 population_data = (
     pd.read_csv(POPULATION_PATH)
     .rename(columns={'State': 'Location'})
-    .melt(id_vars=['Location'],
-          var_name='Year',
-          value_name='Population')
 )
 
 # Extract from the csv file of death counts the columns and rows needed for
@@ -67,7 +64,7 @@ od_type_data = (
 # Create a table that gives the full state name for each state abbreviation.
 location_data = (
     deaths_data[['State', 'State Name']]
-    .drop_duplicates(ignore_index=True)
+    .drop_duplicates()
     .rename(columns={'State': 'Abbr', 'State Name': 'Name'})
 )
 
@@ -82,6 +79,10 @@ deaths_data = (deaths_data.drop(columns='State Name')
 to_replace = dict(zip(location_data.Name, location_data.Abbr))
 population_data.Location = population_data.Location.replace(to_replace)
 population_data.rename(columns={'Location': 'Location_abbr'}, inplace=True)
+
+# Reshape the table of population data and interpolate the yearly population
+# estimates with monthly population estimates.
+population_data = interpolate_population_data(population_data)
 
 if DB_PATH.exists():
     response = input(f'The database {DB_PATH} already exists.  '
