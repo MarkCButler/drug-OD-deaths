@@ -1,5 +1,10 @@
 PRAGMA foreign_keys = ON;
 
+CREATE TABLE od_types (
+  Indicator TEXT NOT NULL PRIMARY KEY ,
+  OD_type TEXT NOT NULL
+);
+
 CREATE TABLE locations (
   Abbr TEXT NOT NULL PRIMARY KEY,
   Name TEXT NOT NULL
@@ -13,12 +18,9 @@ CREATE TABLE death_counts (
   Death_count INTEGER NOT NULL,
   PRIMARY KEY (Location_abbr, Year, Month, Indicator),
   FOREIGN KEY (Location_abbr)
-    REFERENCES locations (Abbr)
-);
-
-CREATE TABLE od_types (
-    Indicator TEXT NOT NULL PRIMARY KEY ,
-    OD_type TEXT NOT NULL
+    REFERENCES locations (Abbr),
+  FOREIGN KEY (Indicator)
+    REFERENCES od_types (Indicator)
 );
 
 CREATE TABLE populations (

@@ -28,7 +28,7 @@ def interpolate_population_data(data):
     interpolation_dates = get_interpolation_dates()
     interpolated_data = create_interpolation_dataframe(interpolation_dates)
     interpolation_timestamps = [date['timestamp']
-                               for date in interpolation_dates]
+                                for date in interpolation_dates]
     measurement_timestamps = get_measurement_timestamps()
 
     data = data.set_index('Location_abbr')

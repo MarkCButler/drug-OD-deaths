@@ -29,13 +29,16 @@ deaths_data = (
     pd.read_csv(DEATH_COUNTS_PATH, usecols=to_load)
     .rename(columns={'Data Value': 'Death_count'})
 )
-bool_index = (~deaths_data.State.isin(['DC', 'YC'])
-              & ~deaths_data.Death_count.isna()
-              & deaths_data.Indicator.str.contains(r'T\d|Drug Overdose Deaths')
-              & ~deaths_data.Indicator.str.contains(r'incl\. methadone'))
+bool_index = (~deaths_data['State'].isin(['DC', 'YC'])
+              & ~deaths_data['Death_count'].isna()
+              & deaths_data['Indicator'].str.contains(r'T\d|Drug Overdose Deaths')
+              & ~deaths_data['Indicator'].str.contains(r'incl\. methadone'))
 deaths_data = deaths_data[bool_index].reset_index(drop=True)
 
-# Define an OD type for each value of the Indicator column.
+# Define an OD type for each value of the Indicator column.  The OD type
+# bypasses the technical terminology used in the Indicator column and also
+# groups different values within this column into the familiar categories shown
+# in the app interface.
 #
 # Note that the order of the commands that define the OD type is significant.
 # For instance, the indicator
@@ -45,7 +48,7 @@ deaths_data = deaths_data[bool_index].reset_index(drop=True)
 # is detected early in the series of cases by checking for the substring
 # 'T40.0', and after this check, simple substrings such as 'T40.4' uniquely
 # identify the remaining indicators.
-od_type = deaths_data.Indicator.copy()
+od_type = deaths_data['Indicator'].copy()
 od_type[od_type.str.contains('T40.0')] = 'all_opioids'
 od_type[od_type.str.contains('T40.1')] = 'heroin'
 od_type[od_type.str.contains('T40.2')] = 'prescription_opioids'
@@ -56,7 +59,7 @@ od_type[od_type.str.contains('Drug Overdose')] = 'all_drug_od'
 
 # Create of table of OD types.
 od_type_data = (
-    pd.DataFrame({'Indicator': deaths_data.Indicator.copy(),
+    pd.DataFrame({'Indicator': deaths_data['Indicator'].copy(),
                   'OD_type': od_type})
     .drop_duplicates()
 )
@@ -76,8 +79,8 @@ location_data = (
 # and replace the full location name in population_data by the abbreviation.
 deaths_data = (deaths_data.drop(columns='State Name')
                .rename(columns={'State': 'Location_abbr'}))
-to_replace = dict(zip(location_data.Name, location_data.Abbr))
-population_data.Location = population_data.Location.replace(to_replace)
+to_replace = dict(zip(location_data['Name'], location_data['Abbr']))
+population_data['Location'] = population_data['Location'].replace(to_replace)
 population_data.rename(columns={'Location': 'Location_abbr'}, inplace=True)
 
 # Reshape the table of population data and interpolate the yearly population
@@ -97,6 +100,9 @@ db_con = sqlite3.connect(DB_PATH)
 with db_con:
     cursor = db_con.cursor()
     cursor.executescript(SCRIPT_PATH.read_text(encoding='utf-8'))
+    # Since the death_counts table includes foreign keys from the tables
+    # od_types and locations, these tables must be populated with data before
+    # death_counts is populated.
     od_type_data.to_sql('od_types', con=db_con,
                         if_exists='append', index=False)
     location_data.to_sql('locations', con=db_con,
