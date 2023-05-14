@@ -31,7 +31,7 @@ from collections import namedtuple
 import pandas as pd
 
 from .database import (DATASET_START_YEAR, DATASET_END_YEAR,
-                       get_location_od_types, get_location_table)
+                       get_od_types_for_location, get_location_table)
 
 # Used in setting option tags in the HTML template.
 SelectOption = namedtuple('SelectOption', ['value', 'text'])
@@ -378,7 +378,7 @@ def get_time_plot_od_type_options(param_dict):
     Returns:
         List of strings, each corresponding to an option value.
     """
-    unordered_options = get_location_od_types(param_dict['location'])
+    unordered_options = get_od_types_for_location(param_dict['location'])
     # Order the options based on the order of keys in OD_TYPE_LABELS.
     return [option for option in OD_TYPE_LABELS
             if option in unordered_options]

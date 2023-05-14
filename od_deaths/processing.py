@@ -69,10 +69,12 @@ def _process_map_percent_change(data, month, year):
     prior_year_data = (
         get_map_data(month=month, year=prior_year, add_location_names=False)
         .set_index('Location_abbr')
+        .drop(columns=['Month', 'Year'])
         .rename(columns={'Death_count': 'Prior_death_count'})
     )
     data = (
         data
+        .drop(columns=['Month', 'Year'])
         .join(prior_year_data, on='Location_abbr')
     )
     data['Value'] = (
@@ -118,7 +120,6 @@ def get_processed_time_data(param_dict):
     data = get_time_data(
         location_abbr=param_dict['location'],
         od_types=param_dict['od_type'],
-        add_location_names=False
     )
     return process_time_data(data, statistic=param_dict['statistic'])
 
