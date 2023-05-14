@@ -12,6 +12,7 @@ following tables:
     placing OD deaths in relatively simple categories.  The Location column
     gives the full name of a location, while Location_abbr gives an abbreviation
     for the location.
+ - table of locations, with columns Abbr, Name.
 - table of interpolated population data, with columns Location_abbr, Year,
     Month, Population.
 - raw population data, with a Location column and a set of columns corresponding
@@ -55,7 +56,7 @@ QUERY_STRINGS = {
     'location_names': """
         SELECT Abbr, Name
         FROM locations;""",
-    'map_data': """
+    'map_plot_death_counts': """
         SELECT death_counts.Location_abbr,
                death_counts.Year,
                death_counts.Month,
@@ -66,8 +67,15 @@ QUERY_STRINGS = {
                            WHERE OD_type = 'all_drug_od') AS overdose_types
                           ON overdose_types.Indicator = death_counts.Indicator
         WHERE death_counts.Location_abbr != 'US'
-          AND death_counts.YEAR = :year
+          AND death_counts.Year = :year
           AND death_counts.Month = :month;""",
+    'map_plot_populations': """
+        SELECT Location_abbr,
+               Population
+        FROM populations
+        WHERE Location_abbr != 'US'
+          AND Year = :year
+          AND Month = :month;""",
     # Note that the parameter :od_types in the next entry will be
     # programmatically replaced by a series of the form
     #
@@ -75,7 +83,7 @@ QUERY_STRINGS = {
     #
     # This is needed because sqlite3 does not support binding a series as a
     # parameter.
-    'time_data': """
+    'time_plot_death_counts': """
         SELECT death_counts.Year,
                death_counts.Month,
                death_counts.Death_count,
@@ -86,6 +94,12 @@ QUERY_STRINGS = {
                            WHERE OD_type IN (:od_types)) as overdose_types
                           ON overdose_types.Indicator = death_counts.Indicator
         WHERE death_counts.Location_abbr = :location_abbr;""",
+    'time_plot_populations': """
+        SELECT Year,
+               Month,
+               Population
+        FROM populations
+        WHERE Location_abbr = :location_abbr;""",
     'od_types': """
         SELECT DISTINCT od_types.OD_type
         FROM od_types
@@ -126,7 +140,7 @@ def close_database_connection(ex=None):        # pylint: disable=unused-argument
         conn.close()
 
 
-def get_map_data(month, year, add_location_names):
+def get_map_plot_death_counts(month, year, add_location_names):
     """Return a table giving the number of OD deaths per state in a given
     period.
 
@@ -146,7 +160,7 @@ def get_map_data(month, year, add_location_names):
     are not returned.
     """
     data = _perform_query(
-        query=text(QUERY_STRINGS['map_data']),
+        query=text(QUERY_STRINGS['map_plot_death_counts']),
         params={'month': month, 'year': year},
     )
     if add_location_names:
@@ -154,7 +168,24 @@ def get_map_data(month, year, add_location_names):
     return data
 
 
-def get_time_data(location_abbr, od_types):
+def get_map_plot_populations(month, year):
+    """Return a table giving the interpolated population of each state for a
+    given month and year.
+
+    Args:
+        month: month (full name) used in filtering the data
+        year: year (4-digit integer) used in filtering the data
+
+    Returns:
+        Table with columns Location_abbr and Population
+    """
+    return _perform_query(
+        query=text(QUERY_STRINGS['map_plot_populations']),
+        params={'month': month, 'year': year}
+    )
+
+
+def get_time_plot_death_counts(location_abbr, od_types):
     """Return a table giving the number of OD deaths in a given location as a
     function of time.
 
@@ -175,7 +206,7 @@ def get_time_data(location_abbr, od_types):
 
 
 def _get_time_query_and_params(location_abbr, od_types):
-    query_string = QUERY_STRINGS['time_data']
+    query_string = QUERY_STRINGS['time_plot_death_counts']
     # Special handling is needed because od_types may be a list of strings.
     # SQLAlchemy supports binding a series parameter using the following
     # commands:
@@ -201,12 +232,29 @@ def _get_time_query_and_params(location_abbr, od_types):
     return text(query_string), param_dict
 
 
+def get_time_plot_populations(location_abbr):
+    """Return a table giving the interpolated populations of a given location
+    for all available time periods.
+
+    Args:
+        location_abbr: location abbreviation used in filtering the data
+
+    Returns:
+        Table with columns Year, Month, Population
+    """
+    return _perform_query(
+        query=text(QUERY_STRINGS['time_plot_populations']),
+        params={'location_abbr': location_abbr}
+    )
+
+
 def get_od_types_for_location(location_abbr):
     """Return a list of the types of OD deaths stored in the database for a
     given location.
 
     Args:
         location_abbr: location abbreviation used in filtering the data
+
     Returns:
         List of strings, each a value in the OD_type column in the table of OD
         deaths
@@ -248,13 +296,6 @@ def get_raw_population_table():
     # and this shows up when the dataframe is converted to an HTML table.
     data.columns.name = None
     return data
-
-
-def get_population_data():
-    """Return the table of interpolated population data."""
-    return _perform_query(
-        query=text(QUERY_STRINGS['raw_population_data']),
-    )
 
 
 def _perform_query(query, params=None):

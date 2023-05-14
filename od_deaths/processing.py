@@ -3,7 +3,10 @@ functions.
 """
 from flask import current_app
 
-from .database import get_map_data, get_time_data, DATASET_START_YEAR
+from .database import (
+    DATASET_START_YEAR, get_map_plot_death_counts, get_map_plot_populations,
+    get_time_plot_death_counts, get_time_plot_populations
+)
 from .ui_labels import get_month_and_year
 
 # The unit used to normalize death count.
@@ -27,8 +30,8 @@ def get_processed_map_data(param_dict):
     Value.
     """
     period = get_month_and_year(param_dict['period'])
-    data = get_map_data(month=period.month, year=period.year,
-                        add_location_names=True)
+    data = get_map_plot_death_counts(month=period.month, year=period.year,
+                                     add_location_names=True)
     data = process_map_data(data, statistic=param_dict['statistic'],
                             month=period.month, year=period.year)
     current_app.logger.info('\n\n\n' + data.head().to_string() + '\n\n\n')
@@ -67,7 +70,8 @@ def _process_map_percent_change(data, month, year):
     prior_year = year - 1
     _check_year_for_percent_change(year, prior_year)
     prior_year_data = (
-        get_map_data(month=month, year=prior_year, add_location_names=False)
+        get_map_plot_death_counts(month=month, year=prior_year,
+                                  add_location_names=False)
         .set_index('Location_abbr')
         .drop(columns=['Month', 'Year'])
         .rename(columns={'Death_count': 'Prior_death_count'})
@@ -78,7 +82,8 @@ def _process_map_percent_change(data, month, year):
         .join(prior_year_data, on='Location_abbr')
     )
     data['Value'] = (
-        (data['Death_count'] - data['Prior_death_count']) / data['Death_count']
+        (data['Death_count'] - data['Prior_death_count'])
+        / data['Prior_death_count']
     )
     return data.drop(columns=['Death_count', 'Prior_death_count'])
 
@@ -117,7 +122,7 @@ def get_processed_time_data(param_dict):
     The dataframe returned by the function has columns Year, Month, OD_type, and
     Value.
     """
-    data = get_time_data(
+    data = get_time_plot_death_counts(
         location_abbr=param_dict['location'],
         od_types=param_dict['od_type'],
     )
