@@ -44,20 +44,21 @@ def process_map_data(data, statistic, month, year):
     by the front end.
 
     Args:
-        data:  map data fetched from the database
+        data:  map data fetched from the database, containing columns
+            Location_abbr, Location, Death_count
         statistic:  the statistic that should be displayed in the plot (one of
             the strings 'death_count', 'normalized_death_count', or
             'percent_change')
         month:  the month previously used to filter the data
         year:  the year previously used to filter the data
 
-    The dataframe returned by the function has columns Location, Location_abbr,
-    Value.
+    Returns:
+        Dataframe returned with columns Location, Location_abbr, Value
     """
     if statistic == 'percent_change':
         return _process_map_percent_change(data, month, year)
     if statistic == 'normalized_death_count':
-        return _normalize_by_population(data)
+        return _normalize_map_data(data, month, year)
     if statistic == 'death_count':
         return data.rename(columns={'Death_count': 'Value'})
 
@@ -73,14 +74,9 @@ def _process_map_percent_change(data, month, year):
         get_map_plot_death_counts(month=month, year=prior_year,
                                   add_location_names=False)
         .set_index('Location_abbr')
-        .drop(columns=['Month', 'Year'])
         .rename(columns={'Death_count': 'Prior_death_count'})
     )
-    data = (
-        data
-        .drop(columns=['Month', 'Year'])
-        .join(prior_year_data, on='Location_abbr')
-    )
+    data = data.join(prior_year_data, on='Location_abbr')
     data['Value'] = (
         (data['Death_count'] - data['Prior_death_count'])
         / data['Prior_death_count']
@@ -98,8 +94,29 @@ def _check_year_for_percent_change(year, prior_year):
         raise ValueError(message)
 
 
-def _normalize_by_population(data):
-    return data
+def _normalize_map_data(data, month, year):
+    """Normalize by population the death counts for the map plot.
+
+    Args:
+        data:  map data fetched from the database, containing columns
+            Location_abbr, Location, and Death_count.  The death counts in this
+            table correspond to the period specified by arguments month, year.
+        month:  the month previously used to filter the data
+        year:  the year previously used to filter the data
+
+    Returns:
+        Dataframe returned with columns Location, Location_abbr, Value.  The
+        Value column gives the number of deaths per UNIT_POPULATION.
+    """
+    population_data = (
+        get_map_plot_populations(month, year)
+        .set_index('Location_abbr')
+    )
+    data = data.join(population_data, on='Location_abbr')
+    data['Value'] = (
+        data['Death_count'] * UNIT_POPULATION / data['Population']
+    )
+    return data.drop(columns=['Death_count', 'Population'])
 
 
 def get_processed_time_data(param_dict):

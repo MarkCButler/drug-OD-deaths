@@ -6,18 +6,18 @@ hide those details from other modules.
 
 The data model exposed to other modules by the current module consists of the
 following tables:
-- table of OD deaths, with columns Location, Location_abbr, Year, Month,
-    Indicator, Death_count, OD_type.  The OD_type column is a calculated column
-    that groups together different values of Indicator for the purpose of
+- table of OD deaths containing columns Location, Location_abbr, Year, Month,
+    Indicator, Death_count, and OD_type.  The OD_type column is a calculated
+    column that groups together different values of Indicator for the purpose of
     placing OD deaths in relatively simple categories.  The Location column
     gives the full name of a location, while Location_abbr gives an abbreviation
     for the location.
- - table of locations, with columns Abbr, Name.
-- table of interpolated population data, with columns Location_abbr, Year,
-    Month, Population.
-- raw population data, with a Location column and a set of columns corresponding
-    to distinct years.  This table is exposed solely for the purpose of showing
-    the raw data used as input by the app.
+- table of locations containing columns Abbr and Name
+- table of interpolated population data containing columns Location_abbr, Year,
+    Month, and Population
+- raw population data containing a Location column and a set of columns
+    corresponding to distinct years.  This table is exposed solely for the
+    purpose of showing the raw data used as input by the app.
 
 Note that this data model is different from the schema used by the database.
 
@@ -58,8 +58,6 @@ QUERY_STRINGS = {
         FROM locations;""",
     'map_plot_death_counts': """
         SELECT death_counts.Location_abbr,
-               death_counts.Year,
-               death_counts.Month,
                death_counts.Death_count
         FROM death_counts
                INNER JOIN (SELECT Indicator, OD_type
@@ -79,7 +77,7 @@ QUERY_STRINGS = {
     # Note that the parameter :od_types in the next entry will be
     # programmatically replaced by a series of the form
     #
-    # :od_type_0, :od_type_0, ...
+    # :od_type_0, :od_type_1, ...
     #
     # This is needed because sqlite3 does not support binding a series as a
     # parameter.
@@ -144,6 +142,9 @@ def get_map_plot_death_counts(month, year, add_location_names):
     """Return a table giving the number of OD deaths per state in a given
     period.
 
+    Data from the table of OD deaths is returned, with OD_type='all_od_deaths'
+    and with Month and Year equal to the corresponding function arguments.
+
     Args:
         month: month (full name) used in filtering the data
         year: year (4-digit integer) used in filtering the data
@@ -151,13 +152,9 @@ def get_map_plot_death_counts(month, year, add_location_names):
             names should be included in the table.  If add_location_names=False,
             the returned table has column Location_abbr but not column Location.
 
-    Data from the table of OD deaths is returned, with OD_type='all_od_deaths'
-    and with Month and Year given by the function arguments.
-
-    The returned table has columns Location_abbr, Location (if argument
-    add_location_names=True), Year, Month, Death_count.  The Indicator and
-    OD_type columns of the table of OD deaths documented in the module docstring
-    are not returned.
+    Returns:
+        Table with columns Location_abbr, Location (if argument
+        add_location_names=True), and Death_count
     """
     data = _perform_query(
         query=text(QUERY_STRINGS['map_plot_death_counts']),
@@ -189,17 +186,16 @@ def get_time_plot_death_counts(location_abbr, od_types):
     """Return a table giving the number of OD deaths in a given location as a
     function of time.
 
+    Data from the table of OD deaths is returned, with Location_abbr equal to
+    the argument location_abbr, and with the data filtered so that OD_type
+    includes only the value(s) given by argument od_types.
+
     Args:
         location_abbr: location abbreviation used in filtering the data
         od_types: string or list of strings used in filtering the data
 
-    Data from the table of OD deaths is returned, with Location_abbr given by
-    the argument location_abbr, and with the data filtered so that OD_type
-    includes only the value(s) given by argument od_types.
-
-    The returned table has columns Location_abbr, Year, Month, Death_count,
-    OD_type.  The Indicator and Location columns of the table of OD deaths
-    documented in the module docstring are not returned.
+    Returns:
+        Table with columns Year, Month, Death_count, and OD_type.
     """
     query, params = _get_time_query_and_params(location_abbr, od_types)
     return _perform_query(query=query, params=params)
@@ -240,7 +236,7 @@ def get_time_plot_populations(location_abbr):
         location_abbr: location abbreviation used in filtering the data
 
     Returns:
-        Table with columns Year, Month, Population
+        Table with columns Year, Month, and Population
     """
     return _perform_query(
         query=text(QUERY_STRINGS['time_plot_populations']),
@@ -321,7 +317,7 @@ def _add_location_names(data):
         get_location_table()
         .rename(columns={'Name': 'Location'})
     )
-    return data.join(state_names, on='Location_abbr')
+    return data.join(state_names, on='Location_abbr', how='inner')
 
 
 def get_location_table():
