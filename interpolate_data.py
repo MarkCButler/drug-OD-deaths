@@ -22,8 +22,9 @@ def interpolate_population_data(data):
             through '2019'.  This is essentially the raw data loaded from the
             .csv file, but with the State column of the .csv file replaced by
             location abbreviations.
+
     Returns:
-        Dataframe with columns Location_abbr, Year, Month, Population.
+        Dataframe with columns Location_abbr, Year, Month, and Population
     """
     interpolation_dates = get_interpolation_dates()
     interpolated_data = create_interpolation_dataframe(interpolation_dates)

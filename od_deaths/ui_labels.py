@@ -335,8 +335,9 @@ def get_map_plot_statistic_options(param_dict):
             query_parameters.parse_plot_params.  The dictionary should include
             the same keys as MAP_PLOT_PARAM_NAMES, which is defined in the
             current module.
+
     Returns:
-        List of strings, each corresponding to an option value.
+        List of strings, each corresponding to an option value
     """
     if param_dict['period'] == FIRST_TIME_PERIOD:
         statistic_labels = STATISTIC_LABELS.copy()
@@ -355,8 +356,9 @@ def get_map_plot_period_options(param_dict):
             query_parameters.parse_plot_params.  The dictionary should include
             the same keys as MAP_PLOT_PARAM_NAMES, which is defined in the
             current module.
+
     Returns:
-        List of strings, each corresponding to an option value.
+        List of strings, each corresponding to an option value
     """
     if param_dict['statistic'] == 'percent_change':
         time_periods = TIME_PERIODS.copy()
@@ -375,8 +377,9 @@ def get_time_plot_od_type_options(param_dict):
             query_parameters.parse_plot_params.  The dictionary should include
             the same keys as TIME_PLOT_PARAM_NAMES, which is defined in the
             current module.
+
     Returns:
-        List of strings, each corresponding to an option value.
+        List of strings, each corresponding to an option value
     """
     unordered_options = get_od_types_for_location(param_dict['location'])
     # Order the options based on the order of keys in OD_TYPE_LABELS.

@@ -20,7 +20,7 @@ def map_plot_statistic_options():
 
     Returns:
         List of strings, each corresponding to the value of an HTML option
-        element.
+        element
     """
     params = parse_plot_params(MAP_PLOT_PARAM_NAMES)
     return get_map_plot_statistic_options(params)
@@ -36,7 +36,7 @@ def map_plot_period_options():
 
     Returns:
         List of strings, each corresponding to the value of an HTML option
-        element.
+        element
     """
     params = parse_plot_params(MAP_PLOT_PARAM_NAMES)
     return get_map_plot_period_options(params)
@@ -52,7 +52,7 @@ def time_plot_od_type_options():
 
     Returns:
         List of strings, each corresponding to the value of an HTML option
-        element.
+        element
     """
     params = parse_plot_params(TIME_PLOT_PARAM_NAMES)
     return get_time_plot_od_type_options(params)
