@@ -9,138 +9,64 @@ import plotly.utils as plotly_utils
 from .processing import get_processed_map_data, get_processed_time_data
 from .query_parameters import parse_plot_params
 from .ui_labels import (
-    COLORBAR_TITLES, COLORBAR_TICKFORMATS, MAP_HOVERTEMPLATES,
+    COLORBAR_RANGES, COLORBAR_TITLES, COLORBAR_TICKFORMATS, MAP_HOVERTEMPLATES,
     MAP_PLOT_PARAM_NAMES, TIME_PLOT_PARAM_NAMES
 )
 
 plot_views = Blueprint('plots', __name__, url_prefix='/plots')
 
-# Generate dummy data for testing the design of the map.
-# TODO: delete the code for generating dummy data.
-from numpy.random import default_rng
-import pandas as pd
-states = {
-    'AK': 'Alaska',
-    'AL': 'Alabama',
-    'AR': 'Arkansas',
-    'AZ': 'Arizona',
-    'CA': 'California',
-    'CO': 'Colorado',
-    'CT': 'Connecticut',
-    'DC': 'District of Columbia',
-    'DE': 'Delaware',
-    'FL': 'Florida',
-    'GA': 'Georgia',
-    'HI': 'Hawaii',
-    'IA': 'Iowa',
-    'ID': 'Idaho',
-    'IL': 'Illinois',
-    'IN': 'Indiana',
-    'KS': 'Kansas',
-    'KY': 'Kentucky',
-    'LA': 'Louisiana',
-    'MA': 'Massachusetts',
-    'MD': 'Maryland',
-    'ME': 'Maine',
-    'MI': 'Michigan',
-    'MN': 'Minnesota',
-    'MO': 'Missouri',
-    'MS': 'Mississippi',
-    'MT': 'Montana',
-    'NC': 'North Carolina',
-    'ND': 'North Dakota',
-    'NE': 'Nebraska',
-    'NH': 'New Hampshire',
-    'NJ': 'New Jersey',
-    'NM': 'New Mexico',
-    'NV': 'Nevada',
-    'NY': 'New York',
-    'OH': 'Ohio',
-    'OK': 'Oklahoma',
-    'OR': 'Oregon',
-    'PA': 'Pennsylvania',
-    'RI': 'Rhode Island',
-    'SC': 'South Carolina',
-    'SD': 'South Dakota',
-    'TN': 'Tennessee',
-    'TX': 'Texas',
-    'UT': 'Utah',
-    'VA': 'Virginia',
-    'VT': 'Vermont',
-    'WA': 'Washington',
-    'WI': 'Wisconsin',
-    'WV': 'West Virginia',
-    'WY': 'Wyoming'
-}
-state_columns = list(zip(*states.items()))
-
-
-# Given a choice of statistic, the colorbar range is set to the max and min
-# values of that statistic for the dataset.  The colorbar range remains
-# fixed when the selected year changes.
-colorbar_ranges = {}
-
 
 @plot_views.route('/map')
 def get_map_plot():
     """Parse query parameters sent with the request and return the Plotly JSON
-    for the requested plot of US distribution.
+    for the requested plot showing the distribution of OD deaths by state.
+
+    A query parameter determines whether the plot shows total death counts,
+    death counts per unit population, or percent change in death count within
+    the past year.
     """
-    response_json = _get_map_plot_json()
-    return _make_plot_response(response_json)
-
-
-def _get_map_plot_json():
     params = parse_plot_params(MAP_PLOT_PARAM_NAMES)
     data = get_processed_map_data(params)
+    fig = generate_map_plot(data, params)
+    return _make_plot_response(fig)
 
-    # Dummy value, will be an input passed to the function that plots the map.
-    statistic_label = 'normalized_death_count'
-    # TODO: Add query that gets the absolute maximum and minimum for the
-    #   statistic_label and then stores them (e.g., as a function property).  If
-    #   the values have already been fetched for the current statistic, then use
-    #   the stored values.
 
-    # if statistic_label not in colorbar_ranges:
-    #     colorbar_ranges[statistic_label] = _get_range(statistic_label)
+def generate_map_plot(data, param_dict):
+    """Generate a dictionary with instructions that can be used by the Plotly
+    library to create a choropleth plot showing the distribution of OD deaths by
+    state.
 
-    # TODO: delete this temporary kluge once the above query and range storage
-    #   has been implemented.
-    colorbar_ranges = {
-        'death_count': (55, 5959),
-        'normalized_death_count': (5.9, 55.4),
-        'percent_change': (-.333, .573)
-    }
+    Args:
+        data:  dataframe of processed data with columns Location, Location_abbr,
+            and Value
+        param_dict:  dictionary of query parameters in the format returned by
+            query_parameters.parse_plot_params.  The dictionary should have two
+            keys: 'statistic' and 'period'.
 
-    colorbar_range = colorbar_ranges[statistic_label]
+    Returns:
+        Dictionary that can be converted to Plotly JSON that describes the map
+        plot
+    """
+    statistic = param_dict['statistic']
+    colorbar_range = COLORBAR_RANGES[statistic]
 
-    # Generate dummy data for testing the design of the map.
-    # TODO: delete the code for generating dummy data.
-    rng = default_rng()
-    values = rng.uniform(*colorbar_range, 51)
-    data_dict = {'state_abb': state_columns[0],
-                 'state_names': state_columns[1],
-                 'values': values}
-    data = pd.DataFrame(data_dict)
-
-    # Test the design of the map.
     fig = px.choropleth(
         data_frame=data,
-        locations='state_abb',
-        color='values',
+        locations='Location_abbr',
+        color='Value',
         locationmode='USA-states'
     )
     fig.update_traces(
-        text=data['state_names'],
-        hovertemplate=MAP_HOVERTEMPLATES[statistic_label],
+        text=data['Location'],
+        hovertemplate=MAP_HOVERTEMPLATES[statistic],
         zmin=colorbar_range[0],
         zmax=colorbar_range[1]
     )
-    _set_map_layout(fig, statistic_label)
+    _set_map_layout(fig, statistic)
     return fig
 
 
-def _set_map_layout(fig, statistic_label):
+def _set_map_layout(fig, statistic):
     annotations = [{
         'text': 'Hover over states to see details',
         'xref': 'paper',
@@ -154,9 +80,9 @@ def _set_map_layout(fig, statistic_label):
     }]
     coloraxis = {
         'colorbar': {
-            'tickformat': COLORBAR_TICKFORMATS[statistic_label],
+            'tickformat': COLORBAR_TICKFORMATS[statistic],
             'title': {
-                'text': COLORBAR_TITLES[statistic_label]
+                'text': COLORBAR_TITLES[statistic]
             }
         },
         'colorscale': 'RdBu',
@@ -192,13 +118,13 @@ def get_time_plot():
     """Parse query parameters sent with the request and return the Plotly JSON
     for the requested plot of time development.
     """
-    response_json = _get_time_plot_json()
-    return _make_plot_response(response_json)
-
-
-def _get_time_plot_json():
     params = parse_plot_params(TIME_PLOT_PARAM_NAMES)
     data = get_processed_time_data(params)
+    fig = generate_time_plot(data, params)
+    return _make_plot_response(fig)
+
+
+def generate_time_plot(data, param_dict):
 
     # Generate dummy data for testing the design of the map.
     # TODO: delete the code for generating dummy data
