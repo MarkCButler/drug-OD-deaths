@@ -35,17 +35,17 @@ def get_processed_map_data(param_dict):
     data = process_map_data(data, statistic=param_dict['statistic'],
                             month=period.month, year=period.year)
     current_app.logger.info('\n\n\n' + data.head().to_string() + '\n\n\n')
-    current_app.logger.info('\n\n\n' + str(data.columns) + '\n\n\n')
     return data
 
 
 def process_map_data(data, statistic, month, year):
-    """Process the data fetched from the database as needed for a plot requested
-    by the front end.
+    """Process the data fetched from the database as needed for a map plot
+    requested by the front end.
 
     Args:
-        data:  map data fetched from the database, containing columns
-            Location_abbr, Location, Death_count
+        data:  map data fetched from the database containing columns
+            Location_abbr, Location, Death_count.  The death counts in this
+            table correspond to the period specified by arguments month, year.
         statistic:  the statistic that should be displayed in the plot (one of
             the strings 'death_count', 'normalized_death_count', or
             'percent_change')
@@ -53,10 +53,14 @@ def process_map_data(data, statistic, month, year):
         year:  the year previously used to filter the data
 
     Returns:
-        Dataframe returned with columns Location, Location_abbr, Value
+        Dataframe with columns Location, Location_abbr, and Value.  The
+        statistic argument to the function determines what data is present in
+        the Value column.  For example, if the argument is
+        normalized_death_count, the Value column gives the number of deaths per
+        UNIT_POPULATION.
     """
     if statistic == 'percent_change':
-        return _process_map_percent_change(data, month, year)
+        return _find_percent_change_map_data(data, month, year)
     if statistic == 'normalized_death_count':
         return _normalize_map_data(data, month, year)
     if statistic == 'death_count':
@@ -67,7 +71,7 @@ def process_map_data(data, statistic, month, year):
     raise ValueError(message)
 
 
-def _process_map_percent_change(data, month, year):
+def _find_percent_change_map_data(data, month, year):
     prior_year = year - 1
     _check_year_for_percent_change(year, prior_year)
     prior_year_data = (
@@ -76,7 +80,7 @@ def _process_map_percent_change(data, month, year):
         .set_index('Location_abbr')
         .rename(columns={'Death_count': 'Prior_death_count'})
     )
-    data = data.join(prior_year_data, on='Location_abbr')
+    data = data.join(prior_year_data, on='Location_abbr', how='inner')
     data['Value'] = (
         (data['Death_count'] - data['Prior_death_count'])
         / data['Prior_death_count']
@@ -105,14 +109,14 @@ def _normalize_map_data(data, month, year):
         year:  the year previously used to filter the data
 
     Returns:
-        Dataframe returned with columns Location, Location_abbr, Value.  The
-        Value column gives the number of deaths per UNIT_POPULATION.
+        Dataframe with columns Location, Location_abbr, and Value.  The Value
+        column gives the number of deaths per UNIT_POPULATION.
     """
     population_data = (
         get_map_plot_populations(month, year)
         .set_index('Location_abbr')
     )
-    data = data.join(population_data, on='Location_abbr')
+    data = data.join(population_data, on='Location_abbr', how='inner')
     data['Value'] = (
         data['Death_count'] * UNIT_POPULATION / data['Population']
     )
@@ -143,8 +147,83 @@ def get_processed_time_data(param_dict):
         location_abbr=param_dict['location'],
         od_types=param_dict['od_type'],
     )
-    return process_time_data(data, statistic=param_dict['statistic'])
-
-
-def process_time_data(data, statistic):
+    data = process_time_data(data, statistic=param_dict['statistic'],
+                             location_abbr=param_dict['location'])
+    current_app.logger.info('\n\n\n' + data.head().to_string() + '\n\n\n')
     return data
+
+
+def process_time_data(data, statistic, location_abbr):
+    """Process the data fetched from the database as needed for a
+    time-development plot requested by the front end.
+
+    Args:
+        data:  time-development data fetched from the database containing
+            columns Year, Month, Death_count, and OD_type.  The death counts in
+            this table correspond to the location specified by argument
+            location_abbr.
+        statistic:  the statistic that should be displayed in the plot (one of
+            the strings 'death_count', 'normalized_death_count', or
+            'percent_change')
+        location_abbr: location abbreviation previously used to filter the data
+
+    Returns:
+        Dataframe with columns Year, Month, OD_type, and Value.  The statistic
+        argument to the function determines what data is present in the Value
+        column.  For example, if the argument is normalized_death_count, the
+        Value column gives the number of deaths per UNIT_POPULATION.
+    """
+    if statistic == 'percent_change':
+        return _find_percent_change_time_data(data)
+    if statistic == 'normalized_death_count':
+        return _normalize_time_data(data, location_abbr)
+    if statistic == 'death_count':
+        return data.rename(columns={'Death_count': 'Value'})
+
+    message = ('Unable to process map data because the requested statistic '
+               f'"{statistic}" is not recognized.')
+    raise ValueError(message)
+
+
+def _find_percent_change_time_data(data):
+    # Create a modified copy of the data and then do a self join.  The modified
+    # copy intentionally has the values in the Year column incremented by 1,
+    # with the result that the death count corresponds to (year-1), where year
+    # is the value of the incremented Year column.
+    prior_year_data = (
+        data.assign(Year=data['Year'] + 1)
+        .set_index(['Year', 'Month', 'OD_type'])
+        .rename(columns={'Death_count': 'Prior_death_count'})
+    )
+    data = data.join(prior_year_data, on=['Year', 'Month', 'OD_type'],
+                     how='inner')
+    data['Value'] = (
+            (data['Death_count'] - data['Prior_death_count'])
+            / data['Prior_death_count']
+    )
+    return data.drop(columns=['Death_count', 'Prior_death_count'])
+
+
+def _normalize_time_data(data, location_abbr):
+    """Normalize by population the death counts for the time-development plot.
+
+    Args:
+        data:  time-development data fetched from the database containing
+            columns Year, Month, Death_count, and OD_type.  The death counts in
+            this table correspond to the location specified by argument
+            location_abbr.
+        location_abbr: location abbreviation previously used to filter the data
+
+    Returns:
+        Dataframe with columns Year, Month, OD_type, and Value.  The Value
+        column gives the number of deaths per UNIT_POPULATION.
+    """
+    population_data = (
+        get_time_plot_populations(location_abbr)
+        .set_index(['Year', 'Month'])
+    )
+    data = data.join(population_data, on=['Year', 'Month'], how='inner')
+    data['Value'] = (
+            data['Death_count'] * UNIT_POPULATION / data['Population']
+    )
+    return data.drop(columns=['Death_count', 'Population'])
