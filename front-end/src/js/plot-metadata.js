@@ -44,7 +44,7 @@ export const plotMetadata = [
         controlId: 'select-map-plot-statistic',
         selectize: false,
         optionsUpdate: {
-          url: '/control-options/map-plot-statistic',
+          url: '/form-options/map-plot-statistic',
           triggeringElementIds: ['select-map-plot-period']
         }
       },
@@ -52,7 +52,7 @@ export const plotMetadata = [
         controlId: 'select-map-plot-period',
         selectize: false,
         optionsUpdate: {
-          url: '/control-options/map-plot-period',
+          url: '/form-options/map-plot-period',
           triggeringElementIds: ['select-map-plot-statistic']
         }
       }
@@ -96,7 +96,7 @@ export const plotMetadata = [
         controlId: 'select-time-plot-od-type',
         selectize: true,
         optionsUpdate: {
-          url: '/control-options/time-plot-od-type',
+          url: '/form-options/time-plot-od-type',
           triggeringElementIds: ['select-time-plot-location']
         }
       }

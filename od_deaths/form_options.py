@@ -7,7 +7,7 @@ from .ui_labels import (
     get_time_plot_od_type_options, MAP_PLOT_PARAM_NAMES, TIME_PLOT_PARAM_NAMES
 )
 
-option_views = Blueprint('options', __name__, url_prefix='/control-options')
+option_views = Blueprint('options', __name__, url_prefix='/form-options')
 
 
 @option_views.route('map-plot-statistic')
