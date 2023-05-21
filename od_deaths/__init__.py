@@ -3,8 +3,8 @@ from pathlib import Path
 
 from flask import Flask, render_template
 
-from .control_options import option_views
 from .database import initialize_database
+from .form_options import option_views
 from .html_headings import heading_views
 from .html_tables import table_views
 from .plots import plot_views
