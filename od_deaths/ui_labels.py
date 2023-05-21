@@ -20,9 +20,9 @@ values found in the column OD_type in the table of OD deaths.
 
 There is also a dependency between the keys in some dictionaries defined here
 and the processing module in the current package.  Requests by the front end for
-plot data include parameter name-value pairs defined by constants in the current
-module.  The back-end functions that process data to fulfill these requests need
-to "understand" keys such as 'death_count', 'normalized_death_count', and
+plot data include query parameters defined by constants in the current module.
+The back-end functions that process data to fulfill these requests need to
+"understand" keys such as 'death_count', 'normalized_death_count', and
 'percent_change' (see STATISTIC_LABELS below) in order to determine how data
 should be processed.
 """
@@ -30,11 +30,48 @@ from collections import namedtuple
 
 import pandas as pd
 
-from .database import (DATASET_START_YEAR, DATASET_END_YEAR,
-                       get_od_types_for_location, get_location_table)
+from .database import (
+    DATASET_START_YEAR, DATASET_END_YEAR, execute_initialization_query,
+    get_od_types_for_location, get_location_table
+)
 
 # Used in setting option tags in the HTML template.
 SelectOption = namedtuple('SelectOption', ['value', 'text'])
+
+
+def initialize_ui_labels(app):
+    """Initialize constants in the current module whose definition requires a
+    database query.
+
+    Note that this function should be executed during app initialization, but
+    only after the database engine has been initialized by means of the function
+    initialize_database in database.py.
+    """
+    global ORDERED_LOCATIONS                  # pylint: disable=global-statement
+    if ORDERED_LOCATIONS is None:
+        ORDERED_LOCATIONS = generate_ordered_locations(app)
+
+
+def generate_ordered_locations(app):
+    """Generate a table of ordered locations for which data is available.
+
+    The module-level constant ORDERED_LOCATIONS is initialized to be a dataframe
+    with the following index and column:
+      - index (named 'Abbr') giving the abbreviation used for each location
+      - column 'Name' giving the full name of each location
+
+    The table of locations exposed by the database module is first retrieved.
+    Rows are then ordered alphabetically based on the full name of the location
+    (which will appear in the UI), and the row corresponding to the US is moved
+    to the top of the table.
+    """
+    data = (
+        execute_initialization_query(app, get_location_table)
+        .sort_values(by='Name')
+    )
+    reordered_index = data.index.drop('US').insert(0, 'US')
+    return data.reindex(reordered_index)
+
 
 ################################################################################
 # Categories of OD death
@@ -158,35 +195,11 @@ def get_statistic_types():
 ################################################################################
 # The constant ORDERED_LOCATIONS is used within the functions get_locations and
 # get_location_names.  We must interact with the database in order to define
-# this global variable, and currently this is only supported within an app
-# context.  So ORDERED_LOCATIONS is initially defined to be None, and it is
-# defined on the fly when needed by an instance of the app.  The function
-# generate_ordered_locations is used to initialize ORDERED_LOCATIONS.
+# this constant, and the app only supports doing this within an application
+# context.  So ORDERED_LOCATIONS is defined below to be None, and it is
+# re-defined during app initialization by the function
+# generate_ordered_locations.
 ORDERED_LOCATIONS = None
-
-
-def generate_ordered_locations():
-    """Generate a table of ordered locations for which data is available.
-
-    The module-level global variable ORDERED_LOCATIONS is initialized to be a
-    dataframe with the following index and column:
-      - index (named 'Abbr') giving the abbreviation used for each location
-      - column 'Name' giving the full name of each location
-
-    The table of locations exposed by the database module is first retrieved.
-    Rows are then ordered alphabetically based on the full name of the location
-    (which will appear in the UI), and the row corresponding to the US is moved
-    to the top of the table.
-    """
-    data = get_location_table().sort_values(by='Name')
-    reordered_index = data.index.drop('US').insert(0, 'US')
-    return data.reindex(reordered_index)
-
-
-def _ensure_location_definitions():
-    global ORDERED_LOCATIONS                  # pylint: disable=global-statement
-    if ORDERED_LOCATIONS is None:
-        ORDERED_LOCATIONS = generate_ordered_locations()
 
 
 def get_locations():
@@ -196,7 +209,6 @@ def get_locations():
     The values are abbreviations used internally to identify locations, while
     the corresponding text is displayed in the UI.
     """
-    _ensure_location_definitions()
     return [SelectOption(value=row.Index, text=row.Name)
             for row in ORDERED_LOCATIONS.itertuples()]
 
@@ -205,7 +217,6 @@ def get_location_names():
     """Return a list of full names of the locations for which data is
     available.
     """
-    _ensure_location_definitions()
     return list(ORDERED_LOCATIONS['Name'])
 
 

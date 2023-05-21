@@ -14,7 +14,9 @@ following tables:
     for the location.
 - table of locations containing columns Abbr and Name
 - table of interpolated population data containing columns Location_abbr, Year,
-    Month, and Population
+    Month, and Population.  (Linear interpolation is used to give monthly
+    populations estimates, starting from yearly population estimates from
+    www.census.gov.)
 - raw population data containing a Location column and a set of columns
     corresponding to distinct years.  This table is exposed solely for the
     purpose of showing the raw data used as input by the app.
@@ -106,7 +108,7 @@ QUERY_STRINGS = {
 }
 
 
-def init_app(app):
+def initialize_database(app):
     """Initialize the current app instance for use with sqlalchemy."""
     url = 'sqlite:///' + str(app.config['DATABASE_PATH'])
     # Each instance of the app gets its own SQLAlchemy engine.
@@ -136,6 +138,35 @@ def close_database_connection(ex=None):        # pylint: disable=unused-argument
     conn = g.pop('database_connection', None)
     if conn is not None:
         conn.close()
+
+
+def execute_initialization_query(app, query_function, **kwargs):
+    """Execute a database query during app initialization.
+
+    Database queries defined in the current module use the functions
+    get_database_connection and close_database_connection to manage the database
+    connection.  These functions require an application context to be defined.
+    An application context is defined automatically by flask during a request,
+    but in order to perform a database query outside a request, an application
+    context must be manually created.
+
+    The current function creates an application context, then executes the
+    function given by argument query_function, and then closes the application
+    context.
+
+    Args:
+        app:  instance of the application
+        query_function:  any of the API functions defined in the current module
+            that performs a database query.  The corresponding query is
+            performed, and the results are returned.
+        kwargs:  dictionary of keyword arguments to pass when calling the
+            function given by argument query_function
+
+    Returns:
+        Dataframe containing the query results returned by the database
+    """
+    with app.app_context():
+        return query_function(**kwargs)
 
 
 def get_map_plot_death_counts(month, year, add_location_names):
@@ -300,7 +331,7 @@ def _perform_query(query, params=None):
     Args:
         query:  sqlalchemy.sql.expression.TextClause object representing the SQL
             query
-        params:  dictionary of parameters to be bound to the query
+        params:  dictionary of parameters to bind to the query
     """
     conn = get_database_connection()
     return read_sql_query(query, conn, params=params)
