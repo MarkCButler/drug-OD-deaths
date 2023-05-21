@@ -81,12 +81,16 @@ def get_od_code_table():
 
 
 ################################################################################
-# Statistics used to describe OD deaths
+# The unit used to normalize death count
 ################################################################################
-# The unit used to normalize death count.
 UNIT_POPULATION = 1e5
 UNIT_POPULATION_LABEL = format(int(UNIT_POPULATION), ',')
 
+
+################################################################################
+# Labels / formatting that depend on the statistic used to characterize
+# OD deaths
+################################################################################
 STATISTIC_LABELS = {
     'death_count': 'Number of deaths',
     'normalized_death_count': f'Deaths per {UNIT_POPULATION_LABEL} people',
