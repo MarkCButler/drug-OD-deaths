@@ -7,10 +7,7 @@ from .database import (
     DATASET_START_YEAR, get_map_plot_death_counts, get_map_plot_populations,
     get_time_plot_death_counts, get_time_plot_populations
 )
-from .ui_labels import get_month_and_year
-
-# The unit used to normalize death count.
-UNIT_POPULATION = 1e5
+from .ui_labels import get_month_and_year, UNIT_POPULATION
 
 
 def get_processed_map_data(param_dict):

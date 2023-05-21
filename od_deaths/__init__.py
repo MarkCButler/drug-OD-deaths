@@ -11,7 +11,8 @@ from .tables import table_views
 from .template_data import URLS
 from .ui_labels import (
     get_locations, get_od_types, get_preset_plot_params, get_statistic_types,
-    get_time_periods, MAP_PLOT_PARAM_NAMES, TIME_PLOT_PARAM_NAMES
+    get_time_periods, MAP_PLOT_PARAM_NAMES, TIME_PLOT_PARAM_NAMES,
+    UNIT_POPULATION_LABEL
 )
 
 template_kwargs = {
@@ -19,6 +20,7 @@ template_kwargs = {
     'statistic_types': get_statistic_types(),
     'time_periods': get_time_periods(),
     'urls': URLS,
+    'unit_population': UNIT_POPULATION_LABEL,
     'map_plot_param_names': MAP_PLOT_PARAM_NAMES,
     'time_plot_param_names': TIME_PLOT_PARAM_NAMES,
     'plot_params': get_preset_plot_params()

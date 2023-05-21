@@ -117,7 +117,8 @@
                   </div>
                   <h2 class="h4 mb-3">Regional distribution in 2017</h2>
                   <h3 class="h5 mb-3">
-                    Number of drug-overdose deaths per 100,000 people
+                    Number of drug-overdose deaths per {{ unit_population }}
+                    people
                   </h3>
                   <div
                     class="od-deaths-plot" id="distribution"
@@ -438,9 +439,10 @@
                       the US Census Bureau.
                     </li>
                     <li class="mb-2">
-                      For plots showing number of deaths per 100,000 population,
-                      linear interpolation is used to obtain population
-                      estimates that do not have an abrupt change in July.
+                      For plots showing number of deaths per
+                      {{ unit_population }} population, linear interpolation is
+                      used to obtain population estimates that do not have an
+                      abrupt change in July.
                     </li>
                     <li class="mb-2">
                       Additional information regarding the annual population

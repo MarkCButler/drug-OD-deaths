@@ -19,10 +19,10 @@ module.  For instance, the keys used below in OD_TYPE_LABELS correspond to
 values found in the column OD_type in the table of OD deaths.
 
 There is also a dependency between the keys in some dictionaries defined here
-and the module processed_data.  Requests by the front end for plot data include
-parameter name-value pairs defined by constants in the current module.  The
-back-end functions that process data to fulfill these requests need to
-"understand" keys such as 'death_count', 'normalized_death_count', and
+and the processing module in the current package.  Requests by the front end for
+plot data include parameter name-value pairs defined by constants in the current
+module.  The back-end functions that process data to fulfill these requests need
+to "understand" keys such as 'death_count', 'normalized_death_count', and
 'percent_change' (see STATISTIC_LABELS below) in order to determine how data
 should be processed.
 """
@@ -83,9 +83,13 @@ def get_od_code_table():
 ################################################################################
 # Statistics used to describe OD deaths
 ################################################################################
+# The unit used to normalize death count.
+UNIT_POPULATION = 1e5
+UNIT_POPULATION_LABEL = format(int(UNIT_POPULATION), ',')
+
 STATISTIC_LABELS = {
     'death_count': 'Number of deaths',
-    'normalized_death_count': 'Deaths per 100,000 people',
+    'normalized_death_count': f'Deaths per {UNIT_POPULATION_LABEL} people',
     'percent_change': 'Percent change in one year'
 }
 
@@ -96,10 +100,10 @@ MAP_HOVERTEMPLATES = {
     'percent_change': '%{z:.2p}<br>%{text}<extra></extra>'
 }
 
-# Labels and formatting for the map colorbar
+# Labels, formatting, and range for the map colorbar
 COLORBAR_TITLES = {
     'death_count': 'Number of deaths',
-    'normalized_death_count': 'Deaths per<br>100,000 people',
+    'normalized_death_count': f'Deaths per<br>{UNIT_POPULATION_LABEL} people',
     'percent_change': 'Percent change<br>in one year'
 }
 COLORBAR_TICKFORMATS = {
@@ -107,19 +111,28 @@ COLORBAR_TICKFORMATS = {
     'normalized_death_count': '.0f',
     'percent_change': '.0%'
 }
+# For each statistic, the colorbar range is set to the max and min values of
+# that statistic for the dataset.  The colorbar range remains fixed regardless
+# of which period is selected for the map plot.
+# TODO:  Add SQL query to obtain these ranges during app initialization.
+COLORBAR_RANGES = {
+    'death_count': (55, 5959),
+    'normalized_death_count': (5.9, 55.4),
+    'percent_change': (-.333, .573)
+}
 
 MAP_PLOT_HEADINGS = {
     'death_count': 'Number of drug-overdose deaths',
     'normalized_death_count': ('Number of drug-overdose deaths '
-                               'per 100,000 people'),
+                               f'per {UNIT_POPULATION_LABEL} people'),
     'percent_change': 'Percent change in drug-overdose deaths'
 }
 
 
 TIME_PLOT_HEADINGS = {
     'death_count': 'Number of deaths, preceding 12-month period',
-    'normalized_death_count': ('Number of deaths per 100,000 people, '
-                               'preceding 12-month period'),
+    'normalized_death_count': (f'Number of deaths per {UNIT_POPULATION_LABEL} '
+                               'people, preceding 12-month period'),
     'percent_change': ('Percent change in drug-overdose deaths, '
                        'preceding 12-month period')
 }
