@@ -1,4 +1,4 @@
-"""Views that return tables, along with supporting functions."""
+"""Views that return HTML tables, along with supporting functions."""
 from flask import Blueprint, request
 from pandas import Categorical
 

@@ -7,7 +7,7 @@ from .control_options import option_views
 from .database import initialize_database
 from .headings import heading_views
 from .plots import plot_views
-from .tables import table_views
+from .html_tables import table_views
 from .template_data import URLS
 from .ui_labels import (
     get_locations, get_od_types, get_preset_plot_params, get_statistic_types,
