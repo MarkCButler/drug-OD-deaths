@@ -3,7 +3,7 @@ from pathlib import Path
 
 from flask import Flask, render_template
 
-from .database_queries import initialize_database
+from .database_connection import initialize_connection_pool
 from .form_options import option_views
 from .html_headings import heading_views
 from .html_tables import table_views
@@ -35,7 +35,7 @@ def create_app():
         DATABASE_PATH=Path(app.root_path).parent / 'data' / 'OD-deaths.sqlite'
     )
 
-    initialize_database(app)
+    initialize_connection_pool(app)
     initialize_ui_labels(app)
     register_blueprints(
         app, [heading_views, option_views, plot_views, table_views]

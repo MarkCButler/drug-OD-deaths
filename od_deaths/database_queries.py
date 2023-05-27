@@ -26,9 +26,10 @@ Note that this data model is different from the schema used by the database.
 The tables returned by API functions of this module are in the form of pandas
 dataframes.
 """
-from flask import current_app, g
 from pandas import pivot, read_sql_query
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
+
+from .database_connection import get_database_connection
 
 # The first and last dates for which data is available in the table of OD deaths
 # are January 2015 and September 2019, respectively.
@@ -106,38 +107,6 @@ QUERY_STRINGS = {
                INNER JOIN death_counts ON death_counts.Indicator = od_types.Indicator
         WHERE death_counts.Location_abbr = :location_abbr;"""
 }
-
-
-def initialize_database(app):
-    """Initialize the current app instance for use with sqlalchemy."""
-    url = 'sqlite:///' + str(app.config['DATABASE_PATH'])
-    # Each instance of the app gets its own SQLAlchemy engine.
-    # TODO: Set the echo parameter to true automatically in development mode
-    app.config['DATABASE_ENGINE'] = create_engine(url, future=True, echo=True)
-    app.teardown_appcontext(close_database_connection)
-
-
-def get_database_connection():
-    """Return a database connection scoped to the current request."""
-    if 'database_connection' not in g:
-        engine = current_app.config['DATABASE_ENGINE']
-        g.database_connection = engine.connect()
-    return g.database_connection
-
-
-def close_database_connection(ex=None):        # pylint: disable=unused-argument
-    """Close the database connection for the current request.
-
-    When the app is created, flask.teardown_appcontext is used to register this
-    function to be called when the application context ends.
-
-    Args:
-        ex: unhandled exception, passed to the function if teardown_appcontext
-            was called because of an unhandled exception.
-    """
-    conn = g.pop('database_connection', None)
-    if conn is not None:
-        conn.close()
 
 
 def execute_initialization_query(app, query_function, **kwargs):

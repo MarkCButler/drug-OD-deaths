@@ -44,8 +44,8 @@ def initialize_ui_labels(app):
     database query.
 
     Note that this function should be executed during app initialization, but
-    only after the database engine has been initialized by means of the function
-    initialize_database in database_queries.py.
+    only after the pool of database connections has been initialized by means of
+    the function initialize_connection_pool in database_connection.py.
     """
     global ORDERED_LOCATIONS                  # pylint: disable=global-statement
     if ORDERED_LOCATIONS is None:
