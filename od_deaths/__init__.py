@@ -3,7 +3,7 @@ from pathlib import Path
 
 from flask import Flask, render_template
 
-from .database import initialize_database
+from .database_queries import initialize_database
 from .form_options import option_views
 from .html_headings import heading_views
 from .html_tables import table_views

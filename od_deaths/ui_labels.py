@@ -14,9 +14,9 @@ are delivered through a Jinja2 HTML template, which uses dictionary keys to
 select the strings rendered in the template, or in response to HTTP requests
 made by the front end.
 
-Some dictionaries defined here depend on the data model exposed by the database
-module.  For instance, the keys used below in OD_TYPE_LABELS correspond to
-values found in the column OD_type in the table of OD deaths.
+Some dictionaries defined here depend on the data model exposed by the
+database_queries module.  For instance, the keys used below in OD_TYPE_LABELS
+correspond to values found in the column OD_type in the table of OD deaths.
 
 There is also a dependency between the keys in some dictionaries defined here
 and the processing module in the current package.  Requests by the front end for
@@ -30,7 +30,7 @@ from collections import namedtuple
 
 import pandas as pd
 
-from .database import (
+from .database_queries import (
     DATASET_START_YEAR, DATASET_END_YEAR, execute_initialization_query,
     get_od_types_for_location, get_location_table
 )
@@ -45,7 +45,7 @@ def initialize_ui_labels(app):
 
     Note that this function should be executed during app initialization, but
     only after the database engine has been initialized by means of the function
-    initialize_database in database.py.
+    initialize_database in database_queries.py.
     """
     global ORDERED_LOCATIONS                  # pylint: disable=global-statement
     if ORDERED_LOCATIONS is None:
@@ -60,10 +60,10 @@ def generate_ordered_locations(app):
       - index (named 'Abbr') giving the abbreviation used for each location
       - column 'Name' giving the full name of each location
 
-    The table of locations exposed by the database module is first retrieved.
-    Rows are then ordered alphabetically based on the full name of the location
-    (which will appear in the UI), and the row corresponding to the US is moved
-    to the top of the table.
+    The table of locations exposed by the database_queries module is first
+    retrieved. Rows are then ordered alphabetically based on the full name of
+    the location (which will appear in the UI), and the row corresponding to the
+    US is moved to the top of the table.
     """
     data = (
         execute_initialization_query(app, get_location_table)

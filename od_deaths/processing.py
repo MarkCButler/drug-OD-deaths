@@ -3,7 +3,7 @@ functions.
 """
 from flask import current_app
 
-from .database import (
+from .database_queries import (
     DATASET_START_YEAR, get_map_plot_death_counts, get_map_plot_populations,
     get_time_plot_death_counts, get_time_plot_populations
 )
@@ -127,15 +127,16 @@ def get_processed_time_data(param_dict):
     The argument param_dict gives information about the query parameters used in
     requesting the plot.  The dictionary should have three keys:
       - 'location':  allowed values are given by the Abbr column of the table of
-          locations exposed by the database module in the current package. (Note
-          that a list of allowed values can be obtained programmatically from
-          the function get_locations in the module ui_labels.)
+          locations exposed by the database_queries module in the current
+          package. (Note that a list of allowed values can be obtained
+          programmatically from the function get_locations in the module
+          ui_labels.)
       -'statistic':  allowed values are 'death_count', 'normalized_death_count',
           and 'percent_change'
       - 'od_type':  a string or a list of strings, each equal to a value
           appearing in the OD_type column in the table of OD deaths exposed by
-          the database module.  (Note that the allowed values are keys in the
-          dictionary OD_TYPE_LABELS in the module ui_labels.)
+          the database_queries module.  (Note that the allowed values are keys
+          in the dictionary OD_TYPE_LABELS in the module ui_labels.)
 
     The dataframe returned by the function has columns Year, Month, OD_type, and
     Value.
