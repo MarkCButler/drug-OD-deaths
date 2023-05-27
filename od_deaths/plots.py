@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 import plotly.utils as plotly_utils
 
 from .processing import get_processed_map_data, get_processed_time_data
-from .query_parameters import parse_plot_params
+from .request_parameters import parse_plot_params
 from .ui_labels import (
     COLORBAR_RANGES, COLORBAR_TITLES, COLORBAR_TICKFORMATS, MAP_HOVERTEMPLATES,
     MAP_PLOT_PARAM_NAMES, TIME_PLOT_PARAM_NAMES
@@ -40,8 +40,8 @@ def generate_map_plot(data, param_dict):
         data:  dataframe of processed data with columns Location, Location_abbr,
             and Value
         param_dict:  dictionary of query parameters in the format returned by
-            query_parameters.parse_plot_params.  The dictionary should have two
-            keys: 'statistic' and 'period'.
+            request_parameters.parse_plot_params.  The dictionary should have
+            two keys: 'statistic' and 'period'.
 
     Returns:
         Dictionary that can be converted to Plotly JSON that describes the map
