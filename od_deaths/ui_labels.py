@@ -285,15 +285,6 @@ def get_previous_period_label(period_key):
 
 
 ################################################################################
-# Month names appearing in data tables
-################################################################################
-ORDERED_MONTHS = [
-    'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
-    'September', 'October', 'November', 'December'
-]
-
-
-################################################################################
 # HTML headings that are updated dynamically
 ################################################################################
 def get_map_plot_heading(param_dict):
