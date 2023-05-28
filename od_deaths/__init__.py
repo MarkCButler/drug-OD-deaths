@@ -4,6 +4,7 @@ from pathlib import Path
 from flask import Flask, render_template
 
 from .database_connection import initialize_connection_pool
+from .database_initialization import drop_derived_data, initialize_database
 from .form_options import option_views
 from .html_headings import heading_views
 from .html_tables import table_views
@@ -20,8 +21,8 @@ def register_blueprints(app, blueprints):
     """Register a sequence of blueprints on the app.
 
     Args:
-        app:  application on which blueprints will be registered
-        blueprints:  iterable of blueprints, each of which will be registered on
+        app:  Application on which blueprints will be registered
+        blueprints:  Iterable of blueprints, each of which will be registered on
             the application
     """
     for blueprint in blueprints:
@@ -40,6 +41,11 @@ def create_app():
     register_blueprints(
         app, [heading_views, option_views, plot_views, table_views]
     )
+
+    # CLI commands that drop/recreate the table of derived data, e.g., in
+    # connection with an update to the external data consumed by the app.
+    app.cli.add_command(drop_derived_data)
+    app.cli.add_command(initialize_database)
 
     # The function initialize_ui_labels needs to be called before the dictionary
     # template_kwargs is defined, since that function initializes the table of
