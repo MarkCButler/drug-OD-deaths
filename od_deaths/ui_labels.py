@@ -291,7 +291,7 @@ def get_map_plot_heading(param_dict):
     """Return an HTML heading dynamically selected for the map plot.
 
     Args:
-        param_dict:  dictionary of query parameters in the format returned by
+        param_dict:  Dictionary of query parameters in the format returned by
             request_parameters.parse_plot_params.  The dictionary should include
             the same keys as MAP_PLOT_PARAM_NAMES, which is defined in the
             current module.
@@ -303,7 +303,7 @@ def get_map_plot_subheading(param_dict):
     """Return an HTML subheading dynamically selected for the map plot.
 
     Args:
-        param_dict:  dictionary of query parameters in the format returned by
+        param_dict:  Dictionary of query parameters in the format returned by
             request_parameters.parse_plot_params.  The dictionary should include
             the same keys as MAP_PLOT_PARAM_NAMES, which is defined in the
             current module.
@@ -322,7 +322,7 @@ def get_time_plot_heading(param_dict):
     """Return an HTML heading dynamically selected for the time plot.
 
     Args:
-        param_dict:  dictionary of query parameters in the format returned by
+        param_dict:  Dictionary of query parameters in the format returned by
             request_parameters.parse_plot_params.  The dictionary should include
             the same keys as TIME_PLOT_PARAM_NAMES, which is defined in the
             current module.
@@ -334,7 +334,7 @@ def get_time_plot_subheading(param_dict):
     """Return an HTML subheading dynamically selected for the time plot.
 
     Args:
-        param_dict:  dictionary of query parameters in the format returned by
+        param_dict:  Dictionary of query parameters in the format returned by
             request_parameters.parse_plot_params.  The dictionary should include
             the same keys as TIME_PLOT_PARAM_NAMES, which is defined in the
             current module.
@@ -350,7 +350,7 @@ def get_map_plot_statistic_options(param_dict):
     determines which statistic is displayed on the map plot.
 
     Args:
-        param_dict:  dictionary of query parameters in the format returned by
+        param_dict:  Dictionary of query parameters in the format returned by
             request_parameters.parse_plot_params.  The dictionary should include
             the same keys as MAP_PLOT_PARAM_NAMES, which is defined in the
             current module.
@@ -371,7 +371,7 @@ def get_map_plot_period_options(param_dict):
     determines which time period is displayed on the map plot.
 
     Args:
-        param_dict:  dictionary of query parameters in the format returned by
+        param_dict:  Dictionary of query parameters in the format returned by
             request_parameters.parse_plot_params.  The dictionary should include
             the same keys as MAP_PLOT_PARAM_NAMES, which is defined in the
             current module.
@@ -392,7 +392,7 @@ def get_time_plot_od_type_options(param_dict):
     determines which type of OD death is displayed on the map plot.
 
     Args:
-        param_dict:  dictionary of query parameters in the format returned by
+        param_dict:  Dictionary of query parameters in the format returned by
             request_parameters.parse_plot_params.  The dictionary should include
             the same keys as TIME_PLOT_PARAM_NAMES, which is defined in the
             current module.
