@@ -3,8 +3,8 @@ from flask import request
 
 
 def parse_plot_params(plot_param_names):
-    """Convert query parameters into a dictionary that can be consumed by the
-    app module that processes data.
+    """Convert query parameters sent with a plot request into a dictionary that
+    can be consumed by the app module that generates the plot.
 
     The parameter names used by the front end in requesting plot data are
     replaced by simple strings that are understood by back-end modules.  For
@@ -19,9 +19,12 @@ def parse_plot_params(plot_param_names):
     in the dictionary returned by the current function.
 
     Args:
-        plot_param_names:  Dictionary (such as ui_labels.TIME_PLOT_PARAM_NAMES)
-            that has the UI parameter names as values.  The allowed keys are
-            'location', 'statistic', 'od_type', and 'period'.
+        plot_param_names:  One of the dictionaries TIME_PLOT_PARAM_NAMES,
+            MAP_PLOT_PARAM_NAMES defined in the module ui_labels.    The keys in
+            TIME_PLOT_PARAM_NAMES are 'location', 'statistic', and 'od_type',
+            while the keys in MAP_PLOT_PARAM_NAMES are 'statistic' and 'period'.
+            The corresponding values in each dictionary are parameter names used
+            by the front end in requesting plots.
 
     Returns:
         Dictionary with the same keys as the argument plot_param_names.  If the
