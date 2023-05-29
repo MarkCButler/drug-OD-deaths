@@ -33,11 +33,11 @@ SQL_STRINGS = {
         CREATE TABLE derived_data (
           Location_abbr TEXT    NOT NULL,
           Location      TEXT    NOT NULL,
-          Date          TEXT    NOT NULL,
+          Period        TEXT    NOT NULL,
           OD_type       TEXT    NOT NULL,
           Statistic     TEXT    NOT NULL,
           Value         NUMERIC NOT NULL,
-          PRIMARY KEY (Location_abbr, Date, OD_type, Statistic),
+          PRIMARY KEY (Location_abbr, Period, OD_type, Statistic),
           FOREIGN KEY (Location_abbr)
             REFERENCES locations (Abbr)
         );""",
@@ -202,7 +202,7 @@ def reformat_dates(data):
         month = ISO_MONTH_LABELS[row['Month']]
         return year + '-' + month
 
-    data['Date'] = data[['Year', 'Month']].apply(_get_iso_date_string, axis=1)
+    data['Period'] = data[['Year', 'Month']].apply(_get_iso_date_string, axis=1)
     return data.drop(columns=['Year', 'Month'])
 
 
