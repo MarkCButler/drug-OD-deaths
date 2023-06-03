@@ -199,7 +199,7 @@ def reformat_dates(data):
 
     def _get_iso_date_string(row):
         year = str(row['Year'])
-        month = ISO_MONTH_LABELS[row['Month']]
+        month = ISO_MONTH_LABELS[row['Month'].lower()]
         return year + '-' + month
 
     data['Period'] = data[['Year', 'Month']].apply(_get_iso_date_string, axis=1)

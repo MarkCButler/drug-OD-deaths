@@ -91,7 +91,7 @@ def get_timestamps(data):
     """
     def _get_timestamp(row):
         year = row['Year']
-        month_number = MONTH_NUMBERS[row['Month']]
+        month_number = MONTH_NUMBERS[row['Month'].lower()]
         return datetime(year, month_number, 1).timestamp()
 
     return data[['Year', 'Month']].apply(_get_timestamp, axis=1)
