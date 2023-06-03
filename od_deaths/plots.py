@@ -6,11 +6,11 @@ import plotly.express as px
 import plotly.graph_objects as go
 import plotly.utils as plotly_utils
 
-from .processing import get_processed_map_data, get_processed_time_data
+from .database_queries import get_map_plot_data, get_time_plot_data
 from .request_parameters import parse_plot_params
 from .ui_labels import (
-    COLORBAR_RANGES, COLORBAR_TITLES, COLORBAR_TICKFORMATS, MAP_HOVERTEMPLATES,
-    MAP_PLOT_PARAM_NAMES, TIME_PLOT_PARAM_NAMES
+    COLORBAR_RANGES, COLORBAR_TITLES, COLORBAR_TICKFORMATS, get_iso_date_string,
+    MAP_HOVERTEMPLATES, MAP_PLOT_PARAM_NAMES, TIME_PLOT_PARAM_NAMES
 )
 
 plot_views = Blueprint('plots', __name__, url_prefix='/plots')
@@ -20,34 +20,29 @@ plot_views = Blueprint('plots', __name__, url_prefix='/plots')
 def get_map_plot():
     """Parse query parameters sent with the request and return the Plotly JSON
     for the requested plot showing the distribution of OD deaths by state.
-
-    A query parameter determines whether the plot shows total death counts,
-    death counts per unit population, or percent change in death count within
-    the past year.
     """
     params = parse_plot_params(MAP_PLOT_PARAM_NAMES)
-    data = get_processed_map_data(params)
+    params['period'] = get_iso_date_string(params['period'])
+    data = get_map_plot_data(**params)
     fig = generate_map_plot(data, params)
     return _make_plot_response(fig)
 
 
-def generate_map_plot(data, param_dict):
-    """Generate a dictionary with instructions that can be used by the Plotly
-    library to create a choropleth plot showing the distribution of OD deaths by
-    state.
+def generate_map_plot(data, params):
+    """Generate a dictionary that can be used by the Plotly library to create a
+    choropleth plot showing the distribution of OD deaths by state.
 
     Args:
         data:  dataframe of processed data with columns Location, Location_abbr,
             and Value
-        param_dict:  dictionary of query parameters in the format returned by
+        params:  dictionary of query parameters in the format returned by
             request_parameters.parse_plot_params.  The dictionary should have
             two keys: 'statistic' and 'period'.
 
     Returns:
-        Dictionary that can be converted to Plotly JSON that describes the map
-        plot
+        Dictionary that can be converted to Plotly JSON describing the map plot
     """
-    statistic = param_dict['statistic']
+    statistic = params['statistic']
     colorbar_range = COLORBAR_RANGES[statistic]
 
     fig = px.choropleth(
@@ -119,12 +114,16 @@ def get_time_plot():
     for the requested plot of time development.
     """
     params = parse_plot_params(TIME_PLOT_PARAM_NAMES)
-    data = get_processed_time_data(params)
+    data = get_time_plot_data(
+        location_abbr=params['location'],
+        statistic=params['statistic'],
+        od_types=params['od_type']
+    )
     fig = generate_time_plot(data, params)
     return _make_plot_response(fig)
 
 
-def generate_time_plot(data, param_dict):
+def generate_time_plot(data, params):
 
     # Generate dummy data for testing the design of the map.
     # TODO: delete the code for generating dummy data

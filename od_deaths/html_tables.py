@@ -2,7 +2,7 @@
 from flask import Blueprint, request
 from pandas import Categorical
 
-from .database_queries import get_od_deaths_table, get_raw_population_table
+from .database_queries import get_raw_od_deaths_table, get_raw_population_table
 from .date_formatting import ORDERED_MONTHS
 from .ui_labels import get_location_names, get_od_code_table
 
@@ -19,7 +19,7 @@ def od_deaths_table():
     The table is a subset of the raw data with some column names changed to
     improve readability.
     """
-    data = get_od_deaths_table()
+    data = get_raw_od_deaths_table()
     # Convert columns Location and Month into categorical data for sorting.
     data['Location'] = Categorical(data['Location'],
                                    categories=get_location_names(),

@@ -1,25 +1,20 @@
 """Functions for using sqlalchemy to retrieving data from the app's sqlite
 database.
 
-The functions in this module understand the details of the database and should
-hide those details from other modules.
+The functions in this module understand the details of the database and provide
+an API that hides most of those details from other modules.
 
 The data model exposed to other modules by the current module consists of the
 following tables:
-- table of OD deaths containing columns Location, Location_abbr, Year, Month,
-    Indicator, Death_count, and OD_type.  The OD_type column is a calculated
-    column that groups together different values of Indicator for the purpose of
-    placing OD deaths in relatively simple categories.  The Location column
-    gives the full name of a location, while Location_abbr gives an abbreviation
-    for the location.
+- table of processed data on OD deaths containing columns Location_abbr,
+    Location, Period, OD_type, Statistic, and Value.
 - table of locations containing columns Abbr and Name
-- table of interpolated population data containing columns Location_abbr, Year,
-    Month, and Population.  (Linear interpolation is used to give monthly
-    populations estimates, starting from yearly population estimates from
-    www.census.gov.)
+- raw data on OD deaths containing columns Location, Year, Month, Indicator, and
+    Death count.  This table is exposed solely for the purpose of displaying the
+    raw data used as input by the app.
 - raw population data containing a Location column and a set of columns
     corresponding to distinct years.  This table is exposed solely for the
-    purpose of showing the raw data used as input by the app.
+    purpose of displaying the raw data used as input by the app.
 
 Note that this data model is different from the schema used by the database.
 
@@ -31,52 +26,41 @@ from sqlalchemy import text
 
 from .database_connection import get_database_connection
 
-# The first and last dates for which data is available in the table of OD deaths
-# are January 2015 and September 2019, respectively.
-DATASET_START_YEAR = 2015
-DATASET_END_YEAR = 2019
-
-# In the queries below, the OD_type column of the od_types table is considered
-# part of the "programmer's interface" to the database, since this column
-# contains short, simple strings used in the app code.  As a result, data is
-# consistently filtered by OD_type rather than by Indicator.
-QUERY_STRINGS = {
-    'od_deaths_table': """
-        SELECT locations.Name AS Location,
-               death_counts.Year,
-               death_counts.Month,
-               death_counts.Indicator,
-               death_counts.Death_count AS "Death count"
-        FROM death_counts
-               INNER JOIN locations ON locations.Abbr = death_counts.Location_abbr;""",
+SQL_STRINGS = {
+    'raw_od_deaths_data': """
+        SELECT
+          locations.Name AS Location,
+          death_counts.Year,
+          death_counts.Month,
+          death_counts.Indicator,
+          death_counts.Death_count AS "Death count"
+        FROM
+          death_counts
+            INNER JOIN locations
+                       ON locations.Abbr = death_counts.Location_abbr;""",
     'raw_population_data': """
-        SELECT locations.Name AS Location,
-               populations.Year,
-               populations.Population
-        FROM populations
-               INNER JOIN locations ON locations.Abbr = populations.Location_abbr
-        WHERE populations.Month = 'July';""",
+        SELECT
+          locations.Name AS Location,
+          populations.Year,
+          populations.Population
+        FROM
+          populations
+            INNER JOIN locations
+                       ON locations.Abbr = populations.Location_abbr;""",
     'location_names': """
         SELECT Abbr, Name
         FROM locations;""",
-    'map_plot_death_counts': """
-        SELECT death_counts.Location_abbr,
-               death_counts.Death_count
-        FROM death_counts
-               INNER JOIN (SELECT Indicator, OD_type
-                           FROM od_types
-                           WHERE OD_type = 'all_drug_od') AS overdose_types
-                          ON overdose_types.Indicator = death_counts.Indicator
-        WHERE death_counts.Location_abbr != 'US'
-          AND death_counts.Year = :year
-          AND death_counts.Month = :month;""",
-    'map_plot_populations': """
-        SELECT Location_abbr,
-               Population
-        FROM populations
+    'map_plot_data': """
+        SELECT
+          Location_abbr,
+          Location,
+          Value
+        FROM
+          derived_data
         WHERE Location_abbr != 'US'
-          AND Year = :year
-          AND Month = :month;""",
+          AND OD_type = 'all_drug_od'
+          AND Period = :period
+          AND Statistic = :statistic;""",
     # Note that the parameter :od_types in the next entry will be
     # programmatically replaced by a series of the form
     #
@@ -84,51 +68,43 @@ QUERY_STRINGS = {
     #
     # This is needed because sqlite3 does not support binding a series as a
     # parameter.
-    'time_plot_death_counts': """
-        SELECT death_counts.Year,
-               death_counts.Month,
-               death_counts.Death_count,
-               overdose_types.OD_type
-        FROM death_counts
-               INNER JOIN (SELECT Indicator, OD_type
-                           FROM od_types
-                           WHERE OD_type IN (:od_types)) as overdose_types
-                          ON overdose_types.Indicator = death_counts.Indicator
-        WHERE death_counts.Location_abbr = :location_abbr;""",
-    'time_plot_populations': """
-        SELECT Year,
-               Month,
-               Population
-        FROM populations
-        WHERE Location_abbr = :location_abbr;""",
+    'time_plot_data': """
+        SELECT
+          Period,
+          OD_type,
+          Value
+        FROM
+          derived_data
+        WHERE Location_abbr = :location_abbr
+          AND Statistic = :statistic
+          AND OD_type IN (:od_types);""",
     'od_types': """
-        SELECT DISTINCT od_types.OD_type
-        FROM od_types
-               INNER JOIN death_counts ON death_counts.Indicator = od_types.Indicator
-        WHERE death_counts.Location_abbr = :location_abbr;"""
+        SELECT DISTINCT OD_type
+        FROM derived_data
+        WHERE Location_abbr = :location_abbr;"""
 }
 
 
 def execute_initialization_query(app, query_function, **kwargs):
     """Execute a database query during app initialization.
 
-    Database queries defined in the current module use the functions
-    get_database_connection and close_database_connection to manage the database
-    connection.  These functions require an application context to be defined.
-    An application context is defined automatically by flask during a request,
-    but in order to perform a database query outside a request, an application
-    context must be manually created.
+    Database queries defined in the current module use functions from the
+    database_connection module to manage the database connection.  These
+    functions require an application context to be defined. An application
+    context is defined automatically by flask during a request, but in order to
+    perform a database query outside a request, an application context must be
+    manually created.
 
     The current function creates an application context, then executes the
     function given by argument query_function, and then closes the application
     context.
 
     Args:
-        app:  instance of the application
-        query_function:  any of the API functions defined in the current module
-            that performs a database query.  The corresponding query is
+        app:  Instance of the application
+        query_function:  Any of the API functions defined in the current module
+            that perform a database query.  The corresponding query is
             performed, and the results are returned.
-        kwargs:  dictionary of keyword arguments to pass when calling the
+        kwargs:  Dictionary of keyword arguments to pass when calling the
             function given by argument query_function
 
     Returns:
@@ -138,71 +114,65 @@ def execute_initialization_query(app, query_function, **kwargs):
         return query_function(**kwargs)
 
 
-def get_map_plot_death_counts(month, year, add_location_names):
+def get_map_plot_data(statistic, period):
     """Return a table giving the number of OD deaths per state in a given
     period.
 
-    Data from the table of OD deaths is returned, with OD_type='all_od_deaths'
-    and with Month and Year equal to the corresponding function arguments.
+    Data from the table of processed data is returned, with
+    OD_type='all_od_deaths' and with Statistic and Period equal to the
+    corresponding function arguments.
+
+    Note that the arguments statistic and parameter should be present in the
+    corresponding columns of the table of processed data, since these arguments
+    are used as filters in querying the database.
 
     Args:
-        month: month (full name) used in filtering the data
-        year: year (4-digit integer) used in filtering the data
-        add_location_names:  boolean indicating whether a column of location
-            names should be included in the table.  If add_location_names=False,
-            the returned table has column Location_abbr but not column Location.
+        statistic:  Statistic used in filtering the data.  Allowed values:
+            death_count, normalized_death_count, or percent_change.
+        period:  Time period used in filtering the data.  Values are year-month
+            combinations in ISO format, e.g., 2015-01.
 
     Returns:
-        Table with columns Location_abbr, Location (if argument
-        add_location_names=True), and Death_count
-    """
-    data = _perform_query(
-        query=text(QUERY_STRINGS['map_plot_death_counts']),
-        params={'month': month, 'year': year},
-    )
-    if add_location_names:
-        data = _add_location_names(data)
-    return data
-
-
-def get_map_plot_populations(month, year):
-    """Return a table giving the interpolated population of each state for a
-    given month and year.
-
-    Args:
-        month: month (full name) used in filtering the data
-        year: year (4-digit integer) used in filtering the data
-
-    Returns:
-        Table with columns Location_abbr and Population
+        Table with columns Location_abbr, Location, and Value
     """
     return _perform_query(
-        query=text(QUERY_STRINGS['map_plot_populations']),
-        params={'month': month, 'year': year}
+        query=text(SQL_STRINGS['map_plot_data']),
+        params={'statistic': statistic, 'period': period},
     )
 
 
-def get_time_plot_death_counts(location_abbr, od_types):
+def get_time_plot_data(location_abbr, statistic, od_types):
     """Return a table giving the number of OD deaths in a given location as a
     function of time.
 
-    Data from the table of OD deaths is returned, with Location_abbr equal to
-    the argument location_abbr, and with the data filtered so that OD_type
-    includes only the value(s) given by argument od_types.
+    Data from the table of processed data is returned, with Location_abbr and
+    Statistic equal to the corresponding function arguments, and with OD_type
+    equal to any of the values given by the argument od_types.
+
+    Note that the arguments location_abbr and statistic, along with any values
+    included in the argument od_types, should be present in the corresponding
+    columns of the table of processed data, since these arguments are used as
+    filters in querying the database.
 
     Args:
-        location_abbr: location abbreviation used in filtering the data
-        od_types: string or list of strings used in filtering the data
+        location_abbr:  Location abbreviation used in filtering the data.
+            Values are two-letter abbreviations such as US or CA.
+        statistic:  Statistic used in filtering the data. Allowed values:
+            death_count, normalized_death_count, or percent_change.
+        od_types:  String or list of strings used in filtering the data.
+            Allowed values:  all_drug_od, all_opioids, prescription_opioids,
+            synthetic_opioids, heroin, cocaine, or other_stimulants.
 
     Returns:
-        Table with columns Year, Month, Death_count, and OD_type.
+        Table with columns Period, OD_type, and Value
     """
-    query, params = _get_time_query_and_params(location_abbr, od_types)
+    query, params = _get_time_query_and_params(location_abbr, statistic,
+                                               od_types)
     return _perform_query(query=query, params=params)
 
 
-def _get_time_query_and_params(location_abbr, od_types):
-    query_string = QUERY_STRINGS['time_plot_death_counts']
+def _get_time_query_and_params(location_abbr, statistic, od_types):
+    query_string = SQL_STRINGS['time_plot_data']
     # Special handling is needed because od_types may be a list of strings.
     # SQLAlchemy supports binding a series parameter using the following
     # commands:
@@ -222,26 +192,13 @@ def _get_time_query_and_params(location_abbr, od_types):
         ':od_types',
         ', '.join(numbered_od_types)
     )
-    param_dict = {f'od_type_{index}': element
-                  for index, element in enumerate(od_types)}
-    param_dict['location_abbr'] = location_abbr
-    return text(query_string), param_dict
-
-
-def get_time_plot_populations(location_abbr):
-    """Return a table giving the interpolated populations of a given location
-    for all available time periods.
-
-    Args:
-        location_abbr: location abbreviation used in filtering the data
-
-    Returns:
-        Table with columns Year, Month, and Population
-    """
-    return _perform_query(
-        query=text(QUERY_STRINGS['time_plot_populations']),
-        params={'location_abbr': location_abbr}
-    )
+    params = {f'od_type_{index}': od_type
+              for index, od_type in enumerate(od_types)}
+    params.update({
+        'location_abbr': location_abbr,
+        'statistic': statistic
+    })
+    return text(query_string), params
 
 
 def get_od_types_for_location(location_abbr):
@@ -249,39 +206,45 @@ def get_od_types_for_location(location_abbr):
     given location.
 
     Args:
-        location_abbr: location abbreviation used in filtering the data
+        location_abbr:  Location abbreviation used in filtering the data.  This
+            value should be present in the Location_abbr column of the table of
+            processed data.  Values are two-letter abbreviations such as US or
+            CA.
 
     Returns:
         List of strings, each a value in the OD_type column in the table of OD
         deaths
     """
     data = _perform_query(
-        query=text(QUERY_STRINGS['od_types']),
+        query=text(SQL_STRINGS['od_types']),
         params={'location_abbr': location_abbr}
     )
     return data['OD_type'].tolist()
 
 
-def get_od_deaths_table():
+def get_raw_od_deaths_table():
     """Return a table of raw data on OD deaths as a dataframe.
 
-    The table is a subset of the raw data with some column names changed to
-    improve readability.  After renaming, the column names are 'Location',
-    'Year', 'Month', 'Indicator', and 'Death count'.
+    Returns:
+        Table representing a subset of the raw data with some column names
+        changed to improve readability.  After renaming, the column names are
+        Location, Year, Month, Indicator, and Death count.
     """
     return _perform_query(
-        query=text(QUERY_STRINGS['od_deaths_table'])
+        query=text(SQL_STRINGS['raw_od_deaths_data'])
     )
 
 
 def get_raw_population_table():
     """Return a table of raw population data as a dataframe.
 
-    The table is a subset of the raw data with some column names changed to
-    improve readability.
+    Returns:
+        Table representing a subset of the raw data with one column name changed
+        to improve readability.  The column names are Location, 2014, 2015, ...,
+        2020.
     """
     data = _perform_query(
-        query=text(QUERY_STRINGS['raw_population_data'])
+        query=text(SQL_STRINGS['raw_population_data'])
     )
     # Reshape the table to reproduce the original form of the raw data.
     data = (
@@ -300,24 +263,10 @@ def _perform_query(query, params=None):
     Args:
         query:  sqlalchemy.sql.expression.TextClause object representing the SQL
             query
-        params:  dictionary of parameters to bind to the query
+        params:  Dictionary of parameters to bind to the query
     """
     conn = get_database_connection()
     return read_sql_query(query, conn, params=params)
-
-
-def _add_location_names(data):
-    """Add a column giving the full name of each location in the table of drug
-    OD deaths.
-
-    Used to make the user interface friendlier, e.g., by including the full
-    state name in the hover text of plotly maps.
-    """
-    state_names = (
-        get_location_table()
-        .rename(columns={'Name': 'Location'})
-    )
-    return data.join(state_names, on='Location_abbr', how='inner')
 
 
 def get_location_table():
@@ -326,6 +275,6 @@ def get_location_table():
     The table gives both the full name of each location ('Name') and an
     abbreviation ('Abbr').  The abbreviation is set as the index.
     """
-    query = text(QUERY_STRINGS['location_names'])
+    query = text(SQL_STRINGS['location_names'])
     conn = get_database_connection()
     return read_sql_query(query, conn, index_col='Abbr')

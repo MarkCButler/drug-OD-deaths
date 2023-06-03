@@ -1,5 +1,5 @@
-"""Constants and functions used in managing labels displayed in different parts
-of the app's interface.
+"""Constants and functions used in generating/updating labels displayed in
+different parts of the app's interface.
 
 The keys in the dictionaries below can be considered code that must be used
 consistently in both the app's front end and back end.  These keys correspond to
@@ -16,24 +16,22 @@ made by the front end.
 
 Some dictionaries defined here depend on the data model exposed by the
 database_queries module.  For instance, the keys used below in OD_TYPE_LABELS
-correspond to values found in the column OD_type in the table of OD deaths.
+correspond to values found in the column OD_type in the table of processed data
+on OD deaths.
 
-There is also a dependency between the keys in some dictionaries defined here
-and the processing module in the current package.  Requests by the front end for
-plot data include query parameters defined by constants in the current module.
-The back-end functions that process data to fulfill these requests need to
-"understand" keys such as 'death_count', 'normalized_death_count', and
-'percent_change' (see STATISTIC_LABELS below) in order to determine how data
-should be processed.
+There is also a dependency between the plots module and the keys in the
+dictionaries TIME_PLOT_PARAM_NAMES and MAP_PLOT_PARAM_NAMES defined below.
+Functions in the plots module use the keys in these dictionaries to extract
+information about the query parameters sent with requests.
 """
 from collections import namedtuple
 
 import pandas as pd
 
 from .database_queries import (
-    DATASET_START_YEAR, DATASET_END_YEAR, execute_initialization_query,
-    get_od_types_for_location, get_location_table
+    execute_initialization_query, get_location_table, get_od_types_for_location
 )
+from .date_formatting import ISO_MONTH_LABELS
 
 # Used in setting option tags in the HTML template.
 SelectOption = namedtuple('SelectOption', ['value', 'text'])
@@ -50,27 +48,6 @@ def initialize_ui_labels(app):
     global ORDERED_LOCATIONS                  # pylint: disable=global-statement
     if ORDERED_LOCATIONS is None:
         ORDERED_LOCATIONS = generate_ordered_locations(app)
-
-
-def generate_ordered_locations(app):
-    """Generate a table of ordered locations for which data is available.
-
-    The module-level constant ORDERED_LOCATIONS is initialized to be a dataframe
-    with the following index and column:
-      - index (named 'Abbr') giving the abbreviation used for each location
-      - column 'Name' giving the full name of each location
-
-    The table of locations exposed by the database_queries module is first
-    retrieved. Rows are then ordered alphabetically based on the full name of
-    the location (which will appear in the UI), and the row corresponding to the
-    US is moved to the top of the table.
-    """
-    data = (
-        execute_initialization_query(app, get_location_table)
-        .sort_values(by='Name')
-    )
-    reordered_index = data.index.drop('US').insert(0, 'US')
-    return data.reindex(reordered_index)
 
 
 ################################################################################
@@ -102,7 +79,7 @@ def get_od_code_table():
     """Return a table showing the correspondence between the following:
     1. Labels used in the app's UI to indicate the type of overdose
     2. Cause-of-death codes from ICD–10, the Tenth Revision of the International
-    Statistical Classification of Diseases and Related Health Problems
+       Statistical Classification of Diseases and Related Health Problems
     """
     data = [
         ('all_opioids', 'T40.0-T40.4, T40.6'),
@@ -202,6 +179,27 @@ def get_statistic_types():
 ORDERED_LOCATIONS = None
 
 
+def generate_ordered_locations(app):
+    """Generate a table of ordered locations for which data is available.
+
+    The module-level constant ORDERED_LOCATIONS is initialized to be a dataframe
+    with the following index and column:
+      - index (named 'Abbr') giving the abbreviation used for each location
+      - column 'Name' giving the full name of each location
+
+    The table of locations exposed by the database_queries module is first
+    retrieved. Rows are then ordered alphabetically based on the full name of
+    the location (which will appear in the UI), and the row corresponding to the
+    US is moved to the top of the table.
+    """
+    data = (
+        execute_initialization_query(app, get_location_table)
+        .sort_values(by='Name')
+    )
+    reordered_index = data.index.drop('US').insert(0, 'US')
+    return data.reindex(reordered_index)
+
+
 def get_locations():
     """Return a list of named tuples of the form (value, text) corresponding to
     locations for which data is available.
@@ -223,6 +221,12 @@ def get_location_names():
 ################################################################################
 # Time periods that can be selected for plots.
 ################################################################################
+# TODO: Obtain these values from database queries.
+# The first and last dates for which data is available in the table of OD deaths
+# are January 2015 and September 2019, respectively.
+DATASET_START_YEAR = 2015
+DATASET_END_YEAR = 2019
+
 # Example key-value pair in the TIME_PERIODS dictionary:
 #
 # 'september_2018': 'September 2018'
@@ -252,14 +256,19 @@ def get_time_periods():
     return list(named_tuples)
 
 
-def get_month_and_year(period_key):
-    """Extract the month and year from a string used internally to identify a
-    time period.
+def get_iso_date_string(period_key):
+    """Convert to ISO format a date string used internally to identify a time
+    period.
 
-    The function returns a 2-element iterable Month, Year.
+    Args:
+        period_key:  String used internally to identify a time period, e.g.,
+            'january_2015'
+
+    Returns:
+        ISO-format date string, e.g., '2015-01'
     """
-    month, year = period_key.split('_')
-    return TimePeriod(month=month.capitalize(), year=int(year))
+    month_name, year = period_key.split('_')
+    return year + '-' + ISO_MONTH_LABELS[month_name]
 
 
 def get_current_period_label(period_key):
@@ -287,30 +296,30 @@ def get_previous_period_label(period_key):
 ################################################################################
 # HTML headings that are updated dynamically
 ################################################################################
-def get_map_plot_heading(param_dict):
+def get_map_plot_heading(params):
     """Return an HTML heading dynamically selected for the map plot.
 
     Args:
-        param_dict:  Dictionary of query parameters in the format returned by
+        params:  Dictionary of query parameters in the format returned by
             request_parameters.parse_plot_params.  The dictionary should include
             the same keys as MAP_PLOT_PARAM_NAMES, which is defined in the
             current module.
     """
-    return MAP_PLOT_HEADINGS[param_dict['statistic']]
+    return MAP_PLOT_HEADINGS[params['statistic']]
 
 
-def get_map_plot_subheading(param_dict):
+def get_map_plot_subheading(params):
     """Return an HTML subheading dynamically selected for the map plot.
 
     Args:
-        param_dict:  Dictionary of query parameters in the format returned by
+        params:  Dictionary of query parameters in the format returned by
             request_parameters.parse_plot_params.  The dictionary should include
             the same keys as MAP_PLOT_PARAM_NAMES, which is defined in the
             current module.
     """
-    period_key = param_dict['period']
+    period_key = params['period']
     period_label = get_current_period_label(period_key)
-    if param_dict['statistic'] == 'percent_change':
+    if params['statistic'] == 'percent_change':
         subheading = (get_previous_period_label(period_key)
                       + ' to ' + period_label)
     else:
@@ -318,39 +327,39 @@ def get_map_plot_subheading(param_dict):
     return subheading
 
 
-def get_time_plot_heading(param_dict):
+def get_time_plot_heading(params):
     """Return an HTML heading dynamically selected for the time plot.
 
     Args:
-        param_dict:  Dictionary of query parameters in the format returned by
+        params:  Dictionary of query parameters in the format returned by
             request_parameters.parse_plot_params.  The dictionary should include
             the same keys as TIME_PLOT_PARAM_NAMES, which is defined in the
             current module.
     """
-    return TIME_PLOT_HEADINGS[param_dict['statistic']]
+    return TIME_PLOT_HEADINGS[params['statistic']]
 
 
-def get_time_plot_subheading(param_dict):
+def get_time_plot_subheading(params):
     """Return an HTML subheading dynamically selected for the time plot.
 
     Args:
-        param_dict:  Dictionary of query parameters in the format returned by
+        params:  Dictionary of query parameters in the format returned by
             request_parameters.parse_plot_params.  The dictionary should include
             the same keys as TIME_PLOT_PARAM_NAMES, which is defined in the
             current module.
     """
-    return ORDERED_LOCATIONS.loc[param_dict['location'], 'Name']
+    return ORDERED_LOCATIONS.loc[params['location'], 'Name']
 
 
 ################################################################################
 # Options for HTML select elements that are updated dynamically
 ################################################################################
-def get_map_plot_statistic_options(param_dict):
+def get_map_plot_statistic_options(params):
     """Return a list of options dynamically selected for the form control that
     determines which statistic is displayed on the map plot.
 
     Args:
-        param_dict:  Dictionary of query parameters in the format returned by
+        params:  Dictionary of query parameters in the format returned by
             request_parameters.parse_plot_params.  The dictionary should include
             the same keys as MAP_PLOT_PARAM_NAMES, which is defined in the
             current module.
@@ -358,7 +367,7 @@ def get_map_plot_statistic_options(param_dict):
     Returns:
         List of strings, each corresponding to an option value
     """
-    if param_dict['period'] == FIRST_TIME_PERIOD:
+    if params['period'] == FIRST_TIME_PERIOD:
         statistic_labels = STATISTIC_LABELS.copy()
         del statistic_labels['percent_change']
     else:
@@ -366,12 +375,12 @@ def get_map_plot_statistic_options(param_dict):
     return list(statistic_labels.keys())
 
 
-def get_map_plot_period_options(param_dict):
+def get_map_plot_period_options(params):
     """Return a list of options dynamically selected for the form control that
     determines which time period is displayed on the map plot.
 
     Args:
-        param_dict:  Dictionary of query parameters in the format returned by
+        params:  Dictionary of query parameters in the format returned by
             request_parameters.parse_plot_params.  The dictionary should include
             the same keys as MAP_PLOT_PARAM_NAMES, which is defined in the
             current module.
@@ -379,7 +388,7 @@ def get_map_plot_period_options(param_dict):
     Returns:
         List of strings, each corresponding to an option value
     """
-    if param_dict['statistic'] == 'percent_change':
+    if params['statistic'] == 'percent_change':
         time_periods = TIME_PERIODS.copy()
         del time_periods[FIRST_TIME_PERIOD]
     else:
@@ -387,12 +396,12 @@ def get_map_plot_period_options(param_dict):
     return list(time_periods.keys())
 
 
-def get_time_plot_od_type_options(param_dict):
+def get_time_plot_od_type_options(params):
     """Return a list of options dynamically selected for the form control that
     determines which type of OD death is displayed on the map plot.
 
     Args:
-        param_dict:  Dictionary of query parameters in the format returned by
+        params:  Dictionary of query parameters in the format returned by
             request_parameters.parse_plot_params.  The dictionary should include
             the same keys as TIME_PLOT_PARAM_NAMES, which is defined in the
             current module.
@@ -400,7 +409,7 @@ def get_time_plot_od_type_options(param_dict):
     Returns:
         List of strings, each corresponding to an option value
     """
-    unordered_options = get_od_types_for_location(param_dict['location'])
+    unordered_options = get_od_types_for_location(params['location'])
     # Order the options based on the order of keys in OD_TYPE_LABELS.
     return [option for option in OD_TYPE_LABELS
             if option in unordered_options]
