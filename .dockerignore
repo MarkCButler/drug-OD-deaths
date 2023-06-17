@@ -1,0 +1,14 @@
+.git
+.history
+.idea
+.ipynb_checkpoints
+.venv
+.vscode
+front-end/node_modules
+front-end/out
+*.code-workspace
+**/__pycache__
+**/*.csv
+**/*.ipynb
+**/build*
+**/scratch*
