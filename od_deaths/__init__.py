@@ -32,9 +32,13 @@ def register_blueprints(app, blueprints):
 def create_app():
     """Generate an instance of the app."""
     app = Flask(__name__, static_folder='../static')
+
+    # Load default configuration.
     app.config.from_mapping(
-        DATABASE_PATH=Path(app.root_path).parent / 'data' / 'OD-deaths.sqlite'
+        DATABASE_PATH=Path(app.root_path).parent / 'data' / 'OD-deaths.sqlite',
+        ECHO_SQL=True
     )
+    # TODO: Override the default configuration.
 
     initialize_connection_pool(app)
     initialize_ui_labels(app)

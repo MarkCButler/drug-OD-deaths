@@ -5,10 +5,11 @@ from sqlalchemy import create_engine
 
 def initialize_connection_pool(app):
     """Initialize the current app instance for use with sqlalchemy."""
-    url = 'sqlite:///' + str(app.config['DATABASE_PATH'])
     # Each instance of the app gets its own SQLAlchemy engine.
-    # TODO: Set the echo parameter to true automatically in development mode
-    app.config['DATABASE_ENGINE'] = create_engine(url, future=True, echo=True)
+    app.config['DATABASE_ENGINE'] = create_engine(
+        url='sqlite:///' + str(app.config['DATABASE_PATH']),
+        echo=app.config['ECHO_SQL']
+    )
     app.teardown_appcontext(close_database_connection)
 
 
