@@ -45,3 +45,11 @@ services:
       context: .
       target: production-build
     container_name: od-deaths-app
+    environment:
+      - OD_DEATHS_APP_SETTINGS=/app_settings
+    configs:
+      - app_settings
+
+configs:
+  app_settings:
+    file: ./app_settings.py
