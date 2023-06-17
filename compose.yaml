@@ -1,0 +1,47 @@
+services:
+
+  # Container used for front-end development.  See the stage front-end-dev-env
+  # of the Dockerfile for comments about usage.
+  front-end-dev:
+    build:
+      context: .
+      target: front-end-dev-env
+    stdin_open: true
+    tty: true
+    volumes:
+      - type: bind
+        source: ./front-end
+        target: /app/front-end
+      - type: bind
+        source: ./static
+        target: /app/static
+
+  # Container used for back-end development.  See the stage back-end-dev-env of
+  # the Dockerfile for comments about usage.
+  back-end-dev:
+    build:
+      context: .
+      target: back-end-dev-env
+    stdin_open: true
+    tty: true
+    ports:
+      - target: 5000
+        host_ip: 127.0.0.1
+        published: 5000
+    volumes:
+      - type: bind
+        source: ./od_deaths
+        target: /app/od_deaths
+      - type: bind
+        source: ./data
+        target: /app/data
+      - type: bind
+        source: ./static
+        target: /app/static
+
+  # Container for running the production build of the app.
+  app:
+    build:
+      context: .
+      target: production-build
+    container_name: od-deaths-app
