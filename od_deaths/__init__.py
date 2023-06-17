@@ -1,4 +1,5 @@
 """App factory that generates instances of the app."""
+import os
 from pathlib import Path
 
 from flask import Flask, render_template
@@ -38,7 +39,10 @@ def create_app():
         DATABASE_PATH=Path(app.root_path).parent / 'data' / 'OD-deaths.sqlite',
         ECHO_SQL=True
     )
-    # TODO: Override the default configuration.
+    # Override the default configuration if environment variable
+    # OD_DEATHS_APP_SETTINGS is defined.
+    if os.environ.get('OD_DEATHS_APP_SETTINGS'):
+        app.config.from_envvar('OD_DEATHS_APP_SETTINGS')
 
     initialize_connection_pool(app)
     initialize_ui_labels(app)
