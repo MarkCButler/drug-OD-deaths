@@ -65,3 +65,34 @@ were obtained from government census data.  When the table of derived data is
 created, the census data is interpolated to provide monthly population
 estimates.  Interpolation is needed in order to avoid spurious jumps in
 time-series plots that show the number of deaths per unit population.
+
+## Multi-stage Dockerfile
+
+The repo includes a multi-stage Dockerfile and accompanying compose file.
+- For front-end development, the command
+  ```bash
+  docker compose run front-end-dev
+  ```
+  builds the target `front-end-dev-env` in the Dockerfile and runs the resulting
+  image as a container with an interactive shell.  Commands from the `scripts`
+  object of the file *front-end/package.json* can be executed within this
+  container.  The front-end source code located on the host machine is used as
+  input for these commands, and output files are placed on the host machine.
+- For back-end development, the command
+  ```bash
+  docker compose run --service-ports back-end-dev
+  ```
+  similarly builds the target `back-end-dev-env` in the Dockerfile and runs the
+  resulting image as a container with an interactive shell.  This container can be
+  used to initialize the database and run flask's built-in server during
+  development.  As with the container generated for front-end development,
+  commands executed within this container use source code located on the host
+  machine as input.
+- For deployment to production, the command
+  ```bash
+  docker compose up app
+  ````
+  builds the target `production-build` in the Dockerfile and starts the app behind
+  the `gunicorn` server.  Front- and back-end production builds are performed in
+  earlier stages of the Dockerfile, and the resulting artifacts are copied into
+  the `production-build` stage, giving a minimal production image.
