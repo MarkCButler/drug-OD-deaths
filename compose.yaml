@@ -8,6 +8,7 @@ services:
       target: front-end-dev-env
     stdin_open: true
     tty: true
+    init: true
     volumes:
       - type: bind
         source: ./front-end
@@ -24,6 +25,7 @@ services:
       target: back-end-dev-env
     stdin_open: true
     tty: true
+    init: true
     ports:
       - target: 5000
         host_ip: 127.0.0.1
@@ -45,8 +47,14 @@ services:
       context: .
       target: production-build
     container_name: od-deaths-app
+    init: true
+    ports:
+      - target: 8000
+        host_ip: 127.0.0.1
+        published: 8000
     environment:
       - OD_DEATHS_APP_SETTINGS=/app_settings
+      - PORT=8000                   # Environment variable consumed by Gunicorn.
     configs:
       - app_settings
 

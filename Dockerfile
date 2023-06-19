@@ -53,6 +53,9 @@ FROM python:3.10-slim-bullseye AS back-end-prod-env
 # in production.  The dependencies are installed in a virtual environment, which
 # will later be copied into the final stage of this buils.
 
+# Ensure that Python logging to stdout is not buffered.
+ENV  PYTHONUNBUFFERED=true
+
 # The next group of commands installs poetry using pipx.  The first command
 # below minimizes image size by configuring pip not to create a cache.
 RUN ["pip", "config", "set", "global.no-cache-dir", "true"]
@@ -112,6 +115,7 @@ FROM back-end-prod-env AS back-end-dev-env
 # Install the dev dependencies.
 RUN ["poetry", "install", "--only=dev"]
 
+# Expose the default port used by flask's built-in server.
 EXPOSE 5000
 
 
@@ -144,6 +148,12 @@ RUN ["adduser", "--system", "--group", "app"]
 
 USER app
 
-# TODO: start the app using gunicorn
+# Ensure that Python logging to stdout is not buffered.
+ENV  PYTHONUNBUFFERED=true
+# Activate the virtual environment.
+ENV PATH=.venv/bin:${PATH}
 
-CMD ["bash"]
+# Expose the default port used by gunicorn.
+EXPOSE 8000
+
+CMD ["gunicorn", "od_deaths:create_app()"]
