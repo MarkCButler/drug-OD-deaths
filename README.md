@@ -88,11 +88,11 @@ The repo includes a multi-stage Dockerfile and accompanying compose file.
   development.  As with the container generated for front-end development,
   commands executed within this container use source code located on the host
   machine as input.
-- For deployment to production, the command
+- For local deployment of a production build, the command
   ```bash
   docker compose up app
   ````
   builds the target `production-build` in the Dockerfile and starts the app behind
-  the `gunicorn` server.  Front- and back-end production builds are performed in
-  earlier stages of the Dockerfile, and the resulting artifacts are copied into
-  the `production-build` stage, giving a minimal production image.
+  the `gunicorn` application server.  Front- and back-end production builds are
+  performed in earlier stages of the Dockerfile, and the resulting artifacts are
+  copied into the `production-build` stage, giving a minimal production image.
