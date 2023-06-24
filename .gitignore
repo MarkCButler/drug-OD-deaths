@@ -9,6 +9,7 @@
 .vscode/
 __pycache__/
 data/
+dist/
 build*
 node_modules/
 out/
