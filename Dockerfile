@@ -9,7 +9,8 @@ COPY ["front-end/package.json", "front-end/package-lock.json", "./"]
 
 # Install front-end dependencies without devDependencies.  After the
 # installation, clear the cache to reduce image size.
-RUN npm clean-install --omit=dev && npm cache clean --force
+RUN npm clean-install --omit=dev  \
+    && npm cache clean --force
 
 CMD ["bash"]
 
@@ -62,7 +63,7 @@ RUN ["pip", "config", "set", "global.no-cache-dir", "true"]
 RUN ["pip", "install", "pipx==1.2.0"]
 # Update PATH to include the location at which pipx installs applications.
 ENV PATH=${PATH}:/root/.local/bin
-RUN ["pipx", "install", "poetry==1.2.2"]
+RUN ["pipx", "install", "poetry==1.5.1"]
 
 # Configure poetry to install dependencies in a virtual environment named .venv
 # located in the project root.  With default settings, poetry chooses a
@@ -77,7 +78,9 @@ WORKDIR /app
 COPY ["pyproject.toml", "poetry.lock", "./"]
 
 # Install dependencies, excluding the dev dependencies and the project itself.
-RUN ["poetry", "install", "--no-root", "--without=dev"]
+# After the installation, clear the cache to reduce image size.
+RUN poetry install --no-root --without=dev  \
+    && poetry cache clear --all --no-interaction .
 
 CMD ["bash"]
 
@@ -112,8 +115,10 @@ FROM back-end-prod-env AS back-end-dev-env
 # run the webpack build (with output files placed in the static directory in the
 # repo root on the host machine).
 
-# Install the dev dependencies.
-RUN ["poetry", "install", "--only=dev"]
+# Install the dev dependencies.  After the installation, clear the cache to
+# reduce image size.
+RUN poetry install --only=dev  \
+    && poetry cache clear --all --no-interaction .
 
 # Expose the default port used by flask's built-in server.
 EXPOSE 5000
