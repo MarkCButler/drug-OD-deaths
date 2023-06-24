@@ -50,8 +50,8 @@ RUN ["npm", "run", "build"]
 FROM python:3.10-slim-bullseye AS back-end-prod-env
 # This stage first installs Poetry, a tool for Python dependency management.
 # Poetry is then used to install the Python dependencies needed by the back end
-# in production.  The dependencies are installed in a virtual environment, which
-# will later be copied into the final stage of this buils.
+# in production.  The dependencies are installed in a virtual environment that
+# will later be copied into the final stage.
 
 # Ensure that Python logging to stdout is not buffered.
 ENV  PYTHONUNBUFFERED=true
@@ -119,20 +119,33 @@ RUN ["poetry", "install", "--only=dev"]
 EXPOSE 5000
 
 
+FROM back-end-prod-env AS back-end-prod-build
+# This stage builds the app's Python code as a wheel and installs it in the
+# virtual environment that will later be copied into the final stage.
+
+# Copy the back-end source code.
+COPY ["od_deaths", "./od_deaths/"]
+
+# Build the project as a wheel.
+RUN ["poetry", "build", "--format=wheel"]
+
+# Install the wheel in the virtual environment.
+RUN . .venv/bin/activate \
+    && pip install --no-index --find-links ./dist/ od_deaths
+
+
 FROM python:3.10-slim-bullseye AS production-build
 # This stage does the following:
-#   - Copy build artifacts from two previous stages: back-end-prod-env and
+#   - Copy build artifacts from two previous stages: back-end-prod-build and
 #     front-end-prod-build
 #   - Copy the SQLite database from the host machine
-#   - Copy the app's Python package from the host machine
 #   - Create a non-privileged user to execute the app
 #   - Start the app using gunicorn as a server.
 
 WORKDIR /app
 
 # Copy the Python virtual environment from back-end-prod-env
-COPY --from=back-end-prod-env ["/app/.venv", "./.venv/"]
-
+COPY --from=back-end-prod-build ["/app/.venv", "./.venv/"]
 # Copy the output files from the webpack production build.
 COPY --from=front-end-prod-build ["/app/static", "./static/"]
 
@@ -141,11 +154,7 @@ COPY --from=front-end-prod-build ["/app/static", "./static/"]
 # done within a container running the build target back-end-dev-env as an image.
 COPY ["data/*.sqlite", "./data/"]
 
-# Copy the back-end source code.
-COPY ["od_deaths", "./od_deaths/"]
-
 RUN ["adduser", "--system", "--group", "app"]
-
 USER app
 
 # Ensure that Python logging to stdout is not buffered.
