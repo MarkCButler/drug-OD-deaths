@@ -13,9 +13,42 @@ from .plots import plot_views
 from .template_data import URLS
 from .ui_labels import (
     get_locations, get_od_types, get_preset_plot_params, get_statistic_types,
-    get_time_periods, initialize_ui_labels, MAP_PLOT_PARAM_NAMES,
+    get_time_periods, initialize_interface, MAP_PLOT_PARAM_NAMES,
     TIME_PLOT_PARAM_NAMES, UNIT_POPULATION_LABEL
 )
+
+
+def get_static_folder():
+    """Return the path to the app's static folder, i.e., the folder where the
+    app expects static files such as CSS files to be found.
+
+    The default path (relative to od_deaths, the root directory of the
+    application) is '../static'.  If the environment variable
+    OD_DEATHS_APP_STATIC_FOLDER is defined, its value is used as the path to the
+    static folder.
+    """
+    static_folder = os.environ.get('OD_DEATHS_APP_STATIC_FOLDER')
+    if not static_folder:
+        static_folder = '../static'
+    return static_folder
+
+
+def load_configuration(app):
+    """Load the app's configuration.
+
+    A default configuration is first loaded.  The default configuration can be
+    overridden by defining an environment variable OD_DEATHS_APP_SETTINGS that
+    points to a configuration file.
+    """
+    # Default configuration.
+    app.config.from_mapping(
+        DATABASE_PATH=Path(app.root_path).parent / 'data' / 'OD-deaths.sqlite',
+        ECHO_SQL=True
+    )
+    # Override the default configuration if environment variable
+    # OD_DEATHS_APP_SETTINGS is defined.
+    if os.environ.get('OD_DEATHS_APP_SETTINGS'):
+        app.config.from_envvar('OD_DEATHS_APP_SETTINGS')
 
 
 def register_blueprints(app, blueprints):
@@ -30,35 +63,30 @@ def register_blueprints(app, blueprints):
         app.register_blueprint(blueprint)
 
 
-def create_app():
-    """Generate an instance of the app."""
-    static_folder = os.environ.get('OD_DEATHS_APP_STATIC_FOLDER')
-    if not static_folder:
-        static_folder = '../static'
-    app = Flask(__name__, static_folder=static_folder)
+def register_cli_commands(app):
+    """Register the app's CLI commands.
 
-    # Load default configuration.
-    app.config.from_mapping(
-        DATABASE_PATH=Path(app.root_path).parent / 'data' / 'OD-deaths.sqlite',
-        ECHO_SQL=True
-    )
-    # Override the default configuration if environment variable
-    # OD_DEATHS_APP_SETTINGS is defined.
-    if os.environ.get('OD_DEATHS_APP_SETTINGS'):
-        app.config.from_envvar('OD_DEATHS_APP_SETTINGS')
-
-    initialize_connection_pool(app)
-    initialize_ui_labels(app)
-    register_blueprints(
-        app, [heading_views, option_views, plot_views, table_views]
-    )
-
-    # CLI commands that drop/recreate the table of derived data, e.g., in
-    # connection with an update to the external data consumed by the app.
+    The app's CLI commands can be used to drop/recreate the table of derived
+    data, e.g., in connection with an update to the external data consumed by
+    the app.
+    """
     app.cli.add_command(drop_derived_data)
     app.cli.add_command(initialize_database)
 
-    # The function initialize_ui_labels needs to be called before the dictionary
+
+def create_app():
+    """Generate an instance of the app."""
+    app = Flask(__name__, static_folder=get_static_folder())
+    load_configuration(app)
+
+    initialize_connection_pool(app)
+    initialize_interface(app)
+    register_blueprints(
+        app, [heading_views, option_views, plot_views, table_views]
+    )
+    register_cli_commands(app)
+
+    # The function initialize_interface needs to be called before the dictionary
     # template_kwargs is defined, since that function initializes the table of
     # locations returned below by get_locations.
     template_kwargs = {

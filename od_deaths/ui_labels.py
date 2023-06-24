@@ -37,7 +37,7 @@ from .date_formatting import ISO_MONTH_LABELS
 SelectOption = namedtuple('SelectOption', ['value', 'text'])
 
 
-def initialize_ui_labels(app):
+def initialize_interface(app):
     """Initialize constants in the current module whose definition requires a
     database query.
 
