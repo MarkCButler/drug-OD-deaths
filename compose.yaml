@@ -53,11 +53,19 @@ services:
         host_ip: 127.0.0.1
         published: 8000
     environment:
-      - OD_DEATHS_APP_SETTINGS=/app_settings
-      - PORT=8000                   # Environment variable consumed by Gunicorn.
+      - OD_DEATHS_APP_SETTINGS=/app/app_settings.py
+      # Gunicorn settings that depend on the details of the docker image are
+      # defined below using the environment variable GUNICORN_CMD_ARGS rather
+      # than in the configuration file gunicorn.conf.py in the repo root.
+      - GUNICORN_CMD_ARGS=--bind=0.0.0.0:8000 --worker-tmp-dir=/dev/shm
     configs:
-      - app_settings
+      - source: app_settings
+        target: /app/app_settings.py
+      - source: gunicorn_settings
+        target: /app/gunicorn.conf.py
 
 configs:
   app_settings:
     file: ./app_settings.py
+  gunicorn_settings:
+    file: ./gunicorn.conf.py
