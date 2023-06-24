@@ -32,7 +32,10 @@ def register_blueprints(app, blueprints):
 
 def create_app():
     """Generate an instance of the app."""
-    app = Flask(__name__, static_folder='../static')
+    static_folder = os.environ.get('OD_DEATHS_APP_STATIC_FOLDER')
+    if not static_folder:
+        static_folder = '../static'
+    app = Flask(__name__, static_folder=static_folder)
 
     # Load default configuration.
     app.config.from_mapping(
