@@ -26,7 +26,7 @@ from sqlalchemy import text
 from .data_interpolation import interpolate_population_data
 from .database_connection import get_database_connection
 from .date_formatting import ISO_MONTH_LABELS
-from .ui_labels import UNIT_POPULATION
+from .interface_labels import UNIT_POPULATION
 
 SQL_STRINGS = {
     'create_new_table': """

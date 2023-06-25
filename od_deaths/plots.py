@@ -7,11 +7,11 @@ import plotly.graph_objects as go
 import plotly.utils as plotly_utils
 
 from .database_queries import get_map_plot_data, get_time_plot_data
-from .request_parameters import parse_plot_params
-from .ui_labels import (
+from .interface_labels import (
     COLORBAR_RANGES, COLORBAR_TITLES, COLORBAR_TICKFORMATS, get_iso_date_string,
     MAP_HOVERTEMPLATES, MAP_PLOT_PARAM_NAMES, TIME_PLOT_PARAM_NAMES
 )
+from .request_parameters import parse_plot_params
 
 plot_views = Blueprint('plots', __name__, url_prefix='/plots')
 

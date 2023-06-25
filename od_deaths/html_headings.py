@@ -1,11 +1,11 @@
 """Views that return dynamic updates to HTML headings."""
 from flask import Blueprint
 
-from .request_parameters import parse_plot_params
-from .ui_labels import (
+from .interface_labels import (
     get_map_plot_heading, get_map_plot_subheading, get_time_plot_heading,
     get_time_plot_subheading, MAP_PLOT_PARAM_NAMES, TIME_PLOT_PARAM_NAMES
 )
+from .request_parameters import parse_plot_params
 
 heading_views = Blueprint('headings', __name__, url_prefix='/headings')
 

@@ -9,13 +9,13 @@ from .database_initialization import drop_derived_data, initialize_database
 from .form_options import option_views
 from .html_headings import heading_views
 from .html_tables import table_views
-from .plots import plot_views
-from .template_data import URLS
-from .ui_labels import (
+from .interface_labels import (
     get_locations, get_od_types, get_preset_plot_params, get_statistic_types,
     get_time_periods, initialize_interface, MAP_PLOT_PARAM_NAMES,
     TIME_PLOT_PARAM_NAMES, UNIT_POPULATION_LABEL
 )
+from .plots import plot_views
+from .template_data import URLS
 
 
 def get_static_folder():
