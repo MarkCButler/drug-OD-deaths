@@ -81,7 +81,15 @@ SQL_STRINGS = {
     'od_types': """
         SELECT DISTINCT OD_type
         FROM derived_data
-        WHERE Location_abbr = :location_abbr;"""
+        WHERE Location_abbr = :location_abbr;""",
+    'map_plot_periods': """
+        SELECT DISTINCT
+          Period,
+          Statistic
+        FROM
+          derived_data
+        WHERE OD_type = 'all_drug_od'
+          AND Statistic IN ('death_count', 'percent_change');"""
 }
 
 
@@ -108,7 +116,7 @@ def execute_initialization_query(app, query_function, **kwargs):
             function given by argument query_function
 
     Returns:
-        Dataframe containing the query results returned by the database
+        The return value of query_function
     """
     with app.app_context():
         return query_function(**kwargs)
@@ -201,6 +209,47 @@ def _get_time_query_and_params(location_abbr, statistic, od_types):
     return text(query_string), params
 
 
+def get_map_plot_periods():
+    """Return a table of periods that can be selected for the map plot that
+    shows the distribution of OD deaths in the US.
+
+    Returns:
+        Dataframe with the following index and column:
+          - index (named Period) containing ISO-format date strings (e.g.,
+              2015-01) representing periods that can be selected
+          - column Includes_percent_change containing booleans that indicate
+              whether the percent change in OD deaths during the previous year
+              is available for that period
+    """
+    data = _perform_query(
+        query=text(SQL_STRINGS['map_plot_periods']),
+    )
+    all_periods = (
+        data.loc[data['Statistic'] == 'death_count', ['Period']]
+        .set_index('Period')
+    )
+    periods_with_percent_change = (
+        data.loc[data['Statistic'] == 'percent_change', ['Period']]
+        .set_index('Period')
+        .assign(Includes_percent_change=True)
+    )
+    return (
+        all_periods.join(periods_with_percent_change, on='Period', how='left')
+        .fillna(value=False)
+    )
+
+
+def get_location_table():
+    """Return a table of locations for which data on OD deaths in available.
+
+    The table gives both the full name of each location ('Name') and an
+    abbreviation ('Abbr').  The abbreviation is set as the index.
+    """
+    query = text(SQL_STRINGS['location_names'])
+    conn = get_database_connection()
+    return read_sql_query(query, conn, index_col='Abbr')
+
+
 def get_od_types_for_location(location_abbr):
     """Return a list of the types of OD deaths stored in the database for a
     given location.
@@ -267,14 +316,3 @@ def _perform_query(query, params=None):
     """
     conn = get_database_connection()
     return read_sql_query(query, conn, params=params)
-
-
-def get_location_table():
-    """Return a table of locations for which data on OD deaths in available.
-
-    The table gives both the full name of each location ('Name') and an
-    abbreviation ('Abbr').  The abbreviation is set as the index.
-    """
-    query = text(SQL_STRINGS['location_names'])
-    conn = get_database_connection()
-    return read_sql_query(query, conn, index_col='Abbr')
