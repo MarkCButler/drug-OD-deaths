@@ -5,6 +5,11 @@ from calendar import month_name
 # calendar module has the empty string as the first element, which is discarded.
 ORDERED_MONTHS = list(month_name)[1:]
 
+# Dictionary used in converting month numbers (1-based indexing) to capitalized
+# month names.
+MONTH_NAMES = {(index + 1): month
+               for index, month in enumerate(ORDERED_MONTHS)}
+
 # Dictionary used in converting month names to month numbers (1-based indexing).
 # The dictionary keys are lowercase month names.
 MONTH_NUMBERS = {month.lower(): index + 1
