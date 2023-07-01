@@ -36,16 +36,28 @@ def get_static_folder():
 def load_configuration(app):
     """Load the app's configuration.
 
-    A default configuration is first loaded.  The default configuration can be
-    overridden by defining an environment variable OD_DEATHS_APP_SETTINGS that
-    points to a configuration file.
+    A default configuration is first loaded.  This configuration is modified in
+    two consecutive steps:
+      - Environment variables that start with the prefix FLASK_ are added to the
+          configuration, with the prefix dropped.  If the environment variable
+          FLASK_ECHO_SQL is defined, for instance, then the app's config
+          variable ECHO_SQL is set to the value of that variable.  The flask
+          function from_prefixed_env attempts to convert values to more specific
+          types than strings.
+      - If the environment variable OD_DEATHS_APP_SETTINGS is defined, its value
+          should be the path to a configuration file.  App settings are loaded
+          from that configuration file.
+
+    Note that each step can override previously defined configuration values.
     """
     # Default configuration.
     app.config.from_mapping(
         DATABASE_PATH=Path(app.root_path).parent / 'data' / 'OD-deaths.sqlite',
         ECHO_SQL=True
     )
-    # Override the default configuration if environment variable
+    # Override from environment variables.
+    app.config.from_prefixed_env()
+    # Override from a configuration file if environment variable
     # OD_DEATHS_APP_SETTINGS is defined.
     if os.environ.get('OD_DEATHS_APP_SETTINGS'):
         app.config.from_envvar('OD_DEATHS_APP_SETTINGS')
