@@ -1,12 +1,14 @@
-"""Constants and functions used in generating/updating labels displayed in
-different parts of the app's interface.
+"""Constants and functions used in generating/updating/formatting labels
+displayed in different parts of the app's interface.
 
-The keys in the dictionaries below can be considered code that must be used
-consistently in both the app's front end and back end.  These keys correspond to
-data categories or filters used in the app, while the values determine what is
-displayed in the UI and the HTML markup.
+Each instance of label text or formatting defined in the current module is
+associated with a key.  The text and formatting can be freely modified as the
+interface is tweaked, provided these keys are not modified.
 
-In order to facilitate consistent usage of these keys, several constants and
+The keys, which correspond to data categories or filters used in the app, take
+the form of dictionary keys or index values in a pandas dataframe.
+
+In order to facilitate consistent usage of these keys, most of the constants and
 functions that involve hard-coded instances of the keys are defined here.
 
 Values defined in the current module that are needed by front-end code
@@ -14,10 +16,9 @@ are delivered through a Jinja2 HTML template, which uses dictionary keys to
 select the strings rendered in the template, or in response to HTTP requests
 made by the front end.
 
-Some dictionaries defined here depend on the data model exposed by the
-database_queries module.  For instance, the keys used below in OD_TYPE_LABELS
-correspond to values found in the column OD_type in the table of processed data
-on OD deaths.
+Some keys defined here depend on the data model exposed by the database_queries
+module.  For instance, the keys used below in OD_TYPE_LABELS correspond to
+values found in the column OD_type in the table of processed data on OD deaths.
 
 There is also a dependency between the plots module and the keys in the
 dictionaries TIME_PLOT_PARAM_NAMES and MAP_PLOT_PARAM_NAMES defined below.
@@ -137,16 +138,11 @@ MAP_HOVERTEMPLATES = {
     'percent_change': '%{z:.2p}<br>%{text}<extra></extra>'
 }
 
-# Labels, formatting, and range for the map colorbar
+# Title and range for the map colorbar
 COLORBAR_TITLES = {
     'death_count': 'Number of deaths',
     'normalized_death_count': f'Deaths per<br>{UNIT_POPULATION_LABEL} people',
     'percent_change': 'Percent change<br>in one year'
-}
-COLORBAR_TICKFORMATS = {
-    'death_count': ',d',
-    'normalized_death_count': '.0f',
-    'percent_change': '.0%'
 }
 # For each statistic, the colorbar range is set to the max and min values of
 # that statistic for the dataset.  The colorbar range remains fixed regardless
@@ -165,6 +161,13 @@ MAP_PLOT_HEADINGS = {
     'percent_change': 'Percent change in drug-overdose deaths'
 }
 
+# TODO: the time plot vertical axis label seems to be placed inappropriately
+#   when these are used.
+TICKFORMATS = {
+    'death_count': ',d',
+    'normalized_death_count': '.0f',
+    'percent_change': '.0%'
+}
 
 TIME_PLOT_HEADINGS = {
     'death_count': 'Number of deaths, preceding 12-month period',
@@ -172,6 +175,13 @@ TIME_PLOT_HEADINGS = {
                                'people, preceding 12-month period'),
     'percent_change': ('Percent change in drug-overdose deaths, '
                        'preceding 12-month period')
+}
+
+# Labels displayed when hovering over a a plot of time-development.
+TIME_PLOT_HOVERTEMPLATES = {
+    'death_count': '%{y:,d}<br>%{x|%b %Y}<extra></extra>',
+    'normalized_death_count': '%{y:.1f}<br>%{x|%b %Y}<extra></extra>',
+    'percent_change': '%{y:.2p}<br>%{x|%b %Y}<extra></extra>'
 }
 
 
