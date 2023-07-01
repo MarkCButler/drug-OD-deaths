@@ -21,6 +21,11 @@ plot_views = Blueprint('plots', __name__, url_prefix='/plots')
 def get_map_plot():
     """Parse query parameters sent with the request and return the Plotly JSON
     for the requested plot showing the distribution of OD deaths by state.
+
+    Query parameters determine the following aspects of the plot:
+      - the year-long time period in which the OD deaths occurred
+      - whether the plot shows total death counts, death counts per unit
+          population, or percent change in death count within the past year
     """
     params = parse_plot_params(MAP_PLOT_PARAM_NAMES)
     data = get_map_plot_data(**params)
@@ -29,33 +34,31 @@ def get_map_plot():
 
 
 def generate_map_plot(data, params):
-    """Generate a dictionary that can be used by the Plotly library to create a
-    choropleth plot showing the distribution of OD deaths by state.
+    """Generate a data structure describing a choropleth plot that shows the
+    distribution of OD deaths by state.
 
     Args:
-        data:  dataframe of processed data with columns Location, Location_abbr,
-            and Value
+        data:  dataframe with columns Location, Location_abbr, and Value
         params:  dictionary of query parameters in the format returned by
             request_parameters.parse_plot_params.  The dictionary should have
-            two keys: 'statistic' and 'period'.
+            two keys:  'statistic' and 'period'.
 
     Returns:
-        Dictionary that can be converted to Plotly JSON describing the map plot
+        Data structure that can be converted to Plotly JSON, which in turn can
+        be converted to a plot by the front-end Plotly.js library
     """
     statistic = params['statistic']
-    colorbar_range = COLORBAR_RANGES[statistic]
 
     fig = px.choropleth(
         data_frame=data,
         locations='Location_abbr',
         color='Value',
+        range_color=COLORBAR_RANGES[statistic],
         locationmode='USA-states'
     )
     fig.update_traces(
         text=data['Location'],
-        hovertemplate=MAP_HOVERTEMPLATES[statistic],
-        zmin=colorbar_range[0],
-        zmax=colorbar_range[1]
+        hovertemplate=MAP_HOVERTEMPLATES[statistic]
     )
     _set_map_layout(fig, statistic)
     return fig
@@ -83,6 +86,7 @@ def _set_map_layout(fig, statistic):
         'colorscale': 'RdBu',
         'reversescale': True
     }
+    font = {'size': 14}
     geo = {
         'scope': 'usa',
         'projection': {
@@ -96,8 +100,13 @@ def _set_map_layout(fig, statistic):
         't': 20,
         'b': 60
     }
-    fig.update_layout(annotations=annotations, coloraxis=coloraxis, geo=geo,
-                      margin=margin)
+    fig.update_layout(
+        annotations=annotations,
+        coloraxis=coloraxis,
+        font=font,
+        geo=geo,
+        margin=margin
+    )
 
 
 def _make_plot_response(response_data):
