@@ -6,15 +6,15 @@ an API that hides most of those details from other modules.
 
 The data model exposed to other modules by the current module consists of the
 following tables:
-- table of processed data on OD deaths containing columns Location_abbr,
-    Location, Period, OD_type, Statistic, and Value.
-- table of locations containing columns Abbr and Name
-- raw data on OD deaths containing columns Location, Year, Month, Indicator, and
-    Death count.  This table is exposed solely for the purpose of displaying the
-    raw data used as input by the app.
-- raw population data containing a Location column and a set of columns
-    corresponding to distinct years.  This table is exposed solely for the
-    purpose of displaying the raw data used as input by the app.
+  - table of processed data on OD deaths containing columns Location_abbr,
+      Location, Period, OD_type, Statistic, and Value.
+  - table of locations containing columns Abbr and Name
+  - raw data on OD deaths containing columns Location, Year, Month, Indicator,
+      and Death count.  This table is exposed solely for the purpose of
+      displaying the raw data used as input by the app.
+  - raw population data containing a Location column and a set of columns
+      corresponding to distinct years.  This table is exposed solely for the
+      purpose of displaying the raw data used as input by the app.
 
 Note that this data model is different from the schema used by the database.
 

@@ -50,10 +50,10 @@ def prepare_interpolation_dates(dates):
 
     Returns:
         Tuple (dates, timestamps)
-            - dates is the function argument modified to have rows sorted by
-                increasing date
-            - timestamps is a pandas Series of timestamps corresponding to the
-                sorted dates
+          - dates is the function argument modified to have rows sorted by
+              increasing date
+          - timestamps is a pandas Series of timestamps corresponding to the
+              sorted dates
     """
     dates = sort_chronologically(dates)
     return dates, get_timestamps(dates)
@@ -107,11 +107,11 @@ def prepare_population_data(data):
 
     Returns:
         Tuple (data, timestamps)
-            - data is the function argument reshaped to have all population data
-                for a given location in one row.  The columns are ordered by
-                increasing data.
-            - timestamps is an iterable of timestamps corresponding to the
-                population estimates in the original data
+          - data is the function argument reshaped to have all population data
+              for a given location in one row.  The columns are ordered by
+              increasing data.
+          - timestamps is an iterable of timestamps corresponding to the
+              population estimates in the original data
     """
     # Pivot the data to have all population data for a given location in one
     # row.
