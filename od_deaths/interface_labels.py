@@ -24,17 +24,23 @@ dictionaries TIME_PLOT_PARAM_NAMES and MAP_PLOT_PARAM_NAMES defined below.
 Functions in the plots module use the keys in these dictionaries to extract
 information about the query parameters sent with requests.
 """
-from collections import namedtuple
+from dataclasses import dataclass
 
 import pandas as pd
 
 from .database_queries import (
-    execute_initialization_query, get_location_table, get_od_types_for_location
+    execute_initialization_query, get_location_table, get_map_plot_periods,
+    get_od_types_for_location
 )
-from .date_formatting import ISO_MONTH_LABELS
+from .date_formatting import MONTH_NAMES
+
 
 # Used in setting option tags in the HTML template.
-SelectOption = namedtuple('SelectOption', ['value', 'text'])
+@dataclass
+class SelectOption:
+    """Class representing a single option in an HTML select element."""
+    value: str
+    text: str
 
 
 def initialize_interface(app):
@@ -45,9 +51,22 @@ def initialize_interface(app):
     only after the pool of database connections has been initialized by means of
     the function initialize_connection_pool in database_connection.py.
     """
-    global ORDERED_LOCATIONS                  # pylint: disable=global-statement
-    if ORDERED_LOCATIONS is None:
-        ORDERED_LOCATIONS = generate_ordered_locations(app)
+    global ORDERED_LOCATIONS, TIME_PERIODS    # pylint: disable=global-statement
+
+    # Each empty dataframe is initialized using data from a database query.
+    # Strictly speaking, we could simply overwrite the empty dataframes, but
+    # rows are appended instead.  This is done in order to enforce the accuracy
+    # of the schemas defined for ORDERED_LOCATIONS and TIME_PERIODS.
+    if ORDERED_LOCATIONS.empty:
+        ORDERED_LOCATIONS = pd.concat([
+            ORDERED_LOCATIONS,
+            generate_ordered_locations(app)
+        ])
+    if TIME_PERIODS.empty:
+        TIME_PERIODS = pd.concat([
+            TIME_PERIODS,
+            generate_time_periods(app)
+        ])
 
 
 ################################################################################
@@ -65,14 +84,14 @@ OD_TYPE_LABELS = {
 
 
 def get_od_types():
-    """Return a list of named tuples of the form (value, text) representing the
-    different categories of OD deaths.
+    """Return a list of SelectOption instances representing the different
+    categories of OD deaths.
 
     The values are used internally to identify different categories of OD
     deaths, while the corresponding text is displayed in the UI.
     """
-    named_tuples = map(SelectOption._make, OD_TYPE_LABELS.items())
-    return list(named_tuples)
+    return [SelectOption(value=key, text=label)
+            for key, label in OD_TYPE_LABELS.items()]
 
 
 def get_od_code_table():
@@ -157,35 +176,41 @@ TIME_PLOT_HEADINGS = {
 
 
 def get_statistic_types():
-    """Return a list of named tuples of the form (value, text) representing the
-    different statistics used to describe the OD deaths.
+    """Return a list of SelectOption instances representing the different
+    statistics used to describe the OD deaths.
 
     The values are used internally to identify different statistics, while the
     corresponding text is displayed in the UI.
     """
-    named_tuples = map(SelectOption._make, STATISTIC_LABELS.items())
-    return list(named_tuples)
+    return [SelectOption(value=key, text=label)
+            for key, label in STATISTIC_LABELS.items()]
 
 
 ################################################################################
 # Locations for which data is available.
 ################################################################################
-# The constant ORDERED_LOCATIONS is used within the functions get_locations and
-# get_location_names.  We must interact with the database in order to define
-# this constant, and the app only supports doing this within an application
-# context.  So ORDERED_LOCATIONS is defined below to be None, and it is
-# re-defined during app initialization by the function
-# generate_ordered_locations.
-ORDERED_LOCATIONS = None
+# The constant ORDERED_LOCATIONS is initialized by the function
+# generate_ordered_locations.  After initialization, ORDERED_LOCATIONS is a
+# dataframe with information about the locations for which data on OD deaths is
+# available.  Here ORDERED_LOCATIONS is defined as an empty dataframe in order
+# to document its schema.
+ORDERED_LOCATIONS = pd.DataFrame(
+    {'Name': pd.Series(dtype=str)},
+    index=pd.Index([], dtype=str, name='Abbr')
+)
 
 
 def generate_ordered_locations(app):
     """Generate a table of ordered locations for which data is available.
 
+    Args:
+        app:  Application instance created by the function create_app in the
+            current package's __init__.py
+
     The module-level constant ORDERED_LOCATIONS is initialized to be a dataframe
     with the following index and column:
-      - index (named 'Abbr') giving the abbreviation used for each location
-      - column 'Name' giving the full name of each location
+      - index (named Abbr) giving the abbreviation used for each location
+      - column Name giving the full name of each location
 
     The table of locations exposed by the database_queries module is first
     retrieved. Rows are then ordered alphabetically based on the full name of
@@ -201,8 +226,8 @@ def generate_ordered_locations(app):
 
 
 def get_locations():
-    """Return a list of named tuples of the form (value, text) corresponding to
-    locations for which data is available.
+    """Return a list of SelectOption instances corresponding to locations for
+    which data is available.
 
     The values are abbreviations used internally to identify locations, while
     the corresponding text is displayed in the UI.
@@ -221,76 +246,69 @@ def get_location_names():
 ################################################################################
 # Time periods that can be selected for plots.
 ################################################################################
-# TODO: Obtain these values from database queries.
-# The first and last dates for which data is available in the table of OD deaths
-# are January 2015 and September 2019, respectively.
-DATASET_START_YEAR = 2015
-DATASET_END_YEAR = 2019
+# The constant TIME_PERIODS is initialized by the function
+# generate_time_periods.  After initialization, TIME_PERIODS is a dataframe with
+# information about the periods that can be selected for the map plot that shows
+# the distribution of OD deaths in the US.  Here TIME_PERIODS is defined as an
+# empty dataframe in order to document its schema.
+TIME_PERIODS = pd.DataFrame(
+    {'Label': pd.Series(dtype=str),
+     'Includes_percent_change': pd.Series(dtype=bool)},
+    index=pd.Index([], dtype=str, name='Period')
+)
 
-# Example key-value pair in the TIME_PERIODS dictionary:
-#
-# 'september_2018': 'September 2018'
-#
-# The key 'september_2018' corresponds to the 12-month period ending September
-# 2018.
-TIME_PERIODS = {
-    ('september_' + str(year)): ('September ' + str(year))
-    for year in range(DATASET_START_YEAR, DATASET_END_YEAR + 1)
-}
 
-FIRST_TIME_PERIOD = 'september_' + str(DATASET_START_YEAR)
+def generate_time_periods(app):
+    """Generate a table of time periods that can be selected for the map plot
+    that shows the distribution of OD deaths in the US.
 
-# Used to convert time periods sent as query parameters into data that can be
-# consumed by the back end.
-TimePeriod = namedtuple('TimePeriod', ['month', 'year'])
+    Args:
+        app:  Application instance created by the function create_app in the
+            current package's __init__.py
+
+    The module-level constant TIME_PERIODS is initialized to be a dataframe with
+    the following index and column:
+      - index (named Period) containing ISO-format date strings (e.g.,
+          2015-01) representing periods that can be selected
+      - column Label containing the label that will be used for that period in
+          the interface (e.g., January 2015)
+      - column Includes_percent_change containing booleans that indicate
+          whether the percent change in OD deaths during the previous year
+          is available for that period
+    """
+    data = execute_initialization_query(
+        app, get_map_plot_periods
+    )
+    data = data.sort_values(by='Period')
+    data['Label'] = data.index.map(_generate_label)
+    return data
+
+
+def _generate_label(iso_date_string):
+    year, month_number = iso_date_string.split('-')
+    return MONTH_NAMES[int(month_number)] + ' ' + year
 
 
 def get_time_periods():
-    """Return a list of name tuples of the form (value, text) representing the
-    different time periods for which map data can be displayed.
+    """Return a list of SelectOption instances representing the different time
+    periods for which map data can be displayed.
 
     The values are used internally to identify different time periods, while the
     corresponding text is displayed in the UI.
     """
-    named_tuples = map(SelectOption._make, TIME_PERIODS.items())
-    return list(named_tuples)
-
-
-def get_iso_date_string(period_key):
-    """Convert to ISO format a date string used internally to identify a time
-    period.
-
-    Args:
-        period_key:  String used internally to identify a time period, e.g.,
-            'january_2015'
-
-    Returns:
-        ISO-format date string, e.g., '2015-01'
-    """
-    month_name, year = period_key.split('_')
-    return year + '-' + ISO_MONTH_LABELS[month_name]
-
-
-def get_current_period_label(period_key):
-    """Given as input a string used internally to identify a time period, return
-    a UI label representing the same time period.
-
-    For example, if argument to the function is 'september_2019', return
-    'September 2019'.
-    """
-    month, year = period_key.split('_')
-    return f'{month.capitalize()} {year}'
+    return [SelectOption(value=row.Index, text=row.Label)
+            for row in TIME_PERIODS.itertuples()]
 
 
 def get_previous_period_label(period_key):
     """Given as input a string used internally to identify a time period, return
     a UI label representing time period one year earlier.
 
-    For example, if argument to the function is 'september_2019', return
+    For example, if the argument to the function is '2019-09', return
     'September 2018'.
     """
-    month, year = period_key.split('_')
-    return f'{month.capitalize()} {int(year) - 1}'
+    year, month_number = period_key.split('-')
+    return MONTH_NAMES[int(month_number)] + ' ' + str(int(year) - 1)
 
 
 ################################################################################
@@ -318,7 +336,7 @@ def get_map_plot_subheading(params):
             current module.
     """
     period_key = params['period']
-    period_label = get_current_period_label(period_key)
+    period_label = TIME_PERIODS.loc[period_key, 'Label']
     if params['statistic'] == 'percent_change':
         subheading = (get_previous_period_label(period_key)
                       + ' to ' + period_label)
@@ -367,11 +385,11 @@ def get_map_plot_statistic_options(params):
     Returns:
         List of strings, each corresponding to an option value
     """
-    if params['period'] == FIRST_TIME_PERIOD:
-        statistic_labels = STATISTIC_LABELS.copy()
-        del statistic_labels['percent_change']
-    else:
-        statistic_labels = STATISTIC_LABELS
+    if TIME_PERIODS.loc[params['period'], 'Includes_percent_change']:
+        return list(STATISTIC_LABELS.keys())
+
+    statistic_labels = STATISTIC_LABELS.copy()
+    del statistic_labels['percent_change']
     return list(statistic_labels.keys())
 
 
@@ -389,11 +407,13 @@ def get_map_plot_period_options(params):
         List of strings, each corresponding to an option value
     """
     if params['statistic'] == 'percent_change':
-        time_periods = TIME_PERIODS.copy()
-        del time_periods[FIRST_TIME_PERIOD]
-    else:
-        time_periods = TIME_PERIODS
-    return list(time_periods.keys())
+        return  list(
+            TIME_PERIODS.index[
+                TIME_PERIODS['Includes_percent_change']
+            ]
+        )
+
+    return list(TIME_PERIODS.index)
 
 
 def get_time_plot_od_type_options(params):
@@ -475,7 +495,7 @@ DISTRIBUTION_PARAMS = [
     {'name': MAP_PLOT_PARAM_NAMES['statistic'],
      'value': 'normalized_death_count'},
     {'name': MAP_PLOT_PARAM_NAMES['period'],
-     'value': 'december_2017'}
+     'value': '2017-12'}
 ]
 
 
