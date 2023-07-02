@@ -169,8 +169,6 @@ MAP_PLOT_HEADINGS = {
     'percent_change': 'Percent change in drug-overdose deaths'
 }
 
-# TODO: the time plot vertical axis label seems to be placed inappropriately
-#   when these are used.
 TICKFORMATS = {
     'death_count': ',d',
     'normalized_death_count': '.0f',
@@ -190,6 +188,12 @@ TIME_PLOT_HOVERTEMPLATES = {
     'death_count': '%{y:,d}<br>%{x|%b %Y}<extra></extra>',
     'normalized_death_count': '%{y:.1f}<br>%{x|%b %Y}<extra></extra>',
     'percent_change': '%{y:.2p}<br>%{x|%b %Y}<extra></extra>'
+}
+
+TIME_PLOT_YAXIS_TITLE_FORMATS = {
+    'death_count': {'standoff': 5},
+    'normalized_death_count': {},
+    'percent_change': {'standoff': 5}
 }
 
 

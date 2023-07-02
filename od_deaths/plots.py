@@ -10,7 +10,7 @@ from .database_queries import get_map_plot_data, get_time_plot_data
 from .interface_labels import (
     COLORBAR_RANGES, COLORBAR_TITLES, MAP_HOVERTEMPLATES, MAP_PLOT_PARAM_NAMES,
     OD_TYPE_LABELS, STATISTIC_LABELS, TICKFORMATS, TIME_PLOT_HOVERTEMPLATES,
-    TIME_PLOT_PARAM_NAMES
+    TIME_PLOT_PARAM_NAMES, TIME_PLOT_YAXIS_TITLE_FORMATS
 )
 from .request_parameters import parse_plot_params
 
@@ -205,7 +205,13 @@ def _get_ordered_od_types(params):
 
 def _set_time_plot_layout(fig, statistic):
     font = {'size': 14}
+    margin = {'t': 20}
     yaxis = {
-        'tickformat': TICKFORMATS[statistic]
+        'tickformat': TICKFORMATS[statistic],
+        'title': TIME_PLOT_YAXIS_TITLE_FORMATS[statistic]
     }
-    fig.update_layout(font=font, yaxis=yaxis)
+    fig.update_layout(
+        font=font,
+        margin=margin,
+        yaxis=yaxis
+    )
