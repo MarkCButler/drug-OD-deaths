@@ -56,21 +56,23 @@ SQL_STRINGS = {
           od_data.Death_count
         FROM
           locations
-            INNER JOIN (SELECT
-                          death_counts.Location_abbr,
-                          death_counts.Year,
-                          death_counts.Month,
-                          od_types.OD_type,
-                          SUM(death_counts.Death_count) AS Death_count
-                        FROM
-                          death_counts
-                            INNER JOIN od_types
-                                       ON od_types.Indicator = death_counts.Indicator
-                        GROUP BY death_counts.Location_abbr,
-                                 death_counts.Year,
-                                 death_counts.Month,
-                                 od_types.OD_type) AS od_data
-                       ON od_data.location_abbr = locations.Abbr;""",
+            INNER JOIN (
+              SELECT
+                death_counts.Location_abbr,
+                death_counts.Year,
+                death_counts.Month,
+                od_types.OD_type,
+                SUM(death_counts.Death_count) AS Death_count
+              FROM
+                death_counts
+                  INNER JOIN
+                    od_types ON od_types.Indicator = death_counts.Indicator
+              GROUP BY
+                death_counts.Location_abbr,
+                death_counts.Year,
+                death_counts.Month,
+                od_types.OD_type
+            ) AS od_data ON od_data.location_abbr = locations.Abbr;""",
     'get_population_data': """
         SELECT Location_abbr, Year, Population
         FROM populations;"""

@@ -36,8 +36,8 @@ SQL_STRINGS = {
           death_counts.Death_count AS "Death count"
         FROM
           death_counts
-            INNER JOIN locations
-                       ON locations.Abbr = death_counts.Location_abbr;""",
+            INNER JOIN
+              locations ON locations.Abbr = death_counts.Location_abbr;""",
     'raw_population_data': """
         SELECT
           locations.Name AS Location,
@@ -45,8 +45,8 @@ SQL_STRINGS = {
           populations.Population
         FROM
           populations
-            INNER JOIN locations
-                       ON locations.Abbr = populations.Location_abbr;""",
+            INNER JOIN
+              locations ON locations.Abbr = populations.Location_abbr;""",
     'location_names': """
         SELECT Abbr, Name
         FROM locations;""",
