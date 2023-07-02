@@ -9,7 +9,7 @@ The keys, which correspond to data categories or filters used in the app, take
 the form of dictionary keys or index values in a pandas dataframe.
 
 In order to facilitate consistent usage of these keys, most of the constants and
-functions that involve hard-coded instances of the keys are defined here.
+functions that include hard-coded instances of the keys are defined here.
 
 Values defined in the current module that are needed by front-end code
 are delivered through a Jinja2 HTML template, which uses dictionary keys to
@@ -31,7 +31,7 @@ import pandas as pd
 
 from .database_queries import (
     execute_initialization_query, get_location_table, get_map_plot_periods,
-    get_od_types_for_location
+    get_map_plot_ranges, get_od_types_for_location
 )
 from .date_formatting import MONTH_NAMES
 
@@ -68,6 +68,11 @@ def initialize_interface(app):
             TIME_PERIODS,
             generate_time_periods(app)
         ])
+
+    if not all(COLORBAR_RANGES.values()):
+        map_plot_ranges = execute_initialization_query(app, get_map_plot_ranges)
+        for row in map_plot_ranges.itertuples():
+            COLORBAR_RANGES[row.Index] = (row.Min_value, row.Max_value)
 
 
 ################################################################################
@@ -138,20 +143,23 @@ MAP_HOVERTEMPLATES = {
     'percent_change': '%{z:.2p}<br>%{text}<extra></extra>'
 }
 
-# Title and range for the map colorbar
+# Title for the map plot's color bar
 COLORBAR_TITLES = {
     'death_count': 'Number of deaths',
     'normalized_death_count': f'Deaths per<br>{UNIT_POPULATION_LABEL} people',
     'percent_change': 'Percent change<br>in one year'
 }
-# For each statistic, the colorbar range is set to the max and min values of
-# that statistic for the dataset.  The colorbar range remains fixed regardless
-# of which period is selected for the map plot.
-# TODO:  Add SQL query to obtain these ranges during app initialization.
+
+# The values in COLORBAR_RANGES are initialized by the function
+# initialize_interface, which is defined in the current module.  After
+# initialization, the values in COLORBAR_RANGES are pairs containing the max and
+# min values that can be displayed on the map for each statistic.
+# COLORBAR_RANGES thus allows the color bar range shown for the map plot to
+# remain fixed regardless of which period is selected for the plot.
 COLORBAR_RANGES = {
-    'death_count': (55, 5959),
-    'normalized_death_count': (5.9, 55.4),
-    'percent_change': (-.333, .573)
+    'death_count': None,
+    'normalized_death_count': None,
+    'percent_change': None
 }
 
 MAP_PLOT_HEADINGS = {
@@ -177,7 +185,7 @@ TIME_PLOT_HEADINGS = {
                        'preceding 12-month period')
 }
 
-# Labels displayed when hovering over a a plot of time-development.
+# Labels displayed when hovering over a plot of time-development.
 TIME_PLOT_HOVERTEMPLATES = {
     'death_count': '%{y:,d}<br>%{x|%b %Y}<extra></extra>',
     'normalized_death_count': '%{y:.1f}<br>%{x|%b %Y}<extra></extra>',
