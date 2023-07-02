@@ -89,7 +89,18 @@ SQL_STRINGS = {
         FROM
           derived_data
         WHERE OD_type = 'all_drug_od'
-          AND Statistic IN ('death_count', 'percent_change');"""
+          AND Statistic IN ('death_count', 'percent_change');""",
+    'map_plot_ranges': """
+        SELECT
+          Statistic,
+          MIN(VALUE) AS Min_value,
+          MAX(Value) AS Max_value
+        FROM
+          derived_data
+        WHERE OD_type = 'all_drug_od'
+          AND Location_abbr != 'US'
+        GROUP BY
+            Statistic;"""
 }
 
 
@@ -237,6 +248,21 @@ def get_map_plot_periods():
         all_periods.join(periods_with_percent_change, on='Period', how='left')
         .fillna(value=False)
     )
+
+def get_map_plot_ranges():
+    """Return a table giving the minimum and maximum values of each statistic
+    that can be displayed on the map plot.
+
+    The app uses the min and max values to keep the colorbar ranges fixed when
+    the period selected for the map plot changes.
+
+    Returns:
+        Dataframe with index Statistic and columns Min_value and Max_value
+    """
+    data = _perform_query(
+        query=text(SQL_STRINGS['map_plot_ranges'])
+    )
+    return data.set_index('Statistic')
 
 
 def get_location_table():
