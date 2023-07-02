@@ -119,7 +119,7 @@ def prepare_population_data(data):
                     values='Population')
     # Ensure that the columns of the dataframe are sorted, since rows of data
     # will be used in the interpolation process.
-    data = data.reindex(sorted(data.columns), axis='columns')
+    data = data.sort_index(axis='columns')
     timestamps = [datetime(int(year), 7, 1).timestamp()
                   for year in data.columns]
     return data, timestamps
