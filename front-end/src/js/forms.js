@@ -36,7 +36,7 @@ const formMetadata = plotMetadata.reduce(
       const extractedMetadata = {
         url: metadata.url,
         plotId: metadata.plotId,
-        headingsToUpdate: metadata.headingUpdate,
+        headingsToUpdate: metadata.headingsToUpdate,
         controlsToUpdate: controlsToUpdate
       };
       return {

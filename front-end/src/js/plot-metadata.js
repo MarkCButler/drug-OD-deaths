@@ -13,8 +13,8 @@ export const plotMetadata = [
     visibleOnLoad: true,
     formId: null,
     tabId: 'summary',
-    controls: null,
-    headingUpdate: null
+    controls: [],
+    headingsToUpdate: []
   },
   {
     plotId: 'growth-rate',
@@ -22,8 +22,8 @@ export const plotMetadata = [
     visibleOnLoad: true,
     formId: null,
     tabId: 'summary',
-    controls: null,
-    headingUpdate: null
+    controls: [],
+    headingsToUpdate: []
   },
   {
     plotId: 'distribution',
@@ -31,8 +31,8 @@ export const plotMetadata = [
     visibleOnLoad: true,
     formId: null,
     tabId: 'summary',
-    controls: null,
-    headingUpdate: null
+    controls: [],
+    headingsToUpdate: []
   },
   {
     plotId: 'interactive-map-plot',
@@ -58,7 +58,7 @@ export const plotMetadata = [
         }
       }
     ],
-    headingUpdate: [
+    headingsToUpdate: [
       {
         headingId: 'map-plot-title-1',
         url: '/headings/map-plot-heading',
@@ -102,7 +102,7 @@ export const plotMetadata = [
         }
       }
     ],
-    headingUpdate: [
+    headingsToUpdate: [
       {
         headingId: 'time-plot-title-1',
         url: '/headings/time-plot-heading',
