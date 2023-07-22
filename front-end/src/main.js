@@ -37,7 +37,7 @@ import './js/app-bootstrap';
 // export functions that can be executed in a chain of .then handlers in order
 // to ensure that elements are added to the DOM in the desired order.
 import {initializePlots} from './js/plots';
-import {initializeFormControls} from './js/form-controls';
+import {initializeForms} from './js/forms';
 import {initializeTables} from './js/tables';
 
 
@@ -49,7 +49,7 @@ function initialize() {
   initializePlots()
     .then(
       () => {
-        initializeFormControls();
+        initializeForms();
         // Without the void operator, the IDE warns that the promise returned
         // from the function call below is ignored.  Like initializePlots,
         // initializeTables represents a time-consuming operation, and so it

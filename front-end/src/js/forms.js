@@ -16,7 +16,7 @@ import {displayAppError} from './errors';
 /**
  * Customize form controls and add event listeners.
  */
-export function initializeFormControls() {
+export function initializeForms() {
   applySelectize();
   for (const [formId, metadata] of Object.entries(formMetadata)) {
     addFormListeners(formId, metadata);
