@@ -1,6 +1,7 @@
 /**
- * @fileoverview After importing the components of plotly needed by the app,
- * export the Plotly object for use by other modules in the app.
+ * After importing the components of plotly needed by the app, export the Plotly
+ * object for use by other modules in the app.
+ * @module app-plotly
  */
 
 'use strict';

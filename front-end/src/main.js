@@ -1,6 +1,7 @@
 /**
- * @fileoverview After importing third-party modules for side effects, add
- * plots, tables, and event listeners to the DOM.
+ * After importing third-party modules for side effects, add plots, tables, and
+ * event listeners to the DOM.
+ * @module main
  */
 
 // main.scss includes the following:

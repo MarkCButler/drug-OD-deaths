@@ -1,6 +1,6 @@
 /**
- * @fileoverview Export convenience functions that wrap interactions with the
- * fetch API.
+ * Export convenience functions that wrap interactions with the fetch API.
+ * @module app-fetch
  */
 
 import {HTTPError} from './errors';

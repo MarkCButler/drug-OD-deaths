@@ -1,5 +1,6 @@
 /**
- * @fileoverview Export a function that adds data tables to the DOM.
+ * Export a function that adds data tables to the DOM.
+ * @module tables
  */
 
 // Import the datatables library and its dependency jquery.

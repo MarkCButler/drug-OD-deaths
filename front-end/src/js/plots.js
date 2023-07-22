@@ -1,5 +1,6 @@
 /**
- * @fileoverview Export functions that add and update plots in the DOM.
+ * Export functions that add and update plots in the DOM.
+ * @module plots
  */
 
 // Import a subset of the javascript for plotly.

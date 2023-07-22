@@ -1,5 +1,6 @@
 /**
- * @fileoverview Import the bootstrap plugins needed by the app.
+ * Import the bootstrap plugins needed by the app.
+ * @module app-bootstrap
  */
 
 /*

@@ -1,8 +1,9 @@
 /**
- * @fileoverview Export an array of metadata needed for initializing plots and
- * for adding event listeners to the forms associated with plots.  The metadata
- * in this array allows functions defined in other modules to make changes to
- * the DOM without hard-coding details of the DOM.
+ * Export an array of metadata needed for initializing plots and for adding
+ * event listeners to the forms associated with plots.  The metadata in this
+ * array allows functions defined in other modules to make changes to the DOM
+ * without hard-coding details of the DOM.
+ * @module plot-metadata
  */
 
 export const plotMetadata = [

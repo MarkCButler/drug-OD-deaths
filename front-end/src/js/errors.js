@@ -1,5 +1,6 @@
 /**
- * @fileoverview Custom error handling for the app.
+ * Custom error handling for the app.
+ * @module errors
  */
 
 /**

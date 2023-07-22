@@ -1,6 +1,7 @@
 /**
- * @fileoverview Export a function that customizes form controls and adds event
- * listeners needed for the app's interactivity.
+ * Export a function that customizes form controls and adds event listeners
+ * needed for the app's interactivity.
+ * @module forms
  */
 
 // Import the selectize library and its dependency jquery.
