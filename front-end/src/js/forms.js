@@ -249,40 +249,42 @@ function getAllOptions(selectElement) {
 
 
 /**
- * Update the options for a select element using JSON received from the back
- * end.
- * @param {Array} json - Array of option values that the select element should
- *     have after the update
- * @param {HTMLElement} selectElement - The select element for which the options
- *     should be updated
+ * Update the options for an HTML select element.
+ * @param {Array} optionValues - Array of option values that the select element
+ *     should have after the update
+ * @param {HTMLSelectElement} selectElement - The select element for which the
+ *     options should be updated
  * @param {Object} allOptions - An object that stores all options initially
  *     created for the select element.  The object keys are option values. If
  *     the selectize library has been used to enhance the functionality of the
  *     select element, the object values are option text labels displayed in the
  *     UI; otherwise, the object values are HTMLOptionElements.
  */
-function updateSelectOptions(json, selectElement, allOptions) {
+function updateSelectOptions(optionValues, selectElement, allOptions) {
   if (selectElement.classList.contains('selectized')) {
-    updateSelectizedElement(json, selectElement, allOptions);
+    updateSelectizedElement(optionValues, selectElement, allOptions);
   } else {
-    updateHTMLSelectElement(json, selectElement, allOptions);
+    updateHTMLSelectElement(optionValues, selectElement, allOptions);
   }
 }
 
 
-function updateSelectizedElement(requiredValues, selectElement, allOptions) {
+function updateSelectizedElement(optionValues, selectElement, allOptions) {
   // The reason that keys 'value' and 'text' are used below in updatedOptions is
   // that selectizeSettings defines these as the valueField and labelField,
   // respectively.
-  const updatedOptions = requiredValues.map(
+  const updatedOptions = optionValues.map(
     value => ({
       'value': value,
       'text': allOptions[value]
     })
   );
   const selectedValues = selectElement.selectize.items.filter(
-    value => requiredValues.includes(value)
+    value => optionValues.includes(value)
   );
+  if (selectedValues.length === 0) {
+    selectedValues[0] = optionValues[0];
+  }
   const selectizeControl = selectElement.selectize;
   selectizeControl.clear();
   selectizeControl.clearOptions(true);
@@ -292,36 +294,36 @@ function updateSelectizedElement(requiredValues, selectElement, allOptions) {
 }
 
 
-function updateHTMLSelectElement(requiredValues, selectElement, allOptions) {
-  // Iterate over requiredValues, modifying the options in selectElement.options
+function updateHTMLSelectElement(optionValues, selectElement, allOptions) {
+  // Iterate over optionValues, modifying the options in selectElement.options
   // as needed.
-  requiredValues.forEach((requiredValue, index) => {
+  optionValues.forEach((optionValue, index) => {
     const currentOption = selectElement.options[index];
     if (currentOption) {
       // If selectElement.options[index] exists but does not have the value
-      // given by requiredValue, add or remove an option from
+      // given by optionValue, add or remove an option from
       // selectElement.options.
-      if (requiredValue !== currentOption.value) {
+      if (optionValue !== currentOption.value) {
         // If the value of the next option in selectElement is equal to
-        // requiredValue, then remove currentOption from the select element.
+        // optionValue, then remove currentOption from the select element.
         // Otherwise, add an option with the required value.
         const nextOptionValue = selectElement.options[index+1].value;
-        if (requiredValue === nextOptionValue) {
+        if (optionValue === nextOptionValue) {
           selectElement.remove(index);
         } else {
-          selectElement.add(allOptions[requiredValue], currentOption);
+          selectElement.add(allOptions[optionValue], currentOption);
         }
       }
     } else {
       // If selectElement.options[index] does not exist, just add an option for
       // the next required value to the end of selectElement.options.
-      selectElement.add(allOptions[requiredValue]);
+      selectElement.add(allOptions[optionValue]);
     }
   });
 
   // Discard any options remaining at the end of selectElement.options after the
   // loop.
-  selectElement.options.length = requiredValues.length;
+  selectElement.options.length = optionValues.length;
 }
 
 
