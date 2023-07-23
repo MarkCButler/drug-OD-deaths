@@ -20,7 +20,7 @@ import {displayAppError} from './errors';
 export function initializeForms() {
   applySelectize();
   for (const [formId, metadata] of Object.entries(formMetadata)) {
-    addFormListeners(formId, metadata);
+    addFormListener(formId, metadata);
   }
 }
 
@@ -92,7 +92,6 @@ function getSelectizeChangeHandler(controlId) {
     // Dispatch an event that will be handled by the form.
     const changeEvent = new Event('change', {bubbles: true});
     formControl.dispatchEvent(changeEvent);
-    // console.log('Dispatched ', changeEvent);
   };
 }
 
@@ -112,82 +111,118 @@ function applySelectize() {
 }
 
 
-function addFormListeners(formId, metadata) {
-  addPlotListeners(formId, metadata);
-  addOptionsListeners(formId, metadata);
-  if (metadata.headingsToUpdate) {
-    addHeadingsListeners(formId, metadata);
-  }
-}
-
-
-function addPlotListeners(formId, metadata) {
+function addFormListener(formId, metadata) {
+  // First define constants that are used by the event handler.
   const form = document.getElementById(formId);
   const plotDiv = document.getElementById(metadata.plotId);
-
-  form.addEventListener('change', () => {
-    const paramString = getParamString(form);
-    fetchJson(metadata.url, paramString)
-      .then(json => updatePlot(json, plotDiv))
-      .catch(error => displayAppError(error, plotDiv, metadata.plotId));
-  });
-}
-
-
-function addOptionsListeners(formId, metadata) {
-  const form = document.getElementById(formId);
-  // For each form control that needs to be updated in a listener, create an
-  // object containing metadata and HTML elements used during the update
-  // process.
   const controlUpdateObjects = metadata.controlsToUpdate.map(
     getControlUpdateObject
   );
-
-  form.addEventListener('change', () => {
-    const paramString = getParamString(form);
-    controlUpdateObjects.forEach(
-      ({url, ...elements}) => {
-        if (elements.triggeringElements.includes(event.target)) {
-          const selectElement = elements.selectElement;
-          fetchJson(url, paramString)
-            .then(json =>
-              updateSelectOptions(json, selectElement, elements.allOptions)
-            )
-            .catch(error =>
-              displayAppError(error, elements.divAncestor, selectElement.id)
-            );
-        }
-      }
-    );
-  });
-}
-
-
-function addHeadingsListeners(formId, metadata) {
-  const form = document.getElementById(formId);
-  // For each heading that needs to be updated in a listener, create an object
-  // containing metadata and HTML elements used during the update process.
   const headingUpdateObjects = metadata.headingsToUpdate.map(
     getHeadingUpdateObject
   );
 
-  form.addEventListener('change', () => {
-    const paramString = getParamString(form);
-    headingUpdateObjects.forEach(
-      ({url, ...elements}) => {
-        if (elements.triggeringElements.includes(event.target)) {
-          const headingElement = elements.headingElement;
-          fetchText(url, paramString)
-            .then(text => {
-              headingElement.textContent = text;
-            })
-            .catch(
-              error => displayAppError(error, headingElement, headingElement.id)
-            );
-        }
-      }
+  form.addEventListener('change', event => {
+    // The updates executed by the event handler must obey the following
+    // constraints:
+    // 1. In some cases, user interaction with one form control causes the
+    //    options selected for other form controls to change.  As a result,
+    //    updates to form controls should be completed before the server is
+    //    queried for updates to headings and plots.
+    // 2. All updates that could affect the space available for a plot should be
+    //    complete at the time the plot is updated.  In particular, headings
+    //    should be updated before the plot is updated.
+    // These constraints are enforced using Promises.
+    const formControlsUpdated = updateFormControls(
+      event,
+      controlUpdateObjects,
+      getParamString(form)
     );
+    // After the promises in the array prePlotPromises have settled, the plot
+    // can be updated.
+    const prePlotPromises = [
+      formControlsUpdated
+        .then(() => fetchJson(metadata.url, getParamString(form))),
+      formControlsUpdated
+        .then(() => updateHeadings(
+          event,
+          headingUpdateObjects,
+          getParamString(form)
+        ))
+    ];
+    // Update the plot.
+    Promise.allSettled(prePlotPromises)
+      .then(results => {
+        const fetchJsonResult = results[0];
+        if (fetchJsonResult['status'] === 'fulfilled') {
+          updatePlot(fetchJsonResult['value'], plotDiv)
+            .catch(error => displayAppError(error, plotDiv, metadata.plotId));
+        } else {
+          displayAppError(fetchJsonResult['reason'], plotDiv, metadata.plotId);
+        }
+      });
   });
+}
+
+/**
+ * Update the HTML select elements of a form after the user interacts with the
+ * form.
+ * @param {Event} event - event triggered by the user's interaction with the
+ *     form
+ * @param {Object[]} controlUpdateObjects - array of objects, each generated by
+ *     a call to getControlUpdateObject
+ * @param {string} paramString - query string containing name-value pairs for
+ *     the form
+ * @returns {Promise} promise that is fulfilled once all promises associated
+ *     with updating HTML select elements have settled
+ */
+function updateFormControls(event, controlUpdateObjects, paramString) {
+  const promises = controlUpdateObjects.map(
+    ({url, ...elements}) => {
+      if (elements.triggeringElements.includes(event.target)) {
+        const selectElement = elements.selectElement;
+        fetchJson(url, paramString)
+          .then(json =>
+            updateSelectOptions(json, selectElement, elements.allOptions)
+          )
+          .catch(error =>
+            displayAppError(error, elements.divAncestor, selectElement.id)
+          );
+      }
+    }
+  );
+  return Promise.allSettled(promises);
+}
+
+
+/**
+ * Update the HTML headings associated with a form after the user interacts with
+ * the form.
+ * @param {Event} event - event triggered by the user's interaction with the
+ *     form
+ * @param {Object[]} headingUpdateObjects - array of objects, each generated by
+ *     a call to getHeadingUpdateObject
+ * @param {string} paramString - query string containing name-value pairs for
+ *     the form
+ * @returns {Promise} promise that is fulfilled once all promises associated
+ *     with updating HTML headings have settled
+ */
+function updateHeadings(event, headingUpdateObjects, paramString) {
+  const promises = headingUpdateObjects.map(
+    ({url, ...elements}) => {
+      if (elements.triggeringElements.includes(event.target)) {
+        const headingElement = elements.headingElement;
+        fetchText(url, paramString)
+          .then(text => {
+            headingElement.textContent = text;
+          })
+          .catch(
+            error => displayAppError(error, headingElement, headingElement.id)
+          );
+      }
+    }
+  );
+  return Promise.allSettled(promises);
 }
 
 
