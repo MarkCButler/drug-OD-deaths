@@ -84,16 +84,22 @@
                   <h1 class="display-4 pt-3 mb-3">The Opioid Epidemic</h1>
                   <p class="h5 mb-3">
                     The death rate in the US due to opioid overdose increased by
-                    almost a factor of six between 1997 and 2017 [1]. Even
-                    though the overall number of drug-overdose deaths has
-                    stabilized, the number of deaths due to synthetic opioids
-                    such as fentanyl is still climbing. (See the first plot
-                    below.) There are signs of progress, however. In the second
-                    plot below, the downward slopes on the right side of the
-                    plot show deceleration in growth of the death rate. The map
-                    at the bottom of the page shows the disturbing regional
-                    concentration in the per capita death rate in 2017, when the
-                    overall number of drug-overdose deaths peaked.
+                    almost a factor of six between 1997 and 2017 [1] and has
+                    continued to climb, driven primarily by the abuse of
+                    synthetic opioids such as fentanyl. (See the first plot
+                    below.)
+                  </p>
+                  <p class="h5 mb-3">
+                    From 2017 through early 2019 the growth rate of the epidemic
+                    steadily decreased, as shown by the second plot below.  By
+                    early 2020, however, the growth rate was again increasing
+                    dramatically.
+                  </p>
+                  <p class="h5 mb-3">
+                    The map at the bottom of the page shows the disturbing
+                    regional concentration in the per capita death rate in
+                    November 2017, when the overall number of drug-overdose
+                    deaths temporarily peaked.
                   </p>
                   <p class="mb-5">
                     [1] Sarah DeWeerdt, "Tracing the US opioid crisis to its
@@ -106,7 +112,7 @@
                   </p>
                   <div
                     class="od-deaths-plot mb-5" id="epidemic-peak"
-                    data-od-plot-params='{{ plot_params['epidemic_peak']|tojson }}'
+                    data-od-plot-params='{{ plot_params['epidemic_overview']|tojson }}'
                   >
                   </div>
                   <h2 class="h4 mb-3">Growth rate of the epidemic</h2>
@@ -115,7 +121,9 @@
                     data-od-plot-params='{{ plot_params['growth_rate']|tojson }}'
                   >
                   </div>
-                  <h2 class="h4 mb-3">Regional distribution in 2017</h2>
+                  <h2 class="h4 mb-3">
+                    Regional distribution in November 2017
+                  </h2>
                   <h3 class="h5 mb-3">
                     Number of drug-overdose deaths per {{ unit_population }}
                     people
