@@ -33,7 +33,7 @@ def parse_plot_params(plot_param_names):
             {
                 'location': 'US',
                 'statistic': 'normalized_death_count',
-                'od_type': ['prescription_opioids', 'synthetic_opioids']
+                'od_type': ['all_opioids', 'synthetic_opioids']
             }
     """
     param_dict = {key: request.args.getlist(plot_param_names[key])

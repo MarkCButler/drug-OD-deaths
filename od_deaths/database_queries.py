@@ -179,8 +179,8 @@ def get_time_plot_data(location_abbr, statistic, od_types):
         statistic:  Statistic used in filtering the data. Allowed values:
             death_count, normalized_death_count, or percent_change.
         od_types:  String or list of strings used in filtering the data.
-            Allowed values:  all_drug_od, all_opioids, prescription_opioids,
-            synthetic_opioids, heroin, cocaine, or other_stimulants.
+            Allowed values:  all_drug_od, all_opioids, synthetic_opioids,
+            natural_opioids, heroin, cocaine, or other_stimulants.
 
     Returns:
         Table with columns Period, OD_type, and Value

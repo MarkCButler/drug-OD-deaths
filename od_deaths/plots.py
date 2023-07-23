@@ -128,7 +128,7 @@ def get_time_plot():
       - whether the plot shows total death counts, death counts per unit
           population, or percent change in death count within the past year
       - the categories of OD deaths that are shown in the plot, e.g., deaths
-          due to heroin, deaths due to prescription opioids
+          due to heroin, deaths due to synthetic opioids
     """
     params = parse_plot_params(TIME_PLOT_PARAM_NAMES)
     data = get_time_plot_data(
