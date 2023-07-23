@@ -82,7 +82,7 @@ OD_TYPE_LABELS = {
     'all_drug_od': 'All drug-overdose deaths',
     'all_opioids': 'All opioids',
     'synthetic_opioids': 'Fentanyl and other synthetic opioids',
-    'prescription_opioids': 'Natural and semisynthetic opioids',
+    'natural_opioids': 'Natural and semisynthetic opioids',
     'heroin': 'Heroin',
     'cocaine': 'Cocaine',
     'other_stimulants': 'Methamphetamine and other stimulants'
@@ -109,7 +109,7 @@ def get_od_code_table():
     data = [
         ('all_opioids', 'T40.0-T40.4, T40.6'),
         ('heroin', 'T40.1'),
-        ('prescription_opioids', 'T40.2'),
+        ('natural_opioids', 'T40.2'),
         ('synthetic_opioids', 'T40.3, T40.4'),
         ('cocaine', 'T40.5'),
         ('other_stimulants', '43.6')
@@ -487,7 +487,7 @@ EPIDEMIC_OVERVIEW_PARAMS = [
     {'name': TIME_PLOT_PARAM_NAMES['od_type'],
      'value': 'synthetic_opioids'},
     {'name': TIME_PLOT_PARAM_NAMES['od_type'],
-     'value': 'prescription_opioids'},
+     'value': 'natural_opioids'},
     {'name': TIME_PLOT_PARAM_NAMES['od_type'],
      'value': 'heroin'}
 ]

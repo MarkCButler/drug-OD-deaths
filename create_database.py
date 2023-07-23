@@ -52,7 +52,7 @@ deaths_data = deaths_data[bool_index].reset_index(drop=True)
 od_type = deaths_data['Indicator'].copy()
 od_type[od_type.str.contains('T40.0')] = 'all_opioids'
 od_type[od_type.str.contains('T40.1')] = 'heroin'
-od_type[od_type.str.contains('T40.2')] = 'prescription_opioids'
+od_type[od_type.str.contains('T40.2')] = 'natural_opioids'
 od_type[od_type.str.contains('T40.[34]')] = 'synthetic_opioids'
 od_type[od_type.str.contains('T40.5')] = 'cocaine'
 od_type[od_type.str.contains('T43')] = 'other_stimulants'
