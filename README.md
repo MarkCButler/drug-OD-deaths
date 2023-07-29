@@ -1,7 +1,9 @@
 # drug-OD-deaths-Python
 
 This is an interactive web app written in Python for exploring data on
-drug-overdose deaths in the US.
+drug-overdose deaths in the US.  The app is hosted at
+
+https://drug-od-deaths-393716.uc.r.appspot.com
 
 Note that a similar web app implemented in R is available at the repo
 
