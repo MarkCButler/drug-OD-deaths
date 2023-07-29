@@ -14,3 +14,7 @@ handlers:
 
   - url: /.*
     script: auto
+
+error_handlers:
+  - error_code: over_quota
+    file: over-quota-error.html
