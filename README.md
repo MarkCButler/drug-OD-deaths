@@ -85,9 +85,17 @@ The repo includes a multi-stage Dockerfile and accompanying compose file.
   similarly builds the target `back-end-dev-env` in the Dockerfile and runs the
   resulting image as a container with an interactive shell.  This container can be
   used to initialize the database and run flask's built-in server during
-  development.  As with the container generated for front-end development,
-  commands executed within this container use source code located on the host
-  machine as input.
+  development.  Note that the command to initialize the database using the
+  container's interactive shell is
+  ```bash
+  export FLASK_CLI_MODE=true; poetry run flask --app=od_deaths initialize-database
+  ```
+  while the command to deploy the app with flask's built-in server is
+  ```bash
+  unset FLASK_CLI_MODE; poetry run flask --app=od_deaths --debug run --host=0.0.0.0
+  ```
+  As with the container generated for front-end development, commands executed
+  within this container use source code located on the host machine as input.
 - For local deployment of a production build, the command
   ```bash
   docker compose up app

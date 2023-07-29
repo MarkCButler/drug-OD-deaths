@@ -96,7 +96,7 @@ FROM back-end-prod-env AS back-end-dev-env
 #
 # The command to initialize the database (located on the host machine) from
 # within the container is
-#   poetry run flask --app=od_deaths initialize-database
+#   export FLASK_CLI_MODE=true; poetry run flask --app=od_deaths initialize-database
 #
 # In running flask's built-in server in debugging mode from within the
 # container, the server settings should be customized.  By default, flask's
@@ -106,7 +106,7 @@ FROM back-end-prod-env AS back-end-dev-env
 # resolve this problem is to run the container with option
 #   --publish 127.0.0.1:5000:5000
 # and then start flask's built-in server using the command
-#   poetry run flask --app=od_deaths --debug run --host=0.0.0.0
+#   unset FLASK_CLI_MODE; poetry run flask --app=od_deaths --debug run --host=0.0.0.0
 # With this configuration, the built-in server running in the container responds
 # to all requests on port 5000, but on the host system, only requests from
 # localhost are passed on to the container's network.
