@@ -53,7 +53,8 @@ def load_configuration(app):
     # Default configuration.
     app.config.from_mapping(
         DATABASE_PATH=Path(app.root_path).parent / 'data' / 'OD-deaths.sqlite',
-        ECHO_SQL=True
+        ECHO_SQL=True,
+        CLI_MODE=False
     )
     # Override from environment variables.
     app.config.from_prefixed_env()
@@ -92,29 +93,35 @@ def create_app():
     load_configuration(app)
 
     initialize_connection_pool(app)
-    initialize_interface(app)
-    register_blueprints(
-        app, [heading_views, option_views, plot_views, table_views]
-    )
-    register_cli_commands(app)
 
-    # The function initialize_interface needs to be called before the dictionary
-    # template_kwargs is defined, since that function initializes the table of
-    # locations returned below by get_locations.
-    template_kwargs = {
-        'locations': get_locations(),
-        'od_types': get_od_types(),
-        'statistic_types': get_statistic_types(),
-        'time_periods': get_time_periods(),
-        'urls': URLS,
-        'unit_population': UNIT_POPULATION_LABEL,
-        'map_plot_param_names': MAP_PLOT_PARAM_NAMES,
-        'time_plot_param_names': TIME_PLOT_PARAM_NAMES,
-        'plot_params': get_preset_plot_params()
-    }
+    if app.config['CLI_MODE']:
+        register_cli_commands(app)
 
-    @app.route('/')
-    def index():
-        return render_template('app.html', **template_kwargs)
+        # The app CLI is used to initialize the database.  In this mode, the app
+        # responds to HTTP requests with a simple warning page.
+        @app.route('/')
+        def index():
+            return render_template('cli-mode.html')
+
+    else:
+        register_blueprints(
+            app, [heading_views, option_views, plot_views, table_views]
+        )
+        initialize_interface(app)
+        template_kwargs = {
+            'locations': get_locations(),
+            'od_types': get_od_types(),
+            'statistic_types': get_statistic_types(),
+            'time_periods': get_time_periods(),
+            'urls': URLS,
+            'unit_population': UNIT_POPULATION_LABEL,
+            'map_plot_param_names': MAP_PLOT_PARAM_NAMES,
+            'time_plot_param_names': TIME_PLOT_PARAM_NAMES,
+            'plot_params': get_preset_plot_params()
+        }
+
+        @app.route('/')
+        def index():
+            return render_template('app.html', **template_kwargs)
 
     return app
