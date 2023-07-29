@@ -1,0 +1,16 @@
+# Configuration file for app deployment on Google App Engine
+runtime: python310
+
+entrypoint: gunicorn --bind "0.0.0.0:$PORT" --workers 2 "od_deaths:create_app()"
+
+instance_class: F4
+
+env_variables:
+  FLASK_ECHO_SQL: "false"
+
+handlers:
+  - url: /static
+    static_dir: static
+
+  - url: /.*
+    script: auto
